@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.lab4;
+package ca.mcgill.ecse211.lab5;
 
 import java.io.FileNotFoundException;
 
@@ -17,7 +17,7 @@ import lejos.hardware.Button;
 /**
  * Main entry point class for Lab4
  */
-public final class Lab4 {
+public final class Lab5 {
     
     // Time to wait after display initialization (to allow graphics to apear on EV3's screen)
     private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
@@ -31,6 +31,12 @@ public final class Lab4 {
         INVALID
     }
     
+    private enum StartingCorner {
+        LOWER_LEFT,
+        LOWER_RIGHT,
+        UPPER_RIGHT,
+        
+    }
     
     /**
      * Main entry of program
@@ -38,6 +44,19 @@ public final class Lab4 {
      * @throws OdometerExceptions 
      */
     public static void main(String[] args) throws OdometerExceptions {
+        
+        
+        // ----- Configuration ------
+        
+        // Lower left and upper right corner definitions [0,8]
+        int LLx, LLy;
+        int URx, URy;
+        
+        // Target can [1, 4]
+        int TR;
+        
+        // Starting corner [0, 3]
+        int SC;
         
         // Create new vehicle configuration
         Vehicle.newConfig(new Vehicle.Configuration(2.1, 13.5));
