@@ -13,10 +13,10 @@ import ca.mcgill.ecse211.util.Log.Sender;
 public class Navigator {
 
     // Degree error
-    final static double DEG_ERR = 1.5;
+    final static double DEG_ERR = 1.2;
     
     // Travel error
-    final static double CM_ERR = 1.5;
+    final static double CM_ERR = 2.0;
     
     // Default vehicle speed
     private static final int DEFAULT_SPEED = 100;
@@ -137,7 +137,6 @@ public class Navigator {
      * @param y
      * @param stop
      * @param turn
-     * @param speed
      * @throws OdometerExceptions 
      */
     public static void travelTo(double x, double y, boolean stop, boolean turn) throws OdometerExceptions {

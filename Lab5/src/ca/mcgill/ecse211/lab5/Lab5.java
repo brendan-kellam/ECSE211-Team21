@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.lab5;
 import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.hardware.Vehicle;
+import ca.mcgill.ecse211.lab5.FieldSearch.SearchArea;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.localization.RisingEdgeLocalizer;
@@ -10,9 +11,11 @@ import ca.mcgill.ecse211.localization.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 
 /**
  * Main entry point class for Lab4
@@ -30,13 +33,7 @@ public final class Lab5 {
         FALLING_EDGE,
         INVALID
     }
-    
-    private enum StartingCorner {
-        LOWER_LEFT,
-        LOWER_RIGHT,
-        UPPER_RIGHT,
-        
-    }
+
     
     /**
      * Main entry of program
@@ -48,18 +45,25 @@ public final class Lab5 {
         
         // ----- Configuration ------
         
+        // Create new board::
+        
+        
         // Lower left and upper right corner definitions [0,8]
-        int LLx, LLy;
-        int URx, URy;
+        int LLx = 3, LLy = 3;
+        int URx = 7, URy = 7;
         
         // Target can [1, 4]
-        int TR;
+        int TR = 3;
+        
+        // Starting corner
+        FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
         
         // Starting corner [0, 3]
-        int SC;
+        FieldSearch.SearchArea searchArea = new FieldSearch.SearchArea(LLx, LLy, URx, URy, SC);
+        
         
         // Create new vehicle configuration
-        Vehicle.newConfig(new Vehicle.Configuration(2.1, 13.5));
+        Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.2));
         Vehicle.LEFT_MOTOR.setAcceleration(4000);
         Vehicle.RIGHT_MOTOR.setAcceleration(4000);
         
@@ -75,15 +79,15 @@ public final class Lab5 {
         // Create new UltrasonicLocalizer object
         //UltrasonicLocalizer ul = new UltrasonicLocalizer(usPoller);
         
-        // Create new LightLocalizer
-        LightLocalizer uc = new LightLocalizer();
+        // Search the field
+        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller);
         
         // Initialize logging
         Log.setLogging(true, true, true, true);
         
         // Set logging to write to file
         try {
-            Log.setLogWriter("Lab4" + ".log");
+            Log.setLogWriter("Lab5" + ".log");
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
         }
@@ -111,6 +115,11 @@ public final class Lab5 {
             e.printStackTrace();
         }
         
+        Sound.twoBeeps();
+        fieldSearch.startSearch();
+        Sound.beep();
+        
+        /*
         // Execute US localization
         executeUSLocalization(usPoller, option);
         
@@ -119,6 +128,7 @@ public final class Lab5 {
         
         // Execute light sensor localization
         uc.localize();
+        */
         
         // Wait
         while (Button.waitForAnyPress() != Button.ID_ESCAPE);
