@@ -16,6 +16,14 @@ import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.robotics.chassis.Chassis;
+import lejos.robotics.chassis.Wheel;
+import lejos.robotics.chassis.WheeledChassis;
+import lejos.robotics.localization.PoseProvider;
+import lejos.robotics.navigation.Navigator;
+import lejos.robotics.navigation.Pose;
+import lejos.robotics.navigation.MovePilot;
+import lejos.robotics.navigation.ArcAlgorithms;
 
 /**
  * Main entry point class for Lab4
@@ -33,6 +41,8 @@ public final class Lab5 {
         FALLING_EDGE,
         INVALID
     }
+
+    private static final float TILE_SIZE = 30.48f;
 
     
     /**
@@ -62,11 +72,35 @@ public final class Lab5 {
         FieldSearch.SearchArea searchArea = new FieldSearch.SearchArea(LLx, LLy, URx, URy, SC);
         
         
+        
+        /*
         // Create new vehicle configuration
         Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.2));
         Vehicle.LEFT_MOTOR.setAcceleration(4000);
         Vehicle.RIGHT_MOTOR.setAcceleration(4000);
         
+        Wheel wheel1 = WheeledChassis.modelWheel(Vehicle.LEFT_MOTOR, 4.3).offset(-7.2);
+        Wheel wheel2 = WheeledChassis.modelWheel(Vehicle.RIGHT_MOTOR, 4.3).offset(7.2);
+        Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, WheeledChassis.TYPE_DIFFERENTIAL);
+        
+        MovePilot pilot = new MovePilot(chassis);
+        pilot.setLinearSpeed(5);
+        pilot.setLinearAcceleration(8);
+        pilot.setAngularAcceleration(16);
+
+        Navigator nav = new Navigator(pilot);
+        
+        nav.addWaypoint(TILE_SIZE, 0);
+        
+        nav.followPath();
+        nav.waitForStop();
+        
+        
+        System.out.println("x: " + nav.getPoseProvider().getPose().getX() + " | y: " + nav.getPoseProvider().getPose().getY());
+        
+                while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+        */
+                
         // Create odometer
         Odometer odometer = Odometer.getOdometer();
         
@@ -129,7 +163,7 @@ public final class Lab5 {
         // Execute light sensor localization
         uc.localize();
         */
-        
+       
         // Wait
         while (Button.waitForAnyPress() != Button.ID_ESCAPE);
         System.exit(0);

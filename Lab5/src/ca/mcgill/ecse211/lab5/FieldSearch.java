@@ -2,8 +2,10 @@ package ca.mcgill.ecse211.lab5;
 
 import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
+import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import lejos.hardware.Sound;
 import lejos.robotics.geometry.Point;
 
 public class FieldSearch {
@@ -56,6 +58,21 @@ public class FieldSearch {
             e.printStackTrace();
         }
         Navigator.turnTo(0.0, true);
+        
+        
+        for (int x = 0; x < (int) searchArea.getWidth(); x++) {
+            for (int y = 0; y < (int) searchArea.getHeight(); y++) {
+                try {
+                    Navigator.travelTo(Odometer.getX(), Odometer.getY() + TILE_SIZE, true, false);
+                    Sound.beep();
+                    Thread.sleep(1000);
+                } catch (OdometerExceptions | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                
+            }
+        }
+        
         
     }
     
@@ -141,6 +158,14 @@ public class FieldSearch {
         
         public Point getTopLeft() {
             return topLeft;
+        }
+        
+        public double getHeight() {
+            return this.topLeft.getY() - this.bottomLeft.getY();
+        }
+        
+        public double getWidth() {
+            return this.bottomRight.getX() - this.bottomLeft.getX();
         }
         
     }
