@@ -78,27 +78,29 @@ public class Board {
     }
     
     /**
-     * Determine vehicle's heading
+     * Determine vehicle's heading </br>
+     * 
+     * <b> NOTE: </b> This method will bound theta to: 0 <= theta < 360 <br>
+     * @see EV3Math.boundAngle(theta)
      * 
      * @param theta
      * @return Heading
      */
     public static Heading getHeading(double theta) {
-        double yComp = Math.abs(Math.cos(theta));
-        double xComp = Math.abs(Math.sin(theta));
         
-        if (yComp > xComp) {
-            if (Math.cos(theta) > 0) {
-                return Heading.N;
-            }
-            return Heading.S;
-        }
-        
-        if (Math.sin(theta) > 0) {
+        theta = EV3Math.boundAngle(theta);
+                        
+        if (theta <= 45) {
+            return Heading.N;
+        } else if (theta <= 135) {
             return Heading.E;
+        } else if (theta <= 225) {
+            return Heading.S;
+        } else if (theta <= 315) {
+            return Heading.W;
+        } else {
+            return Heading.N;
         }
-        
-        return Heading.W;
     }
     
     
