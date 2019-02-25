@@ -75,7 +75,7 @@ public class LightLocalizer implements Localizer {
         wait(1000);
         
         // Turn 90 degrees clockwise
-        Navigator.turnTo(90.0, true); 
+        Navigator.turnTo(90.0); 
         wait (1000);
         
         // Drive to next grid line
@@ -91,7 +91,7 @@ public class LightLocalizer implements Localizer {
 
         // Turn counter clockwise
         wait(1000);
-        Navigator.turnTo(0.0, true);
+        Navigator.turnTo(0.0);
         
         // Forward to origin
         Vehicle.setMotorSpeeds(100, 100);

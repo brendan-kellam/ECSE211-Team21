@@ -5,29 +5,25 @@ import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
-import ca.mcgill.ecse211.util.Log.Sender;
-import lejos.hardware.Sound;
 
 /**
  * Facade for performing navigation tasks 
  */
 public class Navigator {
 
-    // Degree error
-    final static double DEG_ERR = 1.2;
-    
-    // Travel error
-    final static double CM_ERR = 3.5;
-    
     // Default vehicle speed
     private static final int DEFAULT_SPEED = 100;
 
+    // Theta threshold
     private static final double THETA_THRESHOLD = 8;
+    
+    // Rotation speed
     public static final int ROTATE_SPEED    = 150;
-
     
     /**
-     * Travel to a specific location in space
+     * Travel to a specific location in space <br>
+     * 
+     * NOTE: <b> BLOCKING FUNCTION </b>
      * 
      * @param x
      * @param y
@@ -46,22 +42,17 @@ public class Navigator {
             minAngle = getDestAngle(x, y);
             turnTo(minAngle, speed, false);
         }
-        
-        int n = 100;
-        int count = 0;
-        
-        
+
+        // Compute distance
         double distX = Math.abs(x - Odometer.getX());
         double distY = Math.abs(y - Odometer.getY());
         double dist = Math.hypot(distX, distY);
         
+        // Set motor speed and rotate
         Vehicle.setMotorSpeeds(speed, speed);
         Vehicle.LEFT_MOTOR.rotate(EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), dist), true);
         Vehicle.RIGHT_MOTOR.rotate(EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), dist), false);
-
-        // Set motor speeds
-        //Vehicle.setMotorSpeeds(speed, speed);
-        //while (!checkIfDone(x, y));
+        
         
         // Stop at location
         if (stop) {
@@ -69,41 +60,14 @@ public class Navigator {
         }
     }
      
+    
+  
     /**
      * TurnTo function which takes an angle and boolean as arguments. The boolean controls whether or not to stop the
      * motors when the turn is completed
      * @param targetAngle
-     * @param stop
+     * @param immediateReturn
      */
-    public static void turnTo(double targetAngle, boolean stop, int speed) {
-
-        // Cute diff
-        double diff = EV3Math.boundAngle(targetAngle - Odometer.getTheta());
-        
-        // While diff is greater than DEG_ERR
-        while (diff > DEG_ERR) {
-          
-          Log.log(Sender.Navigator, "turnTo -> target angle = " + targetAngle + " | current angle = " + Odometer.getTheta() + " | diff = " + diff);
-
-          double goSpeed;
-          
-          // clock wise
-          if (diff < 180) {
-                          
-            Vehicle.setMotorSpeeds(speed, -speed);
-            
-          } else {              
-            Vehicle.setMotorSpeeds(-speed, speed);
-          }
-          
-          diff = EV3Math.boundAngle(targetAngle - Odometer.getTheta());
-        }
-
-        if (stop) {
-            Vehicle.setMotorSpeeds(0, 0);
-        }
-    }
-    
     public static void turnTo(double theta, int speed, boolean immediateReturn) {
         
         double currentHeading = 0.0;
@@ -121,8 +85,7 @@ public class Navigator {
         Log.log(Log.Sender.Navigator, "Current Heading: " + currentHeading);
         Log.log(Log.Sender.Navigator, "Target Heading: " + theta);
         
-        
-        double distance = distance(theta, currentHeading);
+        double distance = EV3Math.distance(theta, currentHeading);
         
         Log.log(Log.Sender.Navigator, "Distance: " + distance);
         
@@ -141,36 +104,24 @@ public class Navigator {
         }
     }
     
-    public static double distance(double theta, double d) {
-        double phi = Math.abs(d - theta) % 360;       // This is either the distance or 360 - distance
-        double distance = phi > 180.0 ? 360.0 - phi : phi;
-        return distance;
-    }
     
-    public static int findTurnSide(double d, double e)
+    
+    /**
+     * Given two angles, determine which way the vehicle will turn
+     * 
+     * @param alpha
+     * @param beta
+     * @return -1 -> Left turn | 1 -> Right turn
+     */
+    public static int findTurnSide(double alpha, double beta)
     {
-         double diff = e - d;
+         double diff = beta - alpha;
          if(diff < 0)
              diff += 360;
          if(diff > 180)
               return -1; // left turn
          else
               return 1; // right turn
-    }
-    
-    /**
-     * Check if the vehicle's current position is within CM_ERR of a specified x, y position
-     * 
-     * @param x
-     * @param y
-     * @return
-     */
-    protected static boolean checkIfDone(double x, double y) {
-      
-      double curX = Odometer.getX(), curY = Odometer.getY();
-      
-      return Math.abs(x - curX) < CM_ERR
-          && Math.abs(y - curY) < CM_ERR;
     }
     
     /**
@@ -197,13 +148,14 @@ public class Navigator {
     }
     
     /**
-     * Optional turnTo. Uses DEFAULT_SPEED
+     * Optional turnTo. Uses DEFAULT_SPEED </br>
+     * NOTE: <b> BLOCKING METHOD </b>
      * 
      * @param targetAngle
      * @param stop
      */
-    public static void turnTo(double targetAngle, boolean stop) {
-        turnTo(targetAngle, stop, DEFAULT_SPEED);
+    public static void turnTo(double targetAngle) {
+        turnTo(targetAngle, DEFAULT_SPEED, false);
     }
     
     /**

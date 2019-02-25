@@ -99,13 +99,15 @@ public class FieldSearch {
             
             double targetLocation;
             
-            if (heading == Heading.N || heading == Heading.E) {
+            if (heading == Heading.N ) {
                 targetLocation = 45.0;
-            } else {
+            } else if (heading == Heading.E || heading == Heading.S){
                 targetLocation = 135.0;
+            } else {
+                targetLocation = Odometer.getTheta();
             }
             
-            Navigator.turnTo(targetLocation, true);
+            Navigator.turnTo(targetLocation);
             
             Sound.beepSequence();
             
@@ -114,17 +116,20 @@ public class FieldSearch {
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
+  
             
+            //correction.enableCorrection();
+                
             try {
                 
                 Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
             } catch (OdometerExceptions e) {
                 e.printStackTrace();
             }
+            //correction.disableCorrection();
             
             Sound.beepSequence();
 
-            correction.enableCorrection();
         }
         
         

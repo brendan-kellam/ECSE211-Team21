@@ -202,7 +202,7 @@ public abstract class UltrasonicLocalizer implements Localizer {
                     Log.log(Log.Sender.USLocalization, "new Theta = " + Odometer.getTheta());
                                
                     // Turn to 0.0
-                    Navigator.turnTo(0.0, true);
+                    Navigator.turnTo(0.0);
                 }
                 
                 break;
