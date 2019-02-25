@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.hardware;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 
@@ -12,17 +13,21 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
  */
 public final class Vehicle {
     
-    //////////////// MOTORS ////////////////
+    //////////////// MOTORS TO DRIVE VEHICLE ////////////////
     public static final EV3LargeRegulatedMotor LEFT_MOTOR =
         new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
     
     public static final EV3LargeRegulatedMotor RIGHT_MOTOR =
         new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-    ///////////////////////////////////////
+    /////////////////////////////////////////////////////////
     
-    //////////////// LCD  ////////////////
+    //////////////// MOTOR FOR THE COLOUR SENSOR ////////////
+	public static final EV3MediumRegulatedMotor LIGHT_SENSOR_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
+	////////////////////////////////////////////////////////
+    
+    //////////////////////// LCD  //////////////////////////
     public static final TextLCD LCD_DISPLAY = LocalEV3.get().getTextLCD();
-    ///////////////////////////////////////
+    ////////////////////////////////////////////////////////
 
     ////////////////ULTRASONIC ////////////////
     public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
@@ -33,7 +38,9 @@ public final class Vehicle {
     public static final EV3ColorSensor RIGHT_COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
     //////////////////////////////////////
     
-    
+    ////////////////COLOR SENSOR FOR COLOUR DETECTION ////////////////
+    public static final EV3ColorSensor COLOR_SENSOR_FRONT = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+    /////////////////////////////////////////////////////////////////
     
     // Configuration class
     private static Configuration configuration;
