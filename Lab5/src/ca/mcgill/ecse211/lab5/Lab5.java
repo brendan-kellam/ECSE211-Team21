@@ -40,8 +40,8 @@ public final class Lab5 {
 	 * Represents a given MenuOption
 	 */
 	private enum MenuOption {
-		RISING_EDGE,
-		FALLING_EDGE,
+		TEST_COLOURS,
+		NAVIGATE_MAP,
 		INVALID
 	}
 
@@ -127,19 +127,6 @@ public final class Lab5 {
 		Thread usThread = new Thread(usPoller);
 		usThread.start();
 
-		// Start Display thread
-		Thread odoDisplayThread = new Thread(odometryDisplay);
-		odoDisplayThread.start();
-
-
-
-		// Sleep to allow Display to initialize
-		try {
-			Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 
 		//        Vehicle.setMotorSpeeds(100, 100);
 		//        odoCorrection.enableCorrection();
@@ -152,8 +139,26 @@ public final class Lab5 {
 		 */
 
 		Sound.twoBeeps();
-//		fieldSearch.startSearch();
-		ColourDetection.forDemoOneToAnalyzeCansOneAfterEachOther();
+		if (option == MenuOption.TEST_COLOURS){
+			ColourDetection.forDemoOneToAnalyzeCansOneAfterEachOther();	
+		}	
+		
+		else {
+			// Start Display thread.
+			//This is here so the display thread doesn't run during colour testing
+			
+			// Sleep to allow Display to initialize
+			try {
+				Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			Thread odoDisplayThread = new Thread(odometryDisplay);
+			odoDisplayThread.start(); 
+			fieldSearch.startSearch();
+		}
+		
 		Sound.beep();
 
 		/*
@@ -172,23 +177,23 @@ public final class Lab5 {
 		System.exit(0);
 	}
 
-	/**
-	 * Executes ultrasonic localization
-	 * 
-	 * @param ul
-	 * @param option
-	 */
-	private static void executeUSLocalization(UltrasonicPoller poller, MenuOption option) {
-		UltrasonicLocalizer ul;
-		if (option == MenuOption.FALLING_EDGE) {
-			ul = new FallingEdgeLocalizer(poller);
-		} else {
-			ul = new RisingEdgeLocalizer(poller);
-		}
-
-		// Localize
-		ul.localize();
-	}
+	//	/**
+	//	 * Executes ultrasonic localization
+	//	 * 
+	//	 * @param ul
+	//	 * @param option
+	//	 */
+	//	private static void executeUSLocalization(UltrasonicPoller poller, MenuOption option) {
+	//		UltrasonicLocalizer ul;
+	//		if (option == MenuOption.FALLING_EDGE) {
+	//			ul = new FallingEdgeLocalizer(poller);
+	//		} else {
+	//			ul = new RisingEdgeLocalizer(poller);
+	//		}
+	//
+	//		// Localize
+	//		ul.localize();
+	//	}
 
 	/**
 	 * Gets the User's menu choice of either RISING or FALLING edge
@@ -196,16 +201,16 @@ public final class Lab5 {
 	 * @return MenuOption
 	 */
 	public static MenuOption getUserChoice() {
-		Vehicle.LCD_DISPLAY.drawString("Rising Edge  -> UP", 0, 0);
-		Vehicle.LCD_DISPLAY.drawString("Falling Edge -> DOWN", 0, 1);
+		Vehicle.LCD_DISPLAY.drawString("Test Colours: UP", 0, 0);
+		Vehicle.LCD_DISPLAY.drawString("Navigate map: DOWN", 0, 1);
 
 		int choice = Button.waitForAnyPress();
 
 		if (choice == Button.ID_UP) {
-			return MenuOption.RISING_EDGE;
+			return MenuOption.TEST_COLOURS;
 		}
 		else if (choice == Button.ID_DOWN) {
-			return MenuOption.FALLING_EDGE;
+			return MenuOption.NAVIGATE_MAP;
 		}
 
 		return MenuOption.INVALID;
