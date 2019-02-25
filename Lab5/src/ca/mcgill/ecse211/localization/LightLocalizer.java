@@ -4,6 +4,7 @@ import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.util.Board;
 import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
@@ -32,12 +33,17 @@ public class LightLocalizer implements Localizer {
     // X and Y grid line diffs
     private static double X_DIFF = 13.5;
     private static double Y_DIFF = 12.5;
-
     
-    public LightLocalizer() {
+    // Board
+    private double finalX, finalY;
+    
+    public LightLocalizer(double finalX, double finalY) {
         // Initialize colorSensor mode and buffer
-        this.csProvider = Vehicle.COLOR_SENSOR.getRGBMode();
+        this.csProvider = Vehicle.LEFT_COLOR_SENSOR.getRGBMode();
         this.curRGB = new float[csProvider.sampleSize()];
+        
+        this.finalX = finalX;
+        this.finalY = finalY;
     }
 
     /**
@@ -95,9 +101,9 @@ public class LightLocalizer implements Localizer {
         Vehicle.setMotorSpeeds(0, 0);
         
         // Reset odometer values
-        try {
-            Odometer.getOdometer().setX(0.0);
-            Odometer.getOdometer().setY(0.0);
+        try {            
+            Odometer.getOdometer().setX(finalX);
+            Odometer.getOdometer().setY(finalY);
         } catch (OdometerExceptions e) {
             e.printStackTrace();
         }

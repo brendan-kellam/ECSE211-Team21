@@ -33,24 +33,31 @@ public class Board {
     
     // Tile length (cm)
     private double tileLength;
-    
-    // Number of lines to cross
-    private int linesToCross;
+
     
     // Width in tiles
     private int boardWidthInTiles;
     
+    // Height in tiles
+    private int boardHeightInTiles;
+    
     // Minimum tile multiple
     private static final double MIN_TILE_MULTIPLE = 0.5;
+    
+    private static final double TILE_SIZE = 30.48;
             
     /**
-     * Constructs board and sets tile length and board dimensions
+     * Constructs a square board and sets tile length and board dimensions
      * 
      * @param tileLength
      * @param boardWidthInTiles
      * @throws IllegalArgumentException
      */
-    public Board(double tileLength, int boardWidthInTiles) throws IllegalArgumentException {
+    public Board(double tileLength, int boardLengthInTiles) throws IllegalArgumentException {
+        this(tileLength, boardLengthInTiles, boardLengthInTiles);
+    }
+    
+    public Board(double tileLength, int boardWidthInTiles, int boardHeightInTiles) throws IllegalArgumentException {
         
         // Check invalid arguments
         if (tileLength <= 0) {
@@ -58,14 +65,16 @@ public class Board {
         }
         
         if (boardWidthInTiles <= 1) {
-            throw new IllegalArgumentException("Cannot define a board that's less than 2x2");
+            throw new IllegalArgumentException("Cannot define a board that's less than 2xn");
+        }
+        
+        if (boardHeightInTiles <= 1) {
+            throw new IllegalArgumentException("Cannot define a board that's less than nx2");
         }
         
         this.tileLength = tileLength;
         this.boardWidthInTiles = boardWidthInTiles;
-        
-        // For a given board, 
-        this.linesToCross = boardWidthInTiles-1;
+        this.boardHeightInTiles = boardHeightInTiles;
     }
     
     /**
@@ -74,7 +83,7 @@ public class Board {
      * @param theta
      * @return Heading
      */
-    public Heading getHeading(double theta) {
+    public static Heading getHeading(double theta) {
         double yComp = Math.abs(Math.cos(theta));
         double xComp = Math.abs(Math.sin(theta));
         
@@ -102,7 +111,7 @@ public class Board {
      * @param position
      * @param odometer
      */
-    public void snapToGridLine(double[] position, Odometer odometer) {
+    public static void snapToGridLine(double[] position, Odometer odometer) {
         
         // Get x, y, theta
         double x = position[0];
@@ -125,7 +134,7 @@ public class Board {
         }
         
         // For the current position, determine the number of tileLength multiples
-        double div = pos / tileLength;
+        double div = pos / TILE_SIZE;
         
         // If the multiple is less than the minimum multiple
         if (Math.abs(div) < MIN_TILE_MULTIPLE) {
@@ -134,7 +143,7 @@ public class Board {
             
         // Otherwise, set position to the rounded multiple multiplied by the tile length
         } else {
-            pos = tileLength * Math.round(div);
+            pos = TILE_SIZE * Math.round(div);
         }
         
         // Moving in the y direction
@@ -149,6 +158,10 @@ public class Board {
 
     public int getBoardWidthInTiles() {
         return boardWidthInTiles;
+    }
+    
+    public int getBoardHeightInTiles() {
+        return boardHeightInTiles;
     }
     
     public double getTileLength() {

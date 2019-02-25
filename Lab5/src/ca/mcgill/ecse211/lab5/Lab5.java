@@ -1,23 +1,36 @@
-package ca.mcgill.ecse211.lab4;
+package ca.mcgill.ecse211.lab5;
 
 import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.hardware.Vehicle;
+import ca.mcgill.ecse211.lab5.FieldSearch.SearchArea;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.localization.RisingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Log.Sender;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
+import lejos.robotics.chassis.Chassis;
+import lejos.robotics.chassis.Wheel;
+import lejos.robotics.chassis.WheeledChassis;
+import lejos.robotics.localization.PoseProvider;
+import lejos.robotics.navigation.Navigator;
+import lejos.robotics.navigation.Pose;
+import lejos.robotics.navigation.MovePilot;
+import lejos.robotics.navigation.ArcAlgorithms;
 
 /**
  * Main entry point class for Lab4
  */
-public final class Lab4 {
+public final class Lab5 {
     
     // Time to wait after display initialization (to allow graphics to apear on EV3's screen)
     private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
@@ -30,8 +43,9 @@ public final class Lab4 {
         FALLING_EDGE,
         INVALID
     }
-    
-    
+
+    private static final double TILE_SIZE = 30.48;
+
     /**
      * Main entry of program
      * @param args
@@ -39,36 +53,62 @@ public final class Lab4 {
      */
     public static void main(String[] args) throws OdometerExceptions {
         
-        // Create new vehicle configuration
-        Vehicle.newConfig(new Vehicle.Configuration(2.1, 13.5));
-        Vehicle.LEFT_MOTOR.setAcceleration(4000);
-        Vehicle.RIGHT_MOTOR.setAcceleration(4000);
         
+        // ----- Configuration ------
+        
+        
+        // Create new vehicle configuration
+        Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.15));
+        Vehicle.LEFT_MOTOR.setAcceleration(100);
+        Vehicle.RIGHT_MOTOR.setAcceleration(100);
+        
+       
+        
+        //System.out.println("x: " + nav.getPoseProvider().getPose().getX() + " | y: " + nav.getPoseProvider().getPose().getY());
+        
+                //while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+        
+        // Lower left and upper right corner definitions [0,8]
+        int LLx = 2, LLy = 2;
+        int URx = 6, URy = 6;
+        
+        // Target can [1, 4]
+        int TR = 3;
+        
+        // Starting corner
+        FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
+        
+        // Starting corner [0, 3]
+        FieldSearch.SearchArea searchArea = new FieldSearch.SearchArea(LLx, LLy, URx, URy, SC);
+        
+        
+                
         // Create odometer
         Odometer odometer = Odometer.getOdometer();
+        
+        // Create odometery correction | disable correction
+        OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.LEFT_COLOR_SENSOR, Vehicle.RIGHT_COLOR_SENSOR);
+        odoCorrection.disableCorrection();
         
         // Create ultrasonic poller
         UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
         
         // Create new display object
         Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
-        
-        // Create new UltrasonicLocalizer object
-        //UltrasonicLocalizer ul = new UltrasonicLocalizer(usPoller);
-        
-        // Create new LightLocalizer
-        LightLocalizer uc = new LightLocalizer();
+                
+        // Search the field
+        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
         
         // Initialize logging
         Log.setLogging(true, true, true, true);
         
         // Set logging to write to file
         try {
-            Log.setLogWriter("Lab4" + ".log");
+            Log.setLogWriter("Lab5" + ".log");
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
         }
-        
+                
         // Get user option
         MenuOption option;
         while ((option = getUserChoice()) == MenuOption.INVALID);
@@ -77,6 +117,10 @@ public final class Lab4 {
         Thread odoThread = new Thread(odometer);
         odoThread.start();
         
+        // Start odometer correction thread
+        Thread odoCorrectionThread = new Thread(odoCorrection);
+        odoCorrectionThread.start();
+        
         // Start ultrasonic poller thread 
         Thread usThread = new Thread(usPoller);
         usThread.start();
@@ -84,6 +128,8 @@ public final class Lab4 {
         // Start Display thread
         Thread odoDisplayThread = new Thread(odometryDisplay);
         odoDisplayThread.start();
+        
+        
 
         // Sleep to allow Display to initialize
         try {
@@ -92,6 +138,22 @@ public final class Lab4 {
             e.printStackTrace();
         }
         
+        
+//        Vehicle.setMotorSpeeds(100, 100);
+//        odoCorrection.enableCorrection();
+        
+        /*
+        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+        
+        executeUSLocalization(usPoller, option);
+        uc.localize();
+        */
+        
+        Sound.twoBeeps();
+        fieldSearch.startSearch();
+        Sound.beep();
+        
+        /*
         // Execute US localization
         executeUSLocalization(usPoller, option);
         
@@ -100,7 +162,8 @@ public final class Lab4 {
         
         // Execute light sensor localization
         uc.localize();
-        
+        */
+       
         // Wait
         while (Button.waitForAnyPress() != Button.ID_ESCAPE);
         System.exit(0);
