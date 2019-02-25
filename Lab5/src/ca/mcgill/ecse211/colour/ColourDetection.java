@@ -127,9 +127,9 @@ public class ColourDetection {
 	private static boolean sweepCan(int desiredColour) throws InterruptedException { 
 		//TEMPORARY: TO VISUALIZE RESULTS.
 		LCD.clear();
-		LCD.drawString("Redd", 0, 0);
-		LCD.drawString("Greenn", 0, 1);
-		LCD.drawString("Bluee", 0, 2);
+		LCD.drawString("Red", 0, 0);
+		LCD.drawString("Green", 0, 1);
+		LCD.drawString("Blue", 0, 2);
 		//REMOVE^
 
 		int colours[] = new int[numReadings];
@@ -314,6 +314,8 @@ public class ColourDetection {
 		float greenAvg = 0;
 		float blueAvg = 0;
 
+		LCD.clear();
+		LCD.drawString("Analyzing..", 0, 0);
 		for (int sample=0;sample<numReadings;sample++) {
 
 			csProvider.fetchSample(curRGB, 0);
@@ -347,9 +349,9 @@ public class ColourDetection {
 		////////////////////////////////
 		//THESE LCD ARE JUST FOR DISPLAY AND TESTING. Can remove from final.
 		LCD.clear();
-		LCD.drawString("RedA: " + redAvg, 0, 0);
-		LCD.drawString("GreenA" + greenAvg, 0, 1);
-		LCD.drawString("BlueA" + blueAvg, 0, 2);
+		LCD.drawString("Red: " + redAvg, 0, 0);
+		LCD.drawString("Green: " + greenAvg, 0, 1);
+		LCD.drawString("Blue: " + blueAvg, 0, 2);
 		Log.log(Sender.colourDetection, "red Average = " + redAvg + " | green Average = " + greenAvg + " | blue Average = " + blueAvg);
 		////////////////////////////////
 
