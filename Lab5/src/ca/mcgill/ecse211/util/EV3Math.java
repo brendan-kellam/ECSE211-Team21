@@ -42,8 +42,17 @@ public class EV3Math {
         return angle;
     }
     
-    
-    public static double euclidDistance(double x, double y) {
-        return Math.hypot(x * x, y * y);
+    /**
+     * Compute distance between two angles
+     * 
+     * @param theta
+     * @param d
+     * @return distance from theta to d
+     */
+    public static double distance(double theta, double d) {
+        double phi = Math.abs(d - theta) % 360;       // This is either the distance or 360 - distance
+        double distance = phi > 180.0 ? 360.0 - phi : phi;
+        return distance;
     }
+    
 }

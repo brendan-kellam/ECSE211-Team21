@@ -99,13 +99,15 @@ public class FieldSearch {
             
             double targetLocation;
             
-            if (heading == Heading.N || heading == Heading.E) {
+            if (heading == Heading.N ) {
                 targetLocation = 45.0;
-            } else {
+            } else if (heading == Heading.E || heading == Heading.S){
                 targetLocation = 135.0;
+            } else {
+                targetLocation = Odometer.getTheta();
             }
             
-            Navigator.turnTo(targetLocation, true);
+            Navigator.turnTo(targetLocation);
             
             Sound.beepSequence();
             
@@ -114,17 +116,20 @@ public class FieldSearch {
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
+  
             
+            //correction.enableCorrection();
+                
             try {
                 
                 Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
             } catch (OdometerExceptions e) {
                 e.printStackTrace();
             }
+            //correction.disableCorrection();
             
             Sound.beepSequence();
 
-            correction.enableCorrection();
         }
         
         
@@ -217,126 +222,6 @@ public class FieldSearch {
     }
     
     
-    static class SearchArea {
-                
-        private Point bottomLeft, bottomRight, topLeft, topRight;
-        private StartingCorner startingCorner;
-        private Board board;
-        
-        private Queue<Point> centerWaypoints;
-        
-        public SearchArea(int LLx, int LLy, int URx, int URy, StartingCorner SC) {
-                        
-            this.startingCorner = SC;
-            
-            Point bl = new Point(LLx-1, LLy-1);
-            Point br = new Point(URx-1, LLy-1);
-            Point tl = new Point(LLx-1, URy-1);
-            Point tr = new Point(URx-1, URy-1);
-                     
-            // Translate points
-            switch(startingCorner) {
-            
-            case LOWER_LEFT:
-                bottomLeft = bl;
-                bottomRight = br;
-                topLeft = tl;
-                topRight = tr;
-                break;
-                
-            case LOWER_RIGHT:
-                bottomLeft = br;
-                bottomRight = tr;
-                topLeft = bl;
-                topRight = tl;
-                break;
-                
-            case UPPER_RIGHT:
-                bottomLeft = tr;
-                bottomRight = tl;
-                topLeft = br;
-                topRight = bl;
-                break;
-                
-            case UPPER_LEFT:
-                bottomLeft = tl;
-                bottomRight = bl;
-                topLeft = tr;
-                topRight = br;
-                break;
-            }
-            
-            // Create new board::
-            this.board = new Board(TILE_SIZE, (int) getWidth(), (int) getHeight());
-            
-            this.centerWaypoints = new ArrayDeque<>();
-            
-            float xCur;
-            float yCur;
-            double xOff = getBottomLeft().getX() * TILE_SIZE;
-            double yOff = getBottomLeft().getY() * TILE_SIZE;
-            
-            for (int x = 0; x < (int) getWidth(); x++) {
-                
-                if (x % 2 == 0) {
-                    for (int y = 0; y < (int) getHeight(); y++) {
-                        
-                        xCur = (float) (x * TILE_SIZE + xOff + TILE_SIZE / 2);
-                        yCur = (float) (y * TILE_SIZE + yOff + TILE_SIZE / 2);
-                        
-                        centerWaypoints.add(new Point(xCur, yCur));
-                        
-//                        System.out.println("x: " + x + " | y: " + y);
-                    }
-                } else {
-                    for (int y = (int) getHeight()-1; y>= 0; y--) {
-                        
-                        xCur = (float) (x * TILE_SIZE + xOff + TILE_SIZE / 2);
-                        yCur = (float) (y * TILE_SIZE + yOff + TILE_SIZE / 2);
-                        
-                        centerWaypoints.add(new Point(xCur, yCur));
-                        
-//                        System.out.println("x: " + x + " | y: " + y);
-                    }
-                }
-                
-            }
-            
-        }
-        
-        public Point getNextWaypoint() {
-            return centerWaypoints.poll();
-        }
- 
-        public Point getBottomLeft() {
-            return bottomLeft;
-        }
-        
-        public Point getTopRight() {
-            return topRight;
-        }
-        
-        public Point getBottomRight() {
-            return bottomRight;
-        }
-        
-        public Point getTopLeft() {
-            return topLeft;
-        }
-        
-        public double getHeight() {
-            return this.topLeft.getY() - this.bottomLeft.getY();
-        }
-        
-        public double getWidth() {
-            return this.bottomRight.getX() - this.bottomLeft.getX();
-        }
-        
-        public Board getBoard() {
-            return board;
-        }
-        
-    }
     
     /**
      * Defines the starting corner for the vehicle

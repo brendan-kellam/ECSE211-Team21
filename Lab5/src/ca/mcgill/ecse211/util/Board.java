@@ -44,7 +44,7 @@ public class Board {
     // Minimum tile multiple
     private static final double MIN_TILE_MULTIPLE = 0.5;
     
-    private static final double TILE_SIZE = 30.48;
+    public static final double TILE_SIZE = 30.48;
             
     /**
      * Constructs a square board and sets tile length and board dimensions
