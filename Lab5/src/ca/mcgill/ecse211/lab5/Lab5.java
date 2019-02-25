@@ -1,32 +1,19 @@
 package ca.mcgill.ecse211.lab5;
 
 import java.io.FileNotFoundException;
-
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
-import ca.mcgill.ecse211.lab5.FieldSearch.SearchArea;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
-import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.localization.RisingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
-import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
-import ca.mcgill.ecse211.util.Log.Sender;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
-import lejos.robotics.chassis.Chassis;
-import lejos.robotics.chassis.Wheel;
-import lejos.robotics.chassis.WheeledChassis;
-import lejos.robotics.localization.PoseProvider;
-import lejos.robotics.navigation.Navigator;
-import lejos.robotics.navigation.Pose;
-import lejos.robotics.navigation.MovePilot;
-import lejos.robotics.navigation.ArcAlgorithms;
 
 /**
  * Main entry point class for Lab4
@@ -75,7 +62,7 @@ public final class Lab5 {
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
 		// Starting corner [0, 3]
-		FieldSearch.SearchArea searchArea = new FieldSearch.SearchArea(LLx, LLy, URx, URy, SC);
+		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
