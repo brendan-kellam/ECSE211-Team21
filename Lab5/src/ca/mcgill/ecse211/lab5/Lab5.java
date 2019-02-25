@@ -10,10 +10,12 @@ import ca.mcgill.ecse211.localization.RisingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Log.Sender;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.robotics.chassis.Chassis;
@@ -42,9 +44,8 @@ public final class Lab5 {
         INVALID
     }
 
-    private static final float TILE_SIZE = 30.48f;
+    private static final double TILE_SIZE = 30.48;
 
-    
     /**
      * Main entry of program
      * @param args
@@ -55,12 +56,21 @@ public final class Lab5 {
         
         // ----- Configuration ------
         
-        // Create new board::
         
+        // Create new vehicle configuration
+        Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.15));
+        Vehicle.LEFT_MOTOR.setAcceleration(100);
+        Vehicle.RIGHT_MOTOR.setAcceleration(100);
+        
+       
+        
+        //System.out.println("x: " + nav.getPoseProvider().getPose().getX() + " | y: " + nav.getPoseProvider().getPose().getY());
+        
+                //while (Button.waitForAnyPress() != Button.ID_ESCAPE);
         
         // Lower left and upper right corner definitions [0,8]
-        int LLx = 3, LLy = 3;
-        int URx = 7, URy = 7;
+        int LLx = 2, LLy = 2;
+        int URx = 6, URy = 6;
         
         // Target can [1, 4]
         int TR = 3;
@@ -72,49 +82,22 @@ public final class Lab5 {
         FieldSearch.SearchArea searchArea = new FieldSearch.SearchArea(LLx, LLy, URx, URy, SC);
         
         
-        
-        /*
-        // Create new vehicle configuration
-        Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.2));
-        Vehicle.LEFT_MOTOR.setAcceleration(4000);
-        Vehicle.RIGHT_MOTOR.setAcceleration(4000);
-        
-        Wheel wheel1 = WheeledChassis.modelWheel(Vehicle.LEFT_MOTOR, 4.3).offset(-7.2);
-        Wheel wheel2 = WheeledChassis.modelWheel(Vehicle.RIGHT_MOTOR, 4.3).offset(7.2);
-        Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, WheeledChassis.TYPE_DIFFERENTIAL);
-        
-        MovePilot pilot = new MovePilot(chassis);
-        pilot.setLinearSpeed(5);
-        pilot.setLinearAcceleration(8);
-        pilot.setAngularAcceleration(16);
-
-        Navigator nav = new Navigator(pilot);
-        
-        nav.addWaypoint(TILE_SIZE, 0);
-        
-        nav.followPath();
-        nav.waitForStop();
-        
-        
-        System.out.println("x: " + nav.getPoseProvider().getPose().getX() + " | y: " + nav.getPoseProvider().getPose().getY());
-        
-                while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-        */
                 
         // Create odometer
         Odometer odometer = Odometer.getOdometer();
+        
+        // Create odometery correction | disable correction
+        OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.LEFT_COLOR_SENSOR, Vehicle.RIGHT_COLOR_SENSOR);
+        odoCorrection.disableCorrection();
         
         // Create ultrasonic poller
         UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
         
         // Create new display object
         Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
-        
-        // Create new UltrasonicLocalizer object
-        //UltrasonicLocalizer ul = new UltrasonicLocalizer(usPoller);
-        
+                
         // Search the field
-        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller);
+        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
         
         // Initialize logging
         Log.setLogging(true, true, true, true);
@@ -125,7 +108,7 @@ public final class Lab5 {
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
         }
-        
+                
         // Get user option
         MenuOption option;
         while ((option = getUserChoice()) == MenuOption.INVALID);
@@ -134,6 +117,10 @@ public final class Lab5 {
         Thread odoThread = new Thread(odometer);
         odoThread.start();
         
+        // Start odometer correction thread
+        Thread odoCorrectionThread = new Thread(odoCorrection);
+        odoCorrectionThread.start();
+        
         // Start ultrasonic poller thread 
         Thread usThread = new Thread(usPoller);
         usThread.start();
@@ -141,6 +128,8 @@ public final class Lab5 {
         // Start Display thread
         Thread odoDisplayThread = new Thread(odometryDisplay);
         odoDisplayThread.start();
+        
+        
 
         // Sleep to allow Display to initialize
         try {
@@ -148,6 +137,17 @@ public final class Lab5 {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        
+        
+//        Vehicle.setMotorSpeeds(100, 100);
+//        odoCorrection.enableCorrection();
+        
+        /*
+        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+        
+        executeUSLocalization(usPoller, option);
+        uc.localize();
+        */
         
         Sound.twoBeeps();
         fieldSearch.startSearch();

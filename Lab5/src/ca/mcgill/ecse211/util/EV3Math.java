@@ -31,10 +31,15 @@ public class EV3Math {
      * 
      * @param angle
      * @return
+     * 
      */
     public static double boundAngle(double angle) {
-        angle = (angle < 0) ? angle + 360 : angle;
-        return angle % 360;
+        // reduce the angle  
+        angle =  angle % 360; 
+
+        // force it to be the positive remainder, so that 0 <= angle < 360  
+        angle = (angle + 360) % 360; 
+        return angle;
     }
     
     

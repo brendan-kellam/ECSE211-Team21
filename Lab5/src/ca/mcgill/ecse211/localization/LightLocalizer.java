@@ -39,7 +39,7 @@ public class LightLocalizer implements Localizer {
     
     public LightLocalizer(double finalX, double finalY) {
         // Initialize colorSensor mode and buffer
-        this.csProvider = Vehicle.COLOR_SENSOR.getRGBMode();
+        this.csProvider = Vehicle.LEFT_COLOR_SENSOR.getRGBMode();
         this.curRGB = new float[csProvider.sampleSize()];
         
         this.finalX = finalX;
@@ -91,7 +91,7 @@ public class LightLocalizer implements Localizer {
 
         // Turn counter clockwise
         wait(1000);
-        Navigator.turnTo(10.0, true);
+        Navigator.turnTo(0.0, true);
         
         // Forward to origin
         Vehicle.setMotorSpeeds(100, 100);

@@ -29,8 +29,11 @@ public final class Vehicle {
     ////////////////////////////////////////////
     
     ////////////////COLOR ////////////////
-    public static final EV3ColorSensor COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+    public static final EV3ColorSensor LEFT_COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+    public static final EV3ColorSensor RIGHT_COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
     //////////////////////////////////////
+    
+    
     
     // Configuration class
     private static Configuration configuration;
