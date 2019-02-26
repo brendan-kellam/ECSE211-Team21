@@ -155,7 +155,7 @@ public class FieldSearch {
 			}
 
 
-			//correction.enableCorrection();
+			correction.enableCorrection();
 
 			try {
 
@@ -163,7 +163,7 @@ public class FieldSearch {
 			} catch (OdometerExceptions e) {
 				e.printStackTrace();
 			}
-			//correction.disableCorrection();
+			correction.disableCorrection();
 
 			Sound.beepSequence();
 

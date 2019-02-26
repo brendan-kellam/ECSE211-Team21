@@ -48,8 +48,13 @@ public class Navigator {
         
         // Set motor speed and rotate
         Vehicle.setMotorSpeeds(speed, speed);
-        Vehicle.LEFT_MOTOR.rotate(EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), dist), true);
-        Vehicle.RIGHT_MOTOR.rotate(EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), dist), false);
+        int distance = EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), dist);
+        if (speed < 0) {
+            distance = -distance;
+        }
+        
+        Vehicle.LEFT_MOTOR.rotate(distance, true);
+        Vehicle.RIGHT_MOTOR.rotate(distance, false);
         
         
         // Stop at location

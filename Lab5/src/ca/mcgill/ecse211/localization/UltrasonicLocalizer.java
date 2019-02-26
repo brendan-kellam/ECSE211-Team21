@@ -36,7 +36,7 @@ public abstract class UltrasonicLocalizer implements Localizer {
     private double theta2 = 0.0;
     
     // Amount of time to wait after detection (Prevents a wall being detected twice)
-    private static final int WAIT_TIME_AFTER_DETECTION = 100;
+    private static final int WAIT_TIME_AFTER_DETECTION = 230;
     
     
     /**
