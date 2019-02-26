@@ -32,7 +32,7 @@ public class FieldSearch {
 	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
 	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
 	private static float[] usData = new float[usDistance.sampleSize()];
-	
+
 	// Search area
 	private SearchArea searchArea;
 
@@ -51,42 +51,30 @@ public class FieldSearch {
 	}
 
 	/**
-	 * Method shall::
+	 * Method shall:: Scan through the grid created from the specified coordinates.
 	 * @throws InterruptedException 
+	 * @throws OdometerExceptions 
 	 * 
 	 * 
 	 */
-	public void startSearch() throws InterruptedException {
+	public void startSearch() throws InterruptedException, OdometerExceptions {
 
-		/*
-        // Navigate to lower left corner
-        try {
-            navigateToLL();
-        } catch (OdometerExceptions e) {
-            e.printStackTrace();
-        }
-
-        // Turn to face N
-        Navigator.turnTo(0.0, true);
-
-        // Traveling to bottom left
-        Point bottomLeft = searchArea.getBottomLeft();
-
-        // Localize to field
-        LightLocalizer ll = new LightLocalizer(bottomLeft.getX()*TILE_SIZE, bottomLeft.getY()*TILE_SIZE);
-        ll.localize();
-
-        // Navigate to center of lower left tile
-        try {
-            Navigator.travelTo(bottomLeft.getX()*TILE_SIZE + TILE_SIZE/1.5, bottomLeft.getY()*TILE_SIZE + TILE_SIZE/1.5, true, true);
-        } catch (OdometerExceptions e) {
-            e.printStackTrace();
-        }
-        Navigator.turnTo(0.0, true);
-		 */
-
+		//Keep track of the coordinate we terminate the search at.
+		double finalX;
+		double finalY;
+		
 		// Travel to first waypoint
 		Point firstWaypoint = searchArea.getNextWaypoint();
+		
+		//Hold onto these variables incase the can is discovered in the first tile.
+		finalX  = firstWaypoint.getX();
+		finalY = firstWaypoint.getY();
+		
+		Navigator.travelTo((Lab5.LLx-1) * TILE_SIZE, (Lab5.LLy-1) * TILE_SIZE, true, true);
+		for (int i=0;i<3;i++) {
+			Sound.beep();
+		}
+		//Travel to the first waypoint, denoted (Lx+0.5tile, Ly+0.tile)
 		try {
 			Navigator.travelTo(firstWaypoint.getX(), firstWaypoint.getY(), true, true);
 		} catch (OdometerExceptions e1) {
@@ -102,7 +90,6 @@ public class FieldSearch {
 
 		Point waypoint;
 		while ((waypoint = searchArea.getNextWaypoint()) != null) {
-
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e1) {
@@ -123,12 +110,11 @@ public class FieldSearch {
 			}
 
 			//            Navigator.turnTo(targetLocation);
+			Thread.sleep(100);
 			Navigator.turnTo(targetLocation, 40, true);
-			
+
 			usSensor.fetchSample(usData,0);	
 			int currentDistance = (int) (usData[0] * 100.0);
-
-			Log.log(Sender.usSensor, "Starts here");
 
 			while (currentDistance > maxDistance && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
 
@@ -139,107 +125,47 @@ public class FieldSearch {
 				LCD.drawString(currentDistance + " is the curr distance", 6, 0);
 			}
 
-			Log.log(Sender.usSensor, "Ends here: " + currentDistance);
-			
 			if (currentDistance < maxDistance ) {
 				Sound.buzz();
-				ColourDetection.checkCanColour(1);
+				if (ColourDetection.checkCanColour(1)) {
+					break;
+				}
 			}
 
-//				Sound.beepSequence();
-
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-
+			Thread.sleep(100);
 
 			//correction.enableCorrection();
-
-			try {
-
-				Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
-			} catch (OdometerExceptions e) {
-				e.printStackTrace();
-			}
+			Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
+			finalX = waypoint.getX();
+			finalY = waypoint.getY();
 			//correction.disableCorrection();
-
 			Sound.beepSequence();
-
 		}
 
+		goToFinal(finalX,finalY);
+		LCD.drawString(":) :) :)", 6, 0);
 
-		Heading curHeading;
-
-		/*
-        for (int x = 0; x < (int) searchArea.getWidth(); x++) {
-            for (int y = 0; y < (int) searchArea.getHeight(); y++) {
-
-                curHeading = searchArea.getBoard().getHeading(Odometer.getTheta());
-
-                double yoff = TILE_SIZE;
-                double turnDir = 45.0;
-
-                // Flip the sign of yoff
-                if (curHeading == Heading.S) {
-                    yoff = -yoff;
-                    turnDir=-45.0;
-                    Sound.buzz();
-                }
-
-                Navigator.turnTo(turnDir, true);
-
-                // INSERT POLLING HERE
-                Sound.twoBeeps();
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-
-                if (usPoller.getDistance() < 15) {
-                    Sound.beep();
-                }
-
-                try {
-                    Navigator.travelTo(Odometer.getX(), Odometer.getY() + yoff, true, true);
-                    Sound.beep();
-                    Thread.sleep(1000);
-                } catch (OdometerExceptions | InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-
-            curHeading = searchArea.getBoard().getHeading(Odometer.getTheta());
-
-            // Need to advance vehicle east across the board
-            try {
-                Navigator.travelTo(Odometer.getX()+TILE_SIZE, Odometer.getY(), true, true);
-            } catch (OdometerExceptions e) {
-                e.printStackTrace();
-            }
-
-            if (x % 2 == 0) {
-                Navigator.turnTo(180.0, true);
-            } else {
-                Navigator.turnTo(0.0, true);
-            }
-
-            Sound.beep();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-		 */
-
-
+		for (int i=0;i<3;i++) {
+			Sound.beep();
+		}
 	}
 
+
+	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
+
+		Sound.beep();
+		Navigator.turnTo(0);
+		Sound.beep();
+		Navigator.travelTo(finalX, (Lab5.URy-1) * TILE_SIZE - TILE_SIZE/2, true, false); //works well
+		Sound.beep();
+		Navigator.turnTo(90);
+		Sound.beep();
+		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy-1) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
+		Sound.beep();
+		Navigator.turnTo(45);
+		Sound.beep();
+		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
+	}
 
 	/**
 	 * Navigate to the lower left-hand corner of the search area
