@@ -290,12 +290,13 @@ public class ColourDetection {
 
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED);
-		//Drive until we're 10 cm away. TODO: 10cm might be too long.
+		//Drive forward slowly.
 
 		while (currentDistance > approachDistance ) {
 			//Read the sensor values.
 			usSensor.fetchSample(usData, 0); 
 			currentDistance = (int) (usData[0] * 100.0);
+			LCD.drawString("Weird, but: " + currentDistance, 6, 0);
 		}
 
 		//Stop the car
