@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.Board.Heading;
 import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
@@ -14,8 +15,8 @@ import lejos.robotics.SampleProvider;
 public class LightLocalizer implements Localizer {
     
     // RGB threashold
-    private static final float LEFT_RGB_DELTA_THRESHOLD = 0.020f;
-    private static final float RIGHT_RGB_DELTA_THRESHOLD = 0.034f;
+    private static final float LEFT_RGB_DELTA_THRESHOLD = 0.018f;
+    private static final float RIGHT_RGB_DELTA_THRESHOLD = 0.026f;
     
     
     // Is line detected
@@ -84,9 +85,9 @@ public class LightLocalizer implements Localizer {
         
         // Detect first x grid line
         double y1 = Odometer.getY();
-        driveTillLineDetection(100, 50, true, DetectionType.LEFT);
-        double y2 = Odometer.getY();
+        driveTillLineDetection(100, 5, true, DetectionType.LEFT);
         wait(200);
+        double y2 = Odometer.getY();
         
         // Reverse backwards to y1
         try {
@@ -101,7 +102,8 @@ public class LightLocalizer implements Localizer {
         wait (200);
         
         // Drive to next grid line
-        driveTillLineDetection(100, 50, true, DetectionType.LEFT);
+        driveTillLineDetection(100, 10, true, DetectionType.LEFT);
+        wait(200);
         double x2 = Odometer.getX();
         
         Sound.beep();
@@ -138,8 +140,33 @@ public class LightLocalizer implements Localizer {
     private void driveTillLineDetection(int speed, int sleep, boolean stop, DetectionType type) {
         Vehicle.setMotorSpeeds(speed, speed);
         
+        leftCSProvider.fetchSample(curRGBLeft, 0);
+        rightCSProvider.fetchSample(curRGBRight, 0);
+        // Update last RGB values
+        lastRGBLeft = curRGBLeft.clone();
+        lastRGBRight = curRGBRight.clone();
+        
+        DetectionType t;
+        boolean leftDetected = false;
+        boolean rightDetected = false;
+        
         // Continue while
-        while (!(lineDetected() == type)) {
+        while ((t = lineDetected()) != DetectionType.BOTH) {
+                        
+            if (t == DetectionType.RIGHT) {
+                Vehicle.RIGHT_MOTOR.setSpeed(0);
+                Sound.playTone(400, 500);
+                leftDetected = true;
+            } else if (t == DetectionType.LEFT) {
+                Vehicle.LEFT_MOTOR.setSpeed(0);
+                Sound.playTone(800, 500);
+                rightDetected = true;
+            }
+            
+            if ( leftDetected && rightDetected) {
+                break;
+            }
+            
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
@@ -147,9 +174,22 @@ public class LightLocalizer implements Localizer {
             }
         }
         
+        Sound.beepSequenceUp();
+        
+        Heading heading = Board.getHeading(Odometer.getTheta());
+        
+        if (heading == Heading.N) {
+            try {
+                Odometer.getOdometer().setTheta(0.0);
+            } catch (OdometerExceptions e) {
+                e.printStackTrace();
+            }
+        }
+        
         if (stop) {
             Vehicle.setMotorSpeeds(0, 0);
         }
+        
     }
     
     /**

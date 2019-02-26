@@ -17,6 +17,7 @@ import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.robotics.SampleProvider;
 
 /**
  * Main entry point class for Lab4
@@ -196,5 +197,26 @@ public final class Lab5 {
 
 		return MenuOption.INVALID;
 	}
+	
+	private static boolean detected(float[] last, float[] cur, double threshold) {
+	      // Get RGB components for last reading and currect
+	      float r1 = last[0];
+	      float g1 = last[1];
+	      float b1 = last[2];
+	      
+	      float r2 = cur[0];
+	      float g2 = cur[1];
+	      float b2 = cur[2];
+	      
+	      // Compute difference in each component
+	      float rdiff = r2 - r1;
+	      float gdiff = g2 - g1;
+	      float bdiff = b2 - b1;
+	      
+	      // Compute delta between the r, g, b components of the last reading and the current reading
+	      float delta = (float) Math.sqrt(rdiff*rdiff + gdiff*gdiff + bdiff*bdiff);
+	      
+	      return delta > threshold;
+	  }
 
 }
