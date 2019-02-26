@@ -13,12 +13,10 @@ public class Navigator {
 
     // Default vehicle speed
     private static final int DEFAULT_SPEED = 100;
+    private static final int DEFAULT_ROTATION_SPEED = 100;
 
     // Theta threshold
     private static final double THETA_THRESHOLD = 8;
-    
-    // Rotation speed
-    public static final int ROTATE_SPEED    = 150;
     
     /**
      * Travel to a specific location in space <br>
@@ -93,8 +91,8 @@ public class Navigator {
             
             int cw = findTurnSide(theta, currentHeading);
             
-            Vehicle.LEFT_MOTOR.setSpeed(ROTATE_SPEED);
-            Vehicle.RIGHT_MOTOR.setSpeed(ROTATE_SPEED);
+            Vehicle.LEFT_MOTOR.setSpeed(speed);
+            Vehicle.RIGHT_MOTOR.setSpeed(speed);
             
             double leftRotation = EV3Math.convertAngle(Vehicle.getConfig().getWheelRadius(),Vehicle.getConfig().getTrackWidth(),distance)*-cw;
             double rightRotation = EV3Math.convertAngle(Vehicle.getConfig().getWheelRadius(),Vehicle.getConfig().getTrackWidth(), distance)*cw;
@@ -155,7 +153,7 @@ public class Navigator {
      * @param stop
      */
     public static void turnTo(double targetAngle) {
-        turnTo(targetAngle, DEFAULT_SPEED, false);
+        turnTo(targetAngle, DEFAULT_ROTATION_SPEED, false);
     }
     
     /**
