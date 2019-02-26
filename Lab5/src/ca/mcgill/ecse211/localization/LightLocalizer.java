@@ -13,34 +13,49 @@ import lejos.robotics.SampleProvider;
  */
 public class LightLocalizer implements Localizer {
     
-    /**
-     * Normalized intensity readings from the R, G, B values
-     */
-    private float[] curRGB;
-    private float[] lastRGB;
+    // RGB threashold
+    private static final float LEFT_RGB_DELTA_THRESHOLD = 0.020f;
+    private static final float RIGHT_RGB_DELTA_THRESHOLD = 0.034f;
     
+    
+    // Is line detected
+    private boolean leftDetected = false, rightDetected = false;
+
     /**
      * Color sensor provider
      */
-    private SampleProvider csProvider;
+    private SampleProvider leftCSProvider;
+    private SampleProvider rightCSProvider;
     
-    // RGB threashold
-    private static final float RGB_DELTA_THRESHOLD = 0.015f;
+    private float[] curRGBLeft;
+    private float[] lastRGBLeft;
     
-    // Is line detected
-    private boolean lineDetected = true;
+    private float[] curRGBRight;
+    private float[] lastRGBRight;
         
     // X and Y grid line diffs
-    private static double X_DIFF = 13.5;
-    private static double Y_DIFF = 12.5;
+    private static double X_DIFF = 11.5;
+    private static double Y_DIFF = 9;
     
     // Board
     private double finalX, finalY;
     
+    // Light sensor that had a detection
+    private enum DetectionType {
+        NONE,
+        LEFT,
+        RIGHT,
+        BOTH
+    }
+    
     public LightLocalizer(double finalX, double finalY) {
         // Initialize colorSensor mode and buffer
-        this.csProvider = Vehicle.LEFT_COLOR_SENSOR.getRGBMode();
-        this.curRGB = new float[csProvider.sampleSize()];
+        this.leftCSProvider = Vehicle.LEFT_COLOR_SENSOR.getRGBMode();
+        this.rightCSProvider = Vehicle.RIGHT_COLOR_SENSOR.getRGBMode();
+        
+        this.curRGBLeft = new float[leftCSProvider.sampleSize()];
+        this.curRGBRight = new float[rightCSProvider.sampleSize()];
+
         
         this.finalX = finalX;
         this.finalY = finalY;
@@ -58,13 +73,20 @@ public class LightLocalizer implements Localizer {
      * turn 90 degrees counter-clockwise and drive forward a set distance based of the first difference measured.
      */
     public void localize() {
-        this.lastRGB = this.curRGB;
+        // Clone the current rgb reading
+        this.lastRGBLeft = this.curRGBLeft.clone();
+        this.lastRGBRight = this.curRGBRight.clone();
+        leftDetected = false;
+        rightDetected = false;
+        
+        Vehicle.LEFT_MOTOR.setAcceleration(6000);
+        Vehicle.RIGHT_MOTOR.setAcceleration(6000);
         
         // Detect first x grid line
         double y1 = Odometer.getY();
-        driveTillLineDetection(100, 50, true);
+        driveTillLineDetection(100, 50, true, DetectionType.LEFT);
         double y2 = Odometer.getY();
-        wait(1000);
+        wait(200);
         
         // Reverse backwards to y1
         try {
@@ -72,15 +94,17 @@ public class LightLocalizer implements Localizer {
         } catch (OdometerExceptions e3) {
             e3.printStackTrace();
         }
-        wait(1000);
+        wait(200);
         
         // Turn 90 degrees clockwise
         Navigator.turnTo(90.0); 
-        wait (1000);
+        wait (200);
         
         // Drive to next grid line
-        driveTillLineDetection(100, 50, true);
+        driveTillLineDetection(100, 50, true, DetectionType.LEFT);
         double x2 = Odometer.getX();
+        
+        Sound.beep();
             
         // Reverse
         Vehicle.setMotorSpeeds(-100, -100);
@@ -90,7 +114,7 @@ public class LightLocalizer implements Localizer {
         Vehicle.setMotorSpeeds(0, 0);
 
         // Turn counter clockwise
-        wait(1000);
+        wait(200);
         Navigator.turnTo(0.0);
         
         // Forward to origin
@@ -111,11 +135,11 @@ public class LightLocalizer implements Localizer {
         
     }
     
-    private void driveTillLineDetection(int speed, int sleep, boolean stop) {
+    private void driveTillLineDetection(int speed, int sleep, boolean stop, DetectionType type) {
         Vehicle.setMotorSpeeds(speed, speed);
         
         // Continue while
-        while (!lineDetected()) {
+        while (!(lineDetected() == type)) {
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
@@ -143,26 +167,53 @@ public class LightLocalizer implements Localizer {
      * 
      * @return
      */
-    private boolean lineDetected() {
-        // Fetch the current RGB intensity sample
-        csProvider.fetchSample(curRGB, 0);
+    private DetectionType lineDetected() {
+     // Fetch the current RGB intensity sample
+        leftCSProvider.fetchSample(curRGBLeft, 0);
+        rightCSProvider.fetchSample(curRGBRight, 0);
         
-        // If a line has already been detected
-        if (lineDetected) {
+        if (leftDetected) {
             
             // Reset the last RGB to the current
-            lastRGB = curRGB.clone();
-            lineDetected = false;
+            lastRGBLeft = curRGBLeft.clone();
+            leftDetected = false;
         }
         
-        // Get RGB components for last reading and currect
-        float r1 = lastRGB[0];
-        float g1 = lastRGB[1];
-        float b1 = lastRGB[2];
+        // If a line has already been detected
+        if (rightDetected) {
+            
+            // Reset the last RGB to the current
+            lastRGBRight = curRGBRight.clone();
+            rightDetected = false;
+        }
         
-        float r2 = curRGB[0];
-        float g2 = curRGB[1];
-        float b2 = curRGB[2];
+        leftDetected = detected(lastRGBLeft, curRGBLeft, LEFT_RGB_DELTA_THRESHOLD);
+        rightDetected = detected(lastRGBRight, curRGBRight, RIGHT_RGB_DELTA_THRESHOLD);
+        
+        // Update last RGB values
+        lastRGBLeft = curRGBLeft.clone();
+        lastRGBRight = curRGBRight.clone();
+        
+        if (leftDetected && rightDetected) {
+            return DetectionType.BOTH;
+        } else if (leftDetected && !rightDetected) {
+            return DetectionType.LEFT;
+        } else if (!leftDetected && rightDetected) {
+            return DetectionType.RIGHT;
+        }
+        
+        return DetectionType.NONE;
+    }
+    
+    private boolean detected(float[] last, float[] cur, double threshold) {
+        // Get RGB components for last reading and currect
+        float r1 = last[0];
+        float g1 = last[1];
+        float b1 = last[2];
+        
+        float r2 = cur[0];
+        float g2 = cur[1];
+        float b2 = cur[2];
         
         // Compute difference in each component
         float rdiff = r2 - r1;
@@ -172,16 +223,7 @@ public class LightLocalizer implements Localizer {
         // Compute delta between the r, g, b components of the last reading and the current reading
         float delta = (float) Math.sqrt(rdiff*rdiff + gdiff*gdiff + bdiff*bdiff);
         
-        // update last RGB value
-        lastRGB = curRGB.clone();
-        
-        // If color delta is significant
-        if (delta > RGB_DELTA_THRESHOLD) {
-            lineDetected = true;
-            Sound.beep();
-            return true;
-        }
-        return false;
+        return delta > threshold;
     }
     
 }

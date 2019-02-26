@@ -134,12 +134,20 @@ public class FieldSearch {
 
 			Thread.sleep(100);
 
+			try {
+
+				Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
+			} catch (OdometerExceptions e) {
+				e.printStackTrace();
+			}
+
 			//correction.enableCorrection();
 			Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
 			finalX = waypoint.getX();
 			finalY = waypoint.getY();
 			//correction.disableCorrection();
-			Sound.beepSequence();
+
+      Sound.beepSequence();
 		}
 
 		goToFinal(finalX,finalY);
