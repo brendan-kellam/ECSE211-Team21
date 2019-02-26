@@ -21,10 +21,14 @@ import lejos.hardware.Sound;
 /**
  * Main entry point class for Lab4
  */
+
 public final class Lab5 {
 
 	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
+	// Lower left and upper right corner definitions [0,8]
+	public static final int LLx = 2, LLy = 2;
+	public static final int URx = 4, URy = 4;
 
 	/**
 	 * Represents a given MenuOption
@@ -53,10 +57,6 @@ public final class Lab5 {
 		Vehicle.LEFT_MOTOR.setAcceleration(100);
 		Vehicle.RIGHT_MOTOR.setAcceleration(100);
 
-
-		// Lower left and upper right corner definitions [0,8]
-		int LLx = 2, LLy = 2;
-		int URx = 6, URy = 6;
 
 		// Target can [1, 4]
 		int TR = 3;
@@ -147,6 +147,7 @@ public final class Lab5 {
 	        Vehicle.RIGHT_MOTOR.setAcceleration(100);
 	        
 			Thread.sleep(500);
+
 			fieldSearch.startSearch();
 		}
 		
