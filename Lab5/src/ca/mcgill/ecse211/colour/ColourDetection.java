@@ -58,7 +58,7 @@ public class ColourDetection {
 	 * How far do we want to be once the scan terminates? 
 	 */
 	private static final int approachDistance = 3;
-	private static final int retreatDistance = 17;
+	private static int retreatDistance = 16;
 
 	/**
 	 * This method will compare the colour of the detect can to the desired colour
@@ -88,11 +88,26 @@ public class ColourDetection {
 	 */
 	public static void forDemoOneToAnalyzeCansOneAfterEachOther () throws InterruptedException {
 
+
+		retreatDistance = 8;
 		while (true) {
+			LCD.clear();
+			usSensor.fetchSample(usData,0);	
+			int currentDistance = (int) (usData[0] * 100.0);
+			LCD.drawString("No object detected", 0, 0);
+			while (currentDistance > 15 ) {
+				//Read the sensor values.
+				usSensor.fetchSample(usData, 0); 
+				currentDistance = (int) (usData[0] * 100.0);
+			}
+			
+			LCD.clear();
+			LCD.drawString("Object Detected", 0, 0);
 			approachCan(); //Approach the can
 			printCanColour();//Check the can colour
+			reverseAwayFromCan();
+			Thread.sleep(3000);
 			Sound.beep();
-	        while (Button.waitForAnyEvent() != Button.ID_ENTER);
 		}
 
 	}
@@ -144,6 +159,7 @@ public class ColourDetection {
 
 			//Rotate to the next sample if there is one.
 			lightSensorMotor.rotate(sweepAngle/numReadings);
+			Thread.sleep(50);
 		}
 
 		//Just to log the data:
@@ -217,10 +233,10 @@ public class ColourDetection {
 		if ( (green > red) && (green - blue > 5) ) {//We're green
 			return 2;
 		}
-		if ( (red - green < 20) && (red > green) && (green - blue > 4)) { // We're yellow
+		if ((red > green) && (green - blue > 15)) { // We're yellow
 			return 3;
 		}
-		if ( (red - green > 20) && (red - blue > 25)) { // Red can
+		if ( (red - green > 12) && (red - blue > 15) && (green - blue < 15)) { // Red can
 			return 4;
 		}
 
@@ -277,7 +293,6 @@ public class ColourDetection {
 			//Read the sensor values.
 			usSensor.fetchSample(usData, 0); 
 			currentDistance = (int) (usData[0] * 100.0);
-			LCD.drawString("Weird, but: " + currentDistance, 6, 0);
 		}
 
 		//Stop the car
@@ -287,14 +302,15 @@ public class ColourDetection {
 	
 	/**
 	 * Reverse away from the can so that we have space to pass it on the next go.
+	 * @throws InterruptedException 
 	 */
-	private static void reverseAwayFromCan() {
-
-		usSensor.fetchSample(usData,0);	
-		int currentDistance = (int) (usData[0] * 100.0);
+	private static void reverseAwayFromCan() throws InterruptedException {
 
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(BACKUP_SPEED, BACKUP_SPEED);
+		Thread.sleep(250);
+		usSensor.fetchSample(usData,0);	
+		int currentDistance = (int) (usData[0] * 100.0);
 		//Retreat until we have enough space. 
 		while (currentDistance < retreatDistance ) {
 			//Read the sensor values.
@@ -317,9 +333,6 @@ public class ColourDetection {
 		float redAvg = 0;
 		float greenAvg = 0;
 		float blueAvg = 0;
-
-		LCD.clear();
-		LCD.drawString("Analyzing..", 0, 0);
 		for (int sample=0;sample<numReadings;sample++) {
 
 			csProvider.fetchSample(curRGB, 0);

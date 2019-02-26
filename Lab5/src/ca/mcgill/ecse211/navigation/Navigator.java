@@ -12,8 +12,8 @@ import ca.mcgill.ecse211.util.Log;
 public class Navigator {
 
     // Default vehicle speed
-    private static final int DEFAULT_SPEED = 100;
-    private static final int DEFAULT_ROTATION_SPEED = 100;
+    private static final int DEFAULT_SPEED = 200;
+    private static final int DEFAULT_ROTATION_SPEED = 125;
 
     // Theta threshold
     private static final double THETA_THRESHOLD = 8;
@@ -63,7 +63,6 @@ public class Navigator {
         }
     }
      
-    
   
     /**
      * TurnTo function which takes an angle and boolean as arguments. The boolean controls whether or not to stop the

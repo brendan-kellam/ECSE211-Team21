@@ -18,6 +18,7 @@ import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.geometry.Point;
@@ -28,10 +29,15 @@ public class FieldSearch {
 	// Ultrasonic poller
 	private UltrasonicPoller usPoller;
 
+	// desired can colour
+	private static final int DESIRED_CAN_COLOUR = 1;
 	//Ultrasonic sensor
 	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
 	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
 	private static float[] usData = new float[usDistance.sampleSize()];
+	
+	//One motor for the light sensor.
+	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.LIGHT_SENSOR_MOTOR;
 
 	// Search area
 	private SearchArea searchArea;
@@ -87,91 +93,108 @@ public class FieldSearch {
 			e1.printStackTrace();
 		}
 		Navigator.turnTo(0);
-
+		
 		Point waypoint;
 		while ((waypoint = searchArea.getNextWaypoint()) != null) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
 
 			Heading heading = Board.getHeading(Odometer.getTheta());
 
-			double targetLocation;
+			double[] targetLocation = new double[2];
 
-			if (heading == Heading.E ) {
-				targetLocation = 180.0;
+			double heldAngle = Odometer.getTheta();
+			if (heading == Heading.N) {
+				targetLocation[0] = 310;
+				targetLocation[1] = 60;
 			}
-			else if (heading == Heading.N || heading == Heading.S){
-				targetLocation = 90.0;
+			else if (heading == Heading.E || heading == Heading.S){
+				targetLocation[0] = 130;//Check from left to right.
+				targetLocation[1] = 235;
 			} else {
-				targetLocation = Odometer.getTheta();
+				targetLocation[0] = Odometer.getTheta();
+				targetLocation[1] = Odometer.getTheta();
 			}
 
-			//            Navigator.turnTo(targetLocation);
-			Thread.sleep(100);
-			Navigator.turnTo(targetLocation, 40, true);
-
-			usSensor.fetchSample(usData,0);	
-			int currentDistance = (int) (usData[0] * 100.0);
-
-			while (currentDistance > maxDistance && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
-
-				Log.log(Sender.usSensor, "curDistance: " + currentDistance);
-				usSensor.fetchSample(usData,0);	
-				currentDistance = (int) (usData[0] * 100.0);
-				Thread.sleep(20);
-				LCD.drawString(currentDistance + " is the curr distance", 6, 0);
+			Thread.sleep(50);
+			Navigator.turnTo(targetLocation[0], 65, true);
+			
+			if (scanForCan(targetLocation[0])) {
+				Sound.beep();
+				break;
 			}
 
-			if (currentDistance < maxDistance ) {
-				Sound.buzz();
-				if (ColourDetection.checkCanColour(1)) {
-					break;
-				}
+			Thread.sleep(50);
+			
+			Navigator.turnTo(heldAngle, 65, false);
+			Thread.sleep(50);
+			
+			Navigator.turnTo(targetLocation[1], 65, true);
+			if (scanForCan(targetLocation[1])) {
+				Sound.beep();
+				break;
 			}
-
-			Thread.sleep(100);
-
-			try {
-
-				Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
-			} catch (OdometerExceptions e) {
-				e.printStackTrace();
-			}
+			
+			Thread.sleep(50);
 
 			//correction.enableCorrection();
 			Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
 			finalX = waypoint.getX();
 			finalY = waypoint.getY();
 			//correction.disableCorrection();
-
-      Sound.beepSequence();
+			Sound.beepSequence();
 		}
 
 		goToFinal(finalX,finalY);
 		LCD.drawString(":) :) :)", 6, 0);
-
 		for (int i=0;i<3;i++) {
 			Sound.beep();
 		}
 	}
 
+	private boolean scanForCan(double targetLocation) throws InterruptedException {
+		//Sound.beep();
+		usSensor.fetchSample(usData,0);	
+		int currentDistance = (int) (usData[0] * 100.0);
+
+		while (currentDistance > maxDistance && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
+
+			Log.log(Sender.usSensor, "curDistance: " + currentDistance);
+			usSensor.fetchSample(usData,0);	
+			currentDistance = (int) (usData[0] * 100.0);
+			Thread.sleep(20);
+			LCD.drawString(currentDistance + " is the curr distance", 6, 0);
+		}
+
+		//Can detected:
+		if (currentDistance < maxDistance ) {
+			Vehicle.setMotorSpeeds(0, 0);
+			Thread.sleep(50);
+			if (ColourDetection.checkCanColour(DESIRED_CAN_COLOUR)) {
+				Sound.beep();
+				return true;
+			}
+		}
+		Sound.twoBeeps();
+		return false;
+	}
 
 	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
 
-		Sound.beep();
+//		Sound.beep();
 		Navigator.turnTo(0);
-		Sound.beep();
-		Navigator.travelTo(finalX, (Lab5.URy-1) * TILE_SIZE - TILE_SIZE/2, true, false); //works well
-		Sound.beep();
+//		Sound.beep();
+		Navigator.travelTo(finalX, (Lab5.URy-1)  * TILE_SIZE - TILE_SIZE/2, true, false); //works well
+//		Sound.beep();
 		Navigator.turnTo(90);
-		Sound.beep();
+//		Sound.beep();
 		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy-1) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
-		Sound.beep();
+//		Sound.beep();
 		Navigator.turnTo(45);
-		Sound.beep();
+//		Sound.beep();
 		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
 	}
 

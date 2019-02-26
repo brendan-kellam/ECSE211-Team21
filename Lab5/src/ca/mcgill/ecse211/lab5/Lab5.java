@@ -28,7 +28,7 @@ public final class Lab5 {
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
 	// Lower left and upper right corner definitions [0,8]
 	public static final int LLx = 2, LLy = 2;
-	public static final int URx = 4, URy = 4;
+	public static final int URx = 5, URy = 5;
 
 	/**
 	 * Represents a given MenuOption
@@ -54,8 +54,8 @@ public final class Lab5 {
 
 		// Create new vehicle configuration
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.15));
-		Vehicle.LEFT_MOTOR.setAcceleration(100);
-		Vehicle.RIGHT_MOTOR.setAcceleration(100);
+		Vehicle.LEFT_MOTOR.setAcceleration(200);
+		Vehicle.RIGHT_MOTOR.setAcceleration(200);
 
 
 		// Target can [1, 4]
@@ -78,7 +78,7 @@ public final class Lab5 {
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
 		// Create new display object
-		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+		//Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
 		// Search the field
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
@@ -98,8 +98,8 @@ public final class Lab5 {
 		odoThread.start();
 
 		// Start odometer correction thread
-		Thread odoCorrectionThread = new Thread(odoCorrection);
-		odoCorrectionThread.start();
+//		Thread odoCorrectionThread = new Thread(odoCorrection);
+//		odoCorrectionThread.start();
 
 		// Start ultrasonic poller thread 
 		Thread usThread = new Thread(usPoller);
@@ -132,19 +132,19 @@ public final class Lab5 {
 				e.printStackTrace();
 			}
 			
-			Thread odoDisplayThread = new Thread(odometryDisplay);
-			odoDisplayThread.start(); 
+//			Thread odoDisplayThread = new Thread(odometryDisplay);
+//			odoDisplayThread.start(); 
 			
 			
-			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
-	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
-	        
-			ul.localize();
-			uc.localize();
+//			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
+//	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+//	        
+//			ul.localize();
+//			uc.localize();
 			
 			Sound.beepSequenceUp();
-			Vehicle.LEFT_MOTOR.setAcceleration(100);
-	        Vehicle.RIGHT_MOTOR.setAcceleration(100);
+			Vehicle.LEFT_MOTOR.setAcceleration(150);
+	        Vehicle.RIGHT_MOTOR.setAcceleration(150);
 	        
 			Thread.sleep(500);
 
