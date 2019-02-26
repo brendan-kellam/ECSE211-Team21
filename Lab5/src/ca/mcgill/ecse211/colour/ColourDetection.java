@@ -18,7 +18,7 @@ import lejos.robotics.SampleProvider;
 
 public class ColourDetection {
 	// Default speed when approaching can
-	private static final int APPROACH_SPEED = 40; //Make sure it's not too fast.
+	private static final int APPROACH_SPEED = 60; //Make sure it's not too fast.
 
 	// Default speed when backing up from can
 	private static final int BACKUP_SPEED = -75; //Make sure it's not too slow.
@@ -58,7 +58,7 @@ public class ColourDetection {
 	 * How far do we want to be once the scan terminates? 
 	 */
 	private static final int approachDistance = 3;
-	private static final int retreatDistance = 15;
+	private static final int retreatDistance = 17;
 
 	/**
 	 * This method will compare the colour of the detect can to the desired colour
@@ -94,25 +94,6 @@ public class ColourDetection {
 			Sound.beep();
 	        while (Button.waitForAnyEvent() != Button.ID_ENTER);
 		}
-
-	}
-
-	private static void reverseAwayFromCan() {
-
-		usSensor.fetchSample(usData,0);	
-		int currentDistance = (int) (usData[0] * 100.0);
-
-		// Drive forward slowly.
-		Vehicle.setMotorSpeeds(BACKUP_SPEED, BACKUP_SPEED);
-		//Drive until we're 137 cm away. 
-		while (currentDistance < 17 ) {
-			//Read the sensor values.
-			usSensor.fetchSample(usData, 0); 
-			currentDistance = (int) (usData[0] * 100.0);
-		}
-
-		//Stop the car
-		Vehicle.setMotorSpeeds(0, 0);
 
 	}
 
@@ -302,6 +283,28 @@ public class ColourDetection {
 		//Stop the car
 		Sound.beep();
 		Vehicle.setMotorSpeeds(0, 0);
+	}
+	
+	/**
+	 * Reverse away from the can so that we have space to pass it on the next go.
+	 */
+	private static void reverseAwayFromCan() {
+
+		usSensor.fetchSample(usData,0);	
+		int currentDistance = (int) (usData[0] * 100.0);
+
+		// Drive forward slowly.
+		Vehicle.setMotorSpeeds(BACKUP_SPEED, BACKUP_SPEED);
+		//Retreat until we have enough space. 
+		while (currentDistance < retreatDistance ) {
+			//Read the sensor values.
+			usSensor.fetchSample(usData, 0); 
+			currentDistance = (int) (usData[0] * 100.0);
+		}
+
+		//Stop the car
+		Vehicle.setMotorSpeeds(0, 0);
+
 	}
 	
 	/**
