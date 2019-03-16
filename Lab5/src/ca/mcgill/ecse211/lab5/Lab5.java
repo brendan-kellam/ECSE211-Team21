@@ -13,6 +13,8 @@ import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.WifiController;
+import ca.mcgill.ecse211.util.Log.Sender;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -88,6 +90,10 @@ public final class Lab5 {
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
+		
+		// ----- Configuration ------
+        WifiController.fetchGameplayData();
+		Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
 
 		// Start Odometer Thread
 		Thread odoThread = new Thread(odometer);
