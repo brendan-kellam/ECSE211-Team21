@@ -7,6 +7,8 @@ import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.localization.RisingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.UltrasonicLocalizer;
+import ca.mcgill.ecse211.localization.mattEdge;
+import ca.mcgill.ecse211.localization.mattLocalize;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -17,6 +19,9 @@ import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.robotics.SampleProvider;
 
 /**
  * Main entry point class for Lab4
@@ -78,7 +83,7 @@ public final class Lab5 {
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
 		// Create new display object
-		//Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
 		// Search the field
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
@@ -98,59 +103,65 @@ public final class Lab5 {
 		odoThread.start();
 
 		// Start odometer correction thread
-//		Thread odoCorrectionThread = new Thread(odoCorrection);
-//		odoCorrectionThread.start();
+		//		Thread odoCorrectionThread = new Thread(odoCorrection);
+		//		odoCorrectionThread.start();
 
 		// Start ultrasonic poller thread 
 		Thread usThread = new Thread(usPoller);
 		usThread.start();
 
-        // Sleep to allow Display to initialize
-        try {
-            Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-                
-        // Get user option
-        MenuOption option;
-        while ((option = getUserChoice()) == MenuOption.INVALID);
+		// Sleep to allow Display to initialize
+		try {
+			Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		// Get user option
+		MenuOption option;
+		while ((option = getUserChoice()) == MenuOption.INVALID);
 
 		Sound.twoBeeps();
 		if (option == MenuOption.TEST_COLOURS){
 			ColourDetection.forDemoOneToAnalyzeCansOneAfterEachOther();	
 		}	
-		
+
 		else {
 			// Start Display thread.
 			//This is here so the display thread doesn't run during colour testing
-			
+
 			// Sleep to allow Display to initialize
 			try {
 				Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-//			Thread odoDisplayThread = new Thread(odometryDisplay);
-//			odoDisplayThread.start(); 
-			
-			
-			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
-	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
-	        
-			ul.localize();
-			uc.localize();
-			
+
+			Thread odoDisplayThread = new Thread(odometryDisplay);
+			odoDisplayThread.start(); 
+
+
+			//			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
+			mattEdge ul2 = new mattEdge(odometer,Vehicle.LEFT_MOTOR,Vehicle.RIGHT_MOTOR,usPoller,
+					Vehicle.getConfig().getTrackWidth(),Vehicle.getConfig().getWheelRadius());
+			//			LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+
+			mattLocalize uc2 = new mattLocalize(odometer,Vehicle.LEFT_MOTOR,Vehicle.RIGHT_MOTOR,
+					Vehicle.COLOR_SENSOR_BACK,Vehicle.getConfig().getWheelRadius());
+			//			ul.localize();
+			//			uc.localize();
+
+			ul2.usLocalize();
+			uc2.lightLocalize();
 			Sound.beepSequenceUp();
 			Vehicle.LEFT_MOTOR.setAcceleration(150);
-	        Vehicle.RIGHT_MOTOR.setAcceleration(150);
-	        
+			Vehicle.RIGHT_MOTOR.setAcceleration(150);
+
 			Thread.sleep(500);
 
 			fieldSearch.startSearch();
 		}
-		
+
 		Sound.beep();
 
 		// Wait

@@ -27,7 +27,7 @@ public abstract class UltrasonicLocalizer implements Localizer {
     protected static final double NOISE_MARGIN = 1.0;
     
     // Detection distance
-    protected static final double DETECTION_DISTANCE = 22;
+    protected static final double DETECTION_DISTANCE = 34;
     
     // Odometer angle for INMARGIN event
     private double theta1 = 0.0;
