@@ -30,7 +30,7 @@ public class ColourDetection {
 	
 
 
-	//BABY COMMIT 2
+	
 	//One motor for the light sensor.
 	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.LIGHT_SENSOR_MOTOR;
 
