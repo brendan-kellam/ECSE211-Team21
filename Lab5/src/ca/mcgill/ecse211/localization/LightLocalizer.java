@@ -39,7 +39,7 @@ public class LightLocalizer implements Localizer {
     
     public LightLocalizer(double finalX, double finalY) {
         // Initialize colorSensor mode and buffer
-        this.csProvider = Vehicle.RIGHT_COLOR_SENSOR.getRGBMode();
+        this.csProvider = Vehicle.COLOR_SENSOR_BACK.getRGBMode();
         this.curRGB = new float[csProvider.sampleSize()];
         
         this.finalX = finalX;

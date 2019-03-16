@@ -30,9 +30,8 @@ public class ColourDetection {
 	
 
 
-	
 	//One motor for the light sensor.
-	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.LIGHT_SENSOR_MOTOR;
+	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.FRONT_COLOUR_SENSOR_MOTOR;
 
 	//The colour sensor:
 

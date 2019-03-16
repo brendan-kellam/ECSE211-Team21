@@ -37,7 +37,7 @@ public class FieldSearch {
 	private static float[] usData = new float[usDistance.sampleSize()];
 	
 	//One motor for the light sensor.
-	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.LIGHT_SENSOR_MOTOR;
+	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.FRONT_COLOUR_SENSOR_MOTOR;
 
 	// Search area
 	private SearchArea searchArea;

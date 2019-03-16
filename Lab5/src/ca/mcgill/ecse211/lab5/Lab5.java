@@ -71,7 +71,7 @@ public final class Lab5 {
 		Odometer odometer = Odometer.getOdometer();
 
 		// Create odometery correction | disable correction
-		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.LEFT_COLOR_SENSOR);
+		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_BACK);
 		odoCorrection.disableCorrection();
 
 		// Create ultrasonic poller
@@ -136,11 +136,11 @@ public final class Lab5 {
 //			odoDisplayThread.start(); 
 			
 			
-//			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
-//	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
-//	        
-//			ul.localize();
-//			uc.localize();
+			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
+	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+	        
+			ul.localize();
+			uc.localize();
 			
 			Sound.beepSequenceUp();
 			Vehicle.LEFT_MOTOR.setAcceleration(150);

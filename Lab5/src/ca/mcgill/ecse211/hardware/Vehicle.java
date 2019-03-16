@@ -22,26 +22,33 @@ public final class Vehicle {
     /////////////////////////////////////////////////////////
     
     //////////////// MOTOR FOR THE COLOUR SENSOR ////////////
-	public static final EV3MediumRegulatedMotor LIGHT_SENSOR_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
+	public static final EV3MediumRegulatedMotor FRONT_COLOUR_SENSOR_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
 	////////////////////////////////////////////////////////
-    
+
+    //////////////// MOTOR FOR THE CLAW ////////////
+	public static final EV3MediumRegulatedMotor CLAW_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+	////////////////////////////////////////////////////////
+	
     //////////////////////// LCD  //////////////////////////
     public static final TextLCD LCD_DISPLAY = LocalEV3.get().getTextLCD();
     ////////////////////////////////////////////////////////
 
     ////////////////ULTRASONIC ////////////////
-    public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(LocalEV3.get().getPort("S1"));
+    public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(LocalEV3.get().getPort("S3"));
     ////////////////////////////////////////////
     
     ////////////////COLOR ////////////////
-//    public static final EV3ColorSensor LEFT_COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
-    public static final EV3ColorSensor LEFT_COLOR_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
-    public static final EV3ColorSensor RIGHT_COLOR_SENSOR = LEFT_COLOR_SENSOR; // TEMP
+    public static final EV3ColorSensor COLOR_SENSOR_BACK = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
     //////////////////////////////////////
     
     ////////////////COLOR SENSOR FOR COLOUR DETECTION ////////////////
-    public static final EV3ColorSensor COLOR_SENSOR_FRONT = new EV3ColorSensor(LocalEV3.get().getPort("S3"));
+    public static final EV3ColorSensor COLOR_SENSOR_FRONT = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
     /////////////////////////////////////////////////////////////////
+    
+    ////////////////TOUCH SENSOR ////////////////
+    //public static final EV3ColorSensor TOUCH_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
+    /////////////////////////////////////////////////////////////////
+    
     
     // Configuration class
     private static Configuration configuration;
