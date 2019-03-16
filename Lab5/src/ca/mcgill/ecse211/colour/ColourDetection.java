@@ -27,8 +27,10 @@ public class ColourDetection {
 	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
 	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
 	private static float[] usData = new float[usDistance.sampleSize()];
+	
 
 
+	//BABY COMMIT 2
 	//One motor for the light sensor.
 	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.LIGHT_SENSOR_MOTOR;
 
