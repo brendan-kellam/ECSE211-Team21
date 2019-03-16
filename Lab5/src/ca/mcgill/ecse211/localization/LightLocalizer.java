@@ -31,7 +31,7 @@ public class LightLocalizer implements Localizer {
         
     // X and Y grid line diffs
     private static double X_DIFF = 13.5;
-    private static double Y_DIFF = 12.5;
+    private static double Y_DIFF = 10.5;
     
     private double finalX;
     private double finalY;

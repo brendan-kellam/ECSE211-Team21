@@ -27,8 +27,8 @@ public final class Lab5 {
 	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
 	// Lower left and upper right corner definitions [0,8]
-	public static final int LLx = 2, LLy = 2;
-	public static final int URx = 5, URy = 5;
+	public static final int LLx = 2, LLy = 3;
+	public static final int URx = 5, URy = 7;
 
 	/**
 	 * Represents a given MenuOption
@@ -136,11 +136,14 @@ public final class Lab5 {
 //			odoDisplayThread.start(); 
 			
 			
-//			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
-//	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
-//	        
-//			ul.localize();
-//			uc.localize();
+			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
+	        LightLocalizer uc = new LightLocalizer(0.0, 0.0);
+	        
+			ul.localize();
+			
+			Vehicle.LEFT_MOTOR.setAcceleration(6000);
+	        Vehicle.RIGHT_MOTOR.setAcceleration(6000);
+			uc.localize();
 			
 			Sound.beepSequenceUp();
 			Vehicle.LEFT_MOTOR.setAcceleration(150);

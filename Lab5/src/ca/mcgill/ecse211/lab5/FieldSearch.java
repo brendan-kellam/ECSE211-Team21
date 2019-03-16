@@ -30,7 +30,7 @@ public class FieldSearch {
 	private UltrasonicPoller usPoller;
 
 	// desired can colour
-	private static final int DESIRED_CAN_COLOUR = 1;
+	private static final int DESIRED_CAN_COLOUR = 3;
 	//Ultrasonic sensor
 	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
 	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
