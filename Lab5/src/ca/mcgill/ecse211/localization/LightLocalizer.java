@@ -109,14 +109,7 @@ public class LightLocalizer {
 			
 			Vehicle.setMotorSpeeds(30, 30);
 			Navigator.turnTo(0); 
-
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-//			odometer.setXYT(0, 0, 0);
+			
 		}
 	}
 

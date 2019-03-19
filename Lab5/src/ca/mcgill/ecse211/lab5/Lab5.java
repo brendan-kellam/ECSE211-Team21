@@ -142,25 +142,17 @@ public final class Lab5 {
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
 //			odoDisplayThread.start(); 
 
-
-			//			UltrasonicLocalizer ul = new FallingEdgeLocalizer(usPoller);
-			FallingEdgeLocalizer ul2 = new FallingEdgeLocalizer(odometer,usPoller);
-			//			LightLocalizer uc = new LightLocalizer(0.0, 0.0);
-
-			LightLocalizer uc2 = new LightLocalizer(odometer);
-			//			ul.localize();
-			//			uc.localize();
-
-//			MattDiffLocalizer uc3 = new MattDiffLocalizer(odometer);
 			
-			ul2.usLocalize();
-			uc2.lightLocalize();
+			FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
+
+			LightLocalizer uc = new LightLocalizer(odometer);
+
+			ul.usLocalize();
+			uc.lightLocalize();
 			
 			Sound.beepSequenceUp();
 			Vehicle.LEFT_MOTOR.setAcceleration(150);
 			Vehicle.RIGHT_MOTOR.setAcceleration(150);
-
-			Thread.sleep(500);
 
 			//fieldSearch.startSearch();
 			
