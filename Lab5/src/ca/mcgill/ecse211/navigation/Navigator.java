@@ -107,7 +107,6 @@ public class Navigator {
     }
     
     
-    
     /**
      * Given two angles, determine which way the vehicle will turn
      * 
