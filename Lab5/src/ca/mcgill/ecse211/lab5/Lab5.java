@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.lab5;
 
+import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
@@ -13,6 +14,9 @@ import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.WifiController;
+import ca.mcgill.ecse211.util.Log.Sender;
+import ca.mcgill.ecse211.util.Tile;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -56,6 +60,13 @@ public final class Lab5 {
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.6));
 		Vehicle.LEFT_MOTOR.setAcceleration(200);
 		Vehicle.RIGHT_MOTOR.setAcceleration(200);
+
+		// ----- Configuration ------
+        WifiController.fetchGameplayData();
+        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
+
+		// Target can [1, 4]
+		int TR = 3;
 
 		// Starting corner
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
@@ -151,7 +162,14 @@ public final class Lab5 {
 
 			Thread.sleep(500);
 
-			fieldSearch.startSearch();
+			//fieldSearch.startSearch();
+			
+			Tile tunnelLR = WifiController.getTunnelLL();
+			Tile tunnelUR = WifiController.getTunnelUR();
+			
+			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
+		
 		}
 
 		Sound.beep();
