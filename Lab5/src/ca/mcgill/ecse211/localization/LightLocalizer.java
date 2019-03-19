@@ -230,6 +230,12 @@ public class LightLocalizer {
 				currLineDetected++;
 				Sound.beep();
 			}
+			
+			try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 		}
 		Vehicle.setMotorSpeeds(0, 0);
 	}
