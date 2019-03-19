@@ -88,8 +88,6 @@ public class ColourDetection {
 	 * @throws InterruptedException 
 	 */
 	public static void forDemoOneToAnalyzeCansOneAfterEachOther () throws InterruptedException {
-
-
 		retreatDistance = 8;
 		while (true) {
 			LCD.clear();
