@@ -26,7 +26,7 @@ public class LightLocalizer {
 	 * Speed constants for localization
 	 */
 	private static final int FORWARD_SPEED = 180;
-	private static final int ROTATE_SPEED = 120;
+	private static final int ROTATE_SPEED = 160;
 
 	/**
 	 * Measured value for the sensor location
@@ -49,7 +49,7 @@ public class LightLocalizer {
 	/**
 	 * RGB Threshold
 	 */
-	private static final float RGB_DELTA_THRESHOLD = 0.015f;
+	private static final float RGB_DELTA_THRESHOLD = 0.035f;
 	/**
 	 * Normalized intensity readings from the R, G, B values
 	 */
@@ -92,7 +92,6 @@ public class LightLocalizer {
 	 */
 	public void lightLocalize(double x, double y) throws OdometerExceptions {
 
-
 		//Initialize the previous RGB values as the current ones for the sake of line detection
 		this.lastRGB = this.curRGB;
 
@@ -100,10 +99,15 @@ public class LightLocalizer {
 		double currX, currY, arcX, arcY,angleCorr;
 		double[] headingAtLine = new double[4];
 
+		boolean origin = false;
 		if (x == Board.TILE_SIZE && y == Board.TILE_SIZE) {
+			origin = true;
+		}
+
+		if (origin) {	
 			goNearCoordinate(x,y); //Blocking method,goes near the origin so that we can find the lines there
 		}
-		
+
 		else {
 			goNearCoordinate(x,y);
 			Heading curHeading = getHeading();
@@ -133,7 +137,7 @@ public class LightLocalizer {
 			}
 			}
 		}
-		
+
 		DetectIntersectionLines(headingAtLine); //Detect all 4 lines that meet at the origin
 
 		//Find out our angle using the difference of the lines.
@@ -142,8 +146,8 @@ public class LightLocalizer {
 		arcX = headingAtLine[1] - headingAtLine[3]; //Lines 1 and 3 are the horizontal lines
 
 		//Use trigonometry to get dx and dy
-		currX = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcY / 2)));
-		currY = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcX / 2)));
+		currX = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcY / 2))) - 2;
+		currY = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcX / 2))) - 2;
 
 
 		//Need to correct the angle:
@@ -151,29 +155,30 @@ public class LightLocalizer {
 
 		//Maybe there's an error here:
 		odometer.setXYT(currX, currY, (odometer.getXYT()[2] + angleCorr) % 360);
-		
+
 		//If we're not near the origin, get there.
 		if (!isNearGridIntersection(currX,currY)) {
 			Navigator.travelTo(0, 0, true, true,FORWARD_SPEED);
 			odometer.setTheta(odometer.getXYT()[2]-17); // 17 is a magic number
 
 			try {
-				Thread.sleep(300);
+				Thread.sleep(25);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
-			Vehicle.setMotorSpeeds(30, 30);
-			Navigator.turnTo(finalHeading); 
+			//Set it to 0 if it's the origin
+			if (origin) {
+				Vehicle.setMotorSpeeds(30, 30);
+				Navigator.turnTo(0);
+			}
 		}
-		
-		odometer.setXYT(x, y, finalHeading);
-		
+
+		odometer.setXYT(x, y, odometer.getXYT()[2]);
+
 		try {
-			Thread.sleep(200);
+			Thread.sleep(25);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -189,9 +194,16 @@ public class LightLocalizer {
 
 		Navigator.turnTo(Navigator.getDestAngle(x,y));
 		//Drive more or less NEAR the coordinate
+
+		leftMotor.forward();
+		rightMotor.forward();
 		while (!lineDetected()) {
-			leftMotor.forward();
-			rightMotor.forward();
+			try {
+				Thread.sleep(35);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 
@@ -223,19 +235,17 @@ public class LightLocalizer {
 			//Rotate ass first in place to find the next line.
 			leftMotor.backward();
 			rightMotor.forward();
-
 			//When a line is detected, correct the angle and keep track of the values
 			if (lineDetected()) {
 				angleAtLines[currLineDetected] = odometer.getXYT()[2];
 				currLineDetected++;
 				Sound.beep();
 			}
-			
 			try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		Vehicle.setMotorSpeeds(0, 0);
 	}
@@ -268,7 +278,6 @@ public class LightLocalizer {
 			rightMotor.forward();
 		}
 
-
 		leftMotor.stop(true);
 		rightMotor.stop();
 
@@ -289,7 +298,6 @@ public class LightLocalizer {
 
 		// If a line has already been detected
 		if (lineDetected) {
-
 			// Reset the last RGB to the current
 			lastRGB = curRGB.clone();
 			lineDetected = false;

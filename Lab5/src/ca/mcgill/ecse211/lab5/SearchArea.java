@@ -18,10 +18,10 @@ public class SearchArea {
                     
         this.startingCorner = SC;
         
-        Point bl = new Point(LLx-1, LLy-1);
-        Point br = new Point(URx-1, LLy-1);
-        Point tl = new Point(LLx-1, URy-1);
-        Point tr = new Point(URx-1, URy-1);
+        Point bl = new Point(LLx, LLy);
+        Point br = new Point(URx, LLy);
+        Point tl = new Point(LLx, URy);
+        Point tr = new Point(URx, URy);
                  
         // Translate points
         switch(startingCorner) {
