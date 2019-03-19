@@ -34,7 +34,7 @@ public class FieldSearch {
 	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
 	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
 	private static float[] usData = new float[usDistance.sampleSize()];
-	
+
 	//One motor for the light sensor.
 	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.FRONT_COLOUR_SENSOR_MOTOR;
 
@@ -47,6 +47,8 @@ public class FieldSearch {
 
 	private OdometryCorrection correction;
 	private final double maxDistance = 26;
+
+	boolean complete = false;
 
 	public FieldSearch(SearchArea searchArea, StartingCorner SC, UltrasonicPoller poller, OdometryCorrection correction) {
 		this.usPoller = poller;
@@ -62,19 +64,19 @@ public class FieldSearch {
 	 * 
 	 * 
 	 */
-	public void startSearch() throws InterruptedException, OdometerExceptions {
+	public void startSearch(int desiredColour) throws InterruptedException, OdometerExceptions {
 
 		//Keep track of the coordinate we terminate the search at.
 		double finalX;
 		double finalY;
-		
+
 		// Travel to first waypoint
 		Point firstWaypoint = searchArea.getNextWaypoint();
-		
+
 		//Hold onto these variables incase the can is discovered in the first tile.
 		finalX  = firstWaypoint.getX();
 		finalY = firstWaypoint.getY();
-		
+
 		Navigator.travelTo((Lab5.LLx-1) * TILE_SIZE, (Lab5.LLy-1) * TILE_SIZE, true, true);
 		for (int i=0;i<3;i++) {
 			Sound.beep();
@@ -92,11 +94,13 @@ public class FieldSearch {
 			e1.printStackTrace();
 		}
 		Navigator.turnTo(0);
-		
+
 		Point waypoint;
 		while ((waypoint = searchArea.getNextWaypoint()) != null) {
+			
+			//Runs under the assumption that we're currently at the center of the tile.
 			try {
-				Thread.sleep(500);
+				Thread.sleep(200);
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
@@ -106,6 +110,8 @@ public class FieldSearch {
 			double[] targetLocation = new double[2];
 
 			double heldAngle = Odometer.getTheta();
+
+			//Sweep between two angles, depending on direction of bot
 			if (heading == Heading.N) {
 				targetLocation[0] = 310;
 				targetLocation[1] = 60;
@@ -118,29 +124,61 @@ public class FieldSearch {
 				targetLocation[1] = Odometer.getTheta();
 			}
 
-			Thread.sleep(50);
+			Thread.sleep(20);
 			Navigator.turnTo(targetLocation[0], 65, true);
-			
+
 			if (scanForCan(targetLocation[0])) {
 				Sound.beep();
 				break;
 			}
 
-			Thread.sleep(50);
-			
+			Thread.sleep(20);
+
 			Navigator.turnTo(heldAngle, 65, false);
-			Thread.sleep(50);
-			
+			Thread.sleep(20);
+
 			Navigator.turnTo(targetLocation[1], 65, true);
+			
 			if (scanForCan(targetLocation[1])) {
 				Sound.beep();
 				break;
 			}
-			
+
 			Thread.sleep(50);
 
-			//correction.enableCorrection();
-			Navigator.travelTo(waypoint.getX(), waypoint.getY(), true, true);
+			//Travel to it, poll if there's a can. If there is, scan it, back up, dodge it, and continue.
+
+			double destinationX = waypoint.getX();
+			double destinationY = waypoint.getY();
+			Navigator.travelToNonBlocking(destinationX, destinationY);
+			//While travelling
+			
+			//TODO: GONNA MAKE A PROBLEM WHERE THE CAR STOPS MOVING
+			
+			while (!withinError(destinationX,destinationY)) {
+				usSensor.fetchSample(usData, 0);
+				int currDistance = (int) (usData[0] * 100);
+				//If we found a can, scan it, then dodge it.
+				
+				if (currDistance < 12) {
+					Vehicle.setMotorSpeeds(0, 0);
+					complete = ColourDetection.checkCanColour(desiredColour);
+					if (complete) {
+						break;
+					}
+					//Don't dodge the same can twice! WE'LL CRASH INTO IT THO!
+						dodgeCan();
+				}
+			}
+
+			if (complete) {
+				Sound.twoBeeps();
+				Sound.twoBeeps();
+				Sound.twoBeeps();
+				Sound.twoBeeps();
+				break;
+			}
+
 			finalX = waypoint.getX();
 			finalY = waypoint.getY();
 			//correction.disableCorrection();
@@ -154,13 +192,42 @@ public class FieldSearch {
 		}
 	}
 
+	/**
+	 * Simple odge around a can
+	 * @param destinationX X to drive to
+	 * @param destinationY Y to drive to
+	 * @throws OdometerExceptions
+	 */
+	private void dodgeCan() throws OdometerExceptions {
+		//Turn right, then drive straight
+		//TODO: ADJUST THESE VALUES
+		Navigator.turnTo(Odometer.getOdometer().getXYT()[2] + 90);
+		Navigator.travelSpecificDistance(20);
+
+		//Turn left to face forward, then drive straight
+		Navigator.turnTo(Odometer.getOdometer().getXYT()[2] - 90);
+		Navigator.travelSpecificDistance(30);
+
+		//Turn left to face forward, then drive straight
+		Navigator.turnTo(Odometer.getOdometer().getXYT()[2] + 90);
+		Navigator.travelSpecificDistance(20);
+	}
+
+
+	private boolean withinError(double x, double y) throws OdometerExceptions {
+
+		double currentX = Odometer.getOdometer().getXYT()[0];
+		double currentY = Odometer.getOdometer().getXYT()[1];
+		double error = Math.sqrt(Math.pow((currentX - x), 2) + Math.pow((currentY - y), 2));
+		return error < 0.5;
+	}
+
 	private boolean scanForCan(double targetLocation) throws InterruptedException {
 		//Sound.beep();
 		usSensor.fetchSample(usData,0);	
 		int currentDistance = (int) (usData[0] * 100.0);
 
 		while (currentDistance > maxDistance && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
-
 			Log.log(Sender.usSensor, "curDistance: " + currentDistance);
 			usSensor.fetchSample(usData,0);	
 			currentDistance = (int) (usData[0] * 100.0);
@@ -183,17 +250,17 @@ public class FieldSearch {
 
 	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
 
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.turnTo(0);
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.travelTo(finalX, (Lab5.URy-1)  * TILE_SIZE - TILE_SIZE/2, true, false); //works well
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.turnTo(90);
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy-1) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.turnTo(45);
-//		Sound.beep();
+		//		Sound.beep();
 		Navigator.travelTo((Lab5.URx-1) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
 	}
 
@@ -213,6 +280,10 @@ public class FieldSearch {
 		// Navigate to lower left
 		Navigator.travelTo(targetX, targetY, true, true);
 	}
+
+	/*
+	 * 
+	 */
 
 
 

@@ -11,6 +11,7 @@ import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
@@ -148,19 +149,19 @@ public final class Lab5 {
 			LightLocalizer uc = new LightLocalizer(odometer);
 
 			ul.usLocalize();
-			uc.lightLocalize();
-			
-			Sound.beepSequenceUp();
-			Vehicle.LEFT_MOTOR.setAcceleration(150);
-			Vehicle.RIGHT_MOTOR.setAcceleration(150);
-
-			//fieldSearch.startSearch();
+			uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
 			
 			Tile tunnelLR = WifiController.getTunnelLL();
 			Tile tunnelUR = WifiController.getTunnelUR();
 			
 			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+			
+			uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+			Thread.sleep(3000);
+			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+			
 	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
+
 		
 		}
 

@@ -3,7 +3,10 @@ import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Board.Heading;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.LCD;
@@ -11,6 +14,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 import lejos.robotics.SampleProvider;
+
+
+//TODO: ADD the ability to localize at any coordinate, and still have perfect heading!
+//TODO: make it so that after initiali localization, coordinates are set to 1.1
+
 
 public class LightLocalizer {
 
@@ -41,7 +49,7 @@ public class LightLocalizer {
 	/**
 	 * RGB Threshold
 	 */
-	private static final float RGB_DELTA_THRESHOLD = 0.01f;
+	private static final float RGB_DELTA_THRESHOLD = 0.015f;
 	/**
 	 * Normalized intensity readings from the R, G, B values
 	 */
@@ -53,9 +61,20 @@ public class LightLocalizer {
 	 */
 	private SampleProvider csProvider;
 
-
 	// Is line detected
 	private boolean lineDetected = true;
+
+	// Final heading
+	private float finalHeading = 0;
+	/*
+	 * Heading states:
+	 */
+	private enum Heading {
+		NE, // angle between 0 and 90, final heading is 0 
+		SE, // angle between 90 and 180, final heading is 90 
+		SW, // angle between 180 and 270, final heading is 180 
+		NW, // angle between 270 and 360, final heading is 270 
+	}
 
 	public LightLocalizer(Odometer odometer)  throws OdometerExceptions {
 		this.odometer = odometer;
@@ -63,55 +82,128 @@ public class LightLocalizer {
 		this.curRGB = new float[csProvider.sampleSize()];
 	}
 
-	/**
-	 * Use the light sensor to localize when AT the origin
-	 * @throws OdometerExceptions 
-	 */
-	public void lightLocalize() throws OdometerExceptions {
-		//Initialize the previous RGB values as the current ones.
 
+
+	/**
+	 * Uses the light sensor to localize around a coordinate.
+	 * @param x the x coordinate of the tile
+	 * @param y the y coordinate of the tile
+	 * @throws OdometerExceptions
+	 */
+	public void lightLocalize(double x, double y) throws OdometerExceptions {
+
+
+		//Initialize the previous RGB values as the current ones for the sake of line detection
 		this.lastRGB = this.curRGB;
 
 		//Necessary local variables
-		double currX, currY, angleX, angleY,angleCorr;
+		double currX, currY, arcX, arcY,angleCorr;
 		double[] headingAtLine = new double[4];
 
-		goNearOrigin(); //Blocking method,goes near the origin so that we can find the lines there
+		if (x == Board.TILE_SIZE && y == Board.TILE_SIZE) {
+			goNearCoordinate(x,y); //Blocking method,goes near the origin so that we can find the lines there
+		}
+		
+		else {
+			goNearCoordinate(x,y);
+			Heading curHeading = getHeading();
+			/*
+			 * 
+	        NE, // angle between 0 and 90, final heading is 0 
+	        SE, // angle between 90 and 180, final heading is 90 
+	        SW, // angle between 180 and 270, final heading is 180 
+	        NW, // angle between 270 and 360, final heading is 270 
+			 */
+			switch (curHeading) {
+			case NE: 
+			{
+				finalHeading = 0;
+			}
+			case SE:
+			{
+				finalHeading = 90;
+			}
+			case SW:
+			{
+				finalHeading = 180;
+			}
+			case NW:
+			{
+				finalHeading = 270;
+			}
+			}
+		}
+		
 		DetectIntersectionLines(headingAtLine); //Detect all 4 lines that meet at the origin
 
 		//Find out our angle using the difference of the lines.
 
-		angleY = headingAtLine[0] - headingAtLine[2]; //Lines 0 and 2 are the vertical lines
-		angleX = headingAtLine[1] - headingAtLine[3]; //Lines 1 and 3 are the horizontal lines
+		arcY = headingAtLine[0] - headingAtLine[2]; //Lines 0 and 2 are the vertical lines
+		arcX = headingAtLine[1] - headingAtLine[3]; //Lines 1 and 3 are the horizontal lines
 
 		//Use trigonometry to get dx and dy
-		currX = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(angleY / 2)));
-		currY = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(angleX / 2)));
+		currX = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcY / 2)));
+		currY = -Math.abs(SENSOR_LOCATION * Math.cos(Math.toRadians(arcX / 2)));
 
 
 		//Need to correct the angle:
-		angleCorr = 270 + (angleY/2) - (headingAtLine[0]); 
-		
+		angleCorr = 270 + (arcY/2) - (headingAtLine[0]); 
+
+		//Maybe there's an error here:
 		odometer.setXYT(currX, currY, (odometer.getXYT()[2] + angleCorr) % 360);
-		//If we're not near the origin, get there.
 		
-		//Just to test the robot, can remove later
-		if (!isNearOrigin(currX,currY)) {
+		//If we're not near the origin, get there.
+		if (!isNearGridIntersection(currX,currY)) {
 			Navigator.travelTo(0, 0, true, true,FORWARD_SPEED);
-			odometer.setTheta(odometer.getXYT()[2]-17); // 20 is a magic number
-			
+			odometer.setTheta(odometer.getXYT()[2]-17); // 17 is a magic number
+
 			try {
 				Thread.sleep(300);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
+
 			Vehicle.setMotorSpeeds(30, 30);
-			Navigator.turnTo(0); 
-			
+			Navigator.turnTo(finalHeading); 
+		}
+		
+		odometer.setXYT(x, y, finalHeading);
+		
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
+
+
+	/**
+	 * Refactor this with the go near origin method.
+	 * @param x
+	 * @param y
+	 * @throws OdometerExceptions
+	 */
+	private void goNearCoordinate(double x,double y) throws OdometerExceptions {
+
+		Navigator.turnTo(Navigator.getDestAngle(x,y));
+		//Drive more or less NEAR the coordinate
+		while (!lineDetected()) {
+			leftMotor.forward();
+			rightMotor.forward();
+		}
+
+
+		leftMotor.stop(true);
+		rightMotor.stop();
+
+		// Move backwards so our light sensor can scan the cross at the origin while rotating
+		//May want to adjust this value.
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
+	}
+
 
 
 	/**
@@ -131,6 +223,7 @@ public class LightLocalizer {
 			//Rotate ass first in place to find the next line.
 			leftMotor.backward();
 			rightMotor.forward();
+
 			//When a line is detected, correct the angle and keep track of the values
 			if (lineDetected()) {
 				angleAtLines[currLineDetected] = odometer.getXYT()[2];
@@ -179,7 +272,7 @@ public class LightLocalizer {
 		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
 	}
 
-	private static boolean isNearOrigin(double x, double y) {
+	private static boolean isNearGridIntersection(double x, double y) {
 		double error = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		return error < 2;
 	}
@@ -222,5 +315,32 @@ public class LightLocalizer {
 			return true;
 		}
 		return false;
+	}
+
+
+	/**
+	 * Determine vehicle's heading </br>
+	 * 
+	 * <b> NOTE: </b> This method will bound theta to: 0 <= theta < 360 <br>
+	 * @see EV3Math.boundAngle(theta)
+	 * 
+	 * @param theta
+	 * @return Heading
+	 */
+	private Heading getHeading() {
+
+		double theta = odometer.getXYT()[2];
+		if (theta > 0 && theta <= 90) {
+			return Heading.NE;
+		} else if (theta > 90 && theta <= 180 ) {
+			return Heading.SE;
+		} else if (theta > 180 && theta <= 270) {
+			return Heading.SW;
+		} else if (theta > 270 && theta < 360) {
+			return Heading.NW;
+		}
+		else {
+			return Heading.NE;
+		}
 	}
 }
