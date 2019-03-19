@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.util;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 /**
  * Represents a given tile in the course
@@ -11,6 +12,7 @@ public class Tile {
      * Vertices of the tile
      */
     private Point2D lowerLeft, lowerRight, upperLeft, upperRight, center;
+    private Quadrant llQuadrant, lrQuadrant,ulQuadrant,urQuadrant;
     
     //////////////// STATIC FACTORIES ////////////////
     
@@ -74,7 +76,6 @@ public class Tile {
     public static Tile upperLeft(int x, int y) {
         double xPos = x * Board.TILE_SIZE;
         double yPos = y * Board.TILE_SIZE;
-        
         return new Tile(new Point2D.Double(xPos, yPos-Board.TILE_SIZE),
                         new Point2D.Double(xPos+Board.TILE_SIZE, yPos-Board.TILE_SIZE),
                         new Point2D.Double(xPos, yPos),
@@ -123,5 +124,49 @@ public class Tile {
     public String toString() {
         return "ll: " + lowerLeft.toString() + " | lr: " + lowerRight.toString() + " | ul: " + upperLeft.toString() + " | ur: " + upperRight.toString(); 
     }
+
+    ////////////////////////////////////////////////////////////////
     
+	public Quadrant getLlQuadrant() {
+		return llQuadrant;
+	}
+
+	private void setLlQuadrant(Quadrant llQuadrant) {
+		this.llQuadrant = llQuadrant;
+	}
+
+	public Quadrant getLrQuadrant() {
+		return lrQuadrant;
+	}
+
+	private void setLrQuadrant(Quadrant lrQuadrant) {
+		this.lrQuadrant = lrQuadrant;
+	}
+
+	private Quadrant getUlQuadrant() {
+		return ulQuadrant;
+	}
+
+	private void setUlQuadrant(Quadrant ulQuadrant) {
+		this.ulQuadrant = ulQuadrant;
+	}
+
+	private Quadrant getUrQuadrant() {
+		return urQuadrant;
+	}
+
+	private void setUrQuadrant(Quadrant urQuadrant) {
+		this.urQuadrant = urQuadrant;
+	}
+	
+	/**
+	 * Creates quadrants for a tile
+	 * @param tile
+	 */
+	public static void createQuadrantsForTile(Tile tile){
+		tile.setLlQuadrant(new Quadrant(tile.getLowerLeft(),tile.getCenter(),tile));
+		tile.setLrQuadrant(new Quadrant(tile.getCenter(),tile.getLowerRight(),tile,true));
+		tile.setUlQuadrant(new Quadrant(tile.getUpperLeft(),tile.getCenter(),tile,true));
+		tile.setUrQuadrant(new Quadrant(tile.getCenter(),tile.getUpperRight(),tile));
+	}
 }

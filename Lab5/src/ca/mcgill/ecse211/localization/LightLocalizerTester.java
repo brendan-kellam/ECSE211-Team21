@@ -20,7 +20,7 @@ import lejos.robotics.SampleProvider;
 //TODO: make it so that after initiali localization, coordinates are set to 1.1
 
 
-public class LightLocalizer {
+public class LightLocalizerTester {
 
 	/**
 	 * Speed constants for localization
@@ -40,6 +40,7 @@ public class LightLocalizer {
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private EV3LargeRegulatedMotor leftMotor = Vehicle.LEFT_MOTOR;
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
+	
 
 	/*
 	 * Odometer and colour sensor.
@@ -53,9 +54,9 @@ public class LightLocalizer {
 	/**
 	 * Normalized intensity readings from the R, G, B values
 	 */
-	private float[] curRGB;
-	private float[] lastRGB;
-
+	private SensorMode sensorColour;
+	private float curIntensity;
+	
 	/**
 	 * Color sensor provider
 	 */
@@ -76,10 +77,9 @@ public class LightLocalizer {
 		NW, // angle between 270 and 360, final heading is 270 
 	}
 
-	public LightLocalizer(Odometer odometer)  throws OdometerExceptions {
+	public LightLocalizerTester(Odometer odometer)  throws OdometerExceptions {
 		this.odometer = odometer;
-		this.csProvider = Vehicle.COLOR_SENSOR_BACK.getRGBMode();
-		this.curRGB = new float[csProvider.sampleSize()];
+		sensorColour = Vehicle.COLOR_SENSOR_BACK.getRedMode(); //Red sensor is best based on what we learned in lab 2	
 	}
 
 
@@ -91,10 +91,6 @@ public class LightLocalizer {
 	 * @throws OdometerExceptions
 	 */
 	public void lightLocalize(double x, double y) throws OdometerExceptions {
-
-
-		//Initialize the previous RGB values as the current ones for the sake of line detection
-		this.lastRGB = this.curRGB;
 
 		//Necessary local variables
 		double currX, currY, arcX, arcY,angleCorr;
@@ -150,8 +146,14 @@ public class LightLocalizer {
 
 		//Maybe there's an error here:
 		odometer.setXYT(currX, currY, (odometer.getXYT()[2] + angleCorr) % 360);
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		//If we're not near the origin, get there.
+		//If we're not near the grid intersection, get there.
 		if (!isNearGridIntersection(currX,currY)) {
 			Navigator.travelTo(0, 0, true, true,FORWARD_SPEED);
 			odometer.setTheta(odometer.getXYT()[2]-17); // 17 is a magic number
@@ -168,6 +170,12 @@ public class LightLocalizer {
 		}
 		
 		odometer.setXYT(x, y, finalHeading);
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 
@@ -270,46 +278,26 @@ public class LightLocalizer {
 	}
 
 	private boolean lineDetected() {
-		// Fetch the current RGB intensity sample
-		csProvider.fetchSample(curRGB, 0);
-
-		// If a line has already been detected
-		if (lineDetected) {
-
-			// Reset the last RGB to the current
-			lastRGB = curRGB.clone();
-			lineDetected = false;
-		}
-
-		// Get RGB components for last reading and currect
-		float r1 = lastRGB[0];
-		float g1 = lastRGB[1];
-		float b1 = lastRGB[2];
-
-		float r2 = curRGB[0];
-		float g2 = curRGB[1];
-		float b2 = curRGB[2];
-
-		// Compute difference in each component
-		float rdiff = r2 - r1;
-		float gdiff = g2 - g1;
-		float bdiff = b2 - b1;
-
-		// Compute delta between the r, g, b components of the last reading and the current reading
-		float delta = (float) Math.sqrt(rdiff*rdiff + gdiff*gdiff + bdiff*bdiff);
-
-		// update last RGB value
-		lastRGB = curRGB.clone();
-
-		// If color delta is significant
-		if (delta > RGB_DELTA_THRESHOLD) {
-			lineDetected = true;
+		//Get the current intensity. On the blue board, the value is roughyl 350.
+		curIntensity = fetchLightSample();
+		LCD.drawString(curIntensity + "is the int", 0, 6);
+		if (curIntensity < 0.34) {
 			return true;
 		}
 		return false;
 	}
 
 
+	/**
+	 * 
+	 * @return the intensity of the light sensor
+	 */
+	private float fetchLightSample() {
+		float[] intensity = new float[sensorColour.sampleSize()];
+		sensorColour.fetchSample(intensity, 0);
+		return intensity[0];
+	}
+	
 	/**
 	 * Determine vehicle's heading </br>
 	 * 

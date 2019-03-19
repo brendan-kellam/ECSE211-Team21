@@ -13,13 +13,16 @@ public class FallingEdgeLocalizer {
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private double TRACK = Vehicle.getConfig().getTrackWidth();
-	public static final int ROTATE_SPEED = 150;
+	public static final int ROTATE_SPEED = 350;
 
     private UltrasonicPoller usPoller; // Ultrasonic poller
 	private Odometer odometer; // Odometer
 
 	private static final int distFallingEdge = 30;
 	private static final int tolFallingEdge = 2;
+
+	
+	
 	
 	public FallingEdgeLocalizer(Odometer odometer,UltrasonicPoller usPoller) {
 		this.odometer = odometer;
@@ -42,7 +45,9 @@ public class FallingEdgeLocalizer {
 	private void fallingEdge() {
 
 		double angle1, angle2, turnAngle;
-
+		leftMotor.setAcceleration(6000);
+		rightMotor.setAcceleration(6000);
+		
 		//Rotate to face away from the wall:
 		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
 			leftMotor.backward();

@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.ultrasonic;
 
 import ca.mcgill.ecse211.util.Log;
+import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
 
@@ -8,6 +9,7 @@ public class UltrasonicPoller implements Runnable {
   private SampleProvider us;
   private float[] usData;
   int distance;
+  volatile boolean exit = false;
 
   public UltrasonicPoller(SampleProvider us) {
     this.us = us;
@@ -18,7 +20,7 @@ public class UltrasonicPoller implements Runnable {
   // Need to convert US result to an integer [0,255]
 
   public void run() {
-    while (true) {
+    while (!exit) {
       us.fetchSample(usData, 0); // acquire data
       distance = (int) (usData[0] * 100.0); // extract from buffer, cast
                           // to int
@@ -31,10 +33,14 @@ public class UltrasonicPoller implements Runnable {
         e.printStackTrace();
       } 
     }
+    Sound.buzz();
   }
 
   public int getDistance() {
     return distance;
   }
 
+  public void stop() {
+	  exit = true;
+  }
 }

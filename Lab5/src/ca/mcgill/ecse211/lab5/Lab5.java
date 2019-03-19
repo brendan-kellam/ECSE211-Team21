@@ -5,12 +5,14 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.localization.LightLocalizer;
+import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
@@ -85,7 +87,7 @@ public final class Lab5 {
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
 		// Create new display object
-//		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
 		// Search the field
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
@@ -145,10 +147,14 @@ public final class Lab5 {
 			
 			FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 
-			LightLocalizer uc = new LightLocalizer(odometer);
+//			LightLocalizer uc = new LightLocalizer(odometer);
 
+			LightLocalizerTester uc2 = new LightLocalizerTester(odometer);
 			ul.usLocalize();
-			uc.lightLocalize();
+			
+			usPoller.stop();
+			
+			uc2.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
 			
 			Sound.beepSequenceUp();
 			Vehicle.LEFT_MOTOR.setAcceleration(150);
@@ -160,6 +166,12 @@ public final class Lab5 {
 			Tile tunnelUR = WifiController.getTunnelUR();
 			
 			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+			
+			uc2.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+			Thread.sleep(3000);
+			
+			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+			
 	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
 		
 		}

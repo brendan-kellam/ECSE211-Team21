@@ -13,6 +13,7 @@ import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Board.Heading;
 import ca.mcgill.ecse211.util.Log.Sender;
+import ca.mcgill.ecse211.util.Quadrant;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Sound;
@@ -161,7 +162,6 @@ public class FieldSearch {
 
 		while (currentDistance > maxDistance && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
 
-			Log.log(Sender.usSensor, "curDistance: " + currentDistance);
 			usSensor.fetchSample(usData,0);	
 			currentDistance = (int) (usData[0] * 100.0);
 			Thread.sleep(20);
@@ -180,6 +180,8 @@ public class FieldSearch {
 		Sound.twoBeeps();
 		return false;
 	}
+
+
 
 	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
 
