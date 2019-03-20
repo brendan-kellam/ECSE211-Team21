@@ -138,12 +138,8 @@ public final class Board {
      */
     public static final class Config {
         
-        public enum STARTING_CORNER {
-            BOTTOM_LEFT,
-            BOTTOM_RIGHT,
-            UPPER_RIGHT,
-            UPPER_LEFT
-        }
+        public static int redTeam;
+        public static int greenTeam;
         
         public static Tile startingAreaLL;
         public static Tile startingAreaUR;
@@ -153,7 +149,7 @@ public final class Board {
         public static Tile searchAreaUR;
         public static Tile tunnelLL;
         public static Tile tunnelUR;
-        public static STARTING_CORNER corner;
+        public static int corner;
     }
     
 }

@@ -112,7 +112,7 @@ public final class Lab5 {
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
-        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
+        Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
 
 
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
@@ -124,8 +124,8 @@ public final class Lab5 {
 	    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 
 		
-		Tile tunnelLR = WifiController.getTunnelLL();
-		Tile tunnelUR = WifiController.getTunnelUR();
+		Tile tunnelLR = Board.Config.tunnelLL;
+		Tile tunnelUR = Board.Config.tunnelUR;
 		
 		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
 		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
