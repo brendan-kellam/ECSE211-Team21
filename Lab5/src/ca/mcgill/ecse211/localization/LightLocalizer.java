@@ -221,8 +221,8 @@ public class LightLocalizer {
 
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6.5), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6.5), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6), false);
 	}
 
 

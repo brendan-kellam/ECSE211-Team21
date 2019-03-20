@@ -16,7 +16,7 @@ public class Navigator {
 	private static final int DEFAULT_ROTATION_SPEED = 125;
 
 	// Theta threshold
-	private static final double THETA_THRESHOLD = 8;
+	private static final double THETA_THRESHOLD = 3;
 
 	/**
 	 * Travel to a specific location in space <br>

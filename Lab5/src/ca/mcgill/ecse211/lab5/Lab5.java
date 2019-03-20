@@ -87,7 +87,7 @@ public final class Lab5 {
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
 
 		// Initialize logging
-		Log.setLogging(true, true, true, true, true);
+		Log.setLogging(true, false, false, false, false);
 
 		// Set logging to write to file
 		try {
@@ -115,57 +115,33 @@ public final class Lab5 {
         Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
 
 
-		// Sleep to allow Display to initialize
-		try {
-			Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		// Get user option
-		MenuOption option;
-		while ((option = getUserChoice()) == MenuOption.INVALID);
-
-		Sound.twoBeeps();
-		if (option == MenuOption.TEST_COLOURS){
-			ColourDetection.forDemoOneToAnalyzeCansOneAfterEachOther();	
-		}	
-
-		else {
-			// Start Display thread.
-			//This is here so the display thread doesn't run during colour testing
-
-			// Sleep to allow Display to initialize
-			try {
-				Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
 //			odoDisplayThread.start(); 
 
-			ul.usLocalize();
-			uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
-			
-		    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+		ul.usLocalize();
+		uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
+		
+	    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 
-			
-			Tile tunnelLR = WifiController.getTunnelLL();
-			Tile tunnelUR = WifiController.getTunnelUR();
-			
-			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-			
-			//uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
-			Thread.sleep(500);
-			
+		
+		Tile tunnelLR = WifiController.getTunnelLL();
+		Tile tunnelUR = WifiController.getTunnelUR();
+		
+		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
+		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
+		
+		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+		
+		//uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+		Thread.sleep(500);
+		
 //			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
-			//Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-	        
-			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
-	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
+		//Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+        
+		Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
+        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
 //			fieldSearch.startSearch();
-		}
+        
 
 		Sound.beep();
 		

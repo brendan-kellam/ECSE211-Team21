@@ -52,7 +52,6 @@ public class WifiController {
             System.err.println("Error: " + e.getMessage());
         }
         
-        Button.waitForAnyPress();
     }
     
     private static int getInt(Map data, String key) {
