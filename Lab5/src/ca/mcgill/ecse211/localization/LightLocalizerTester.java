@@ -200,9 +200,14 @@ public class LightLocalizerTester {
 		}
 
 		odometer.setXYT(x, y, odometer.getXYT()[2]);
-
+		Sound.beep();
+		LCD.clear();
+		LCD.drawString("x: " + odometer.getXYT()[0], 0, 0);
+		LCD.drawString("y: " + odometer.getXYT()[1], 0, 1);
+		LCD.drawString("Theta: " + odometer.getXYT()[2], 0, 2);
+		
 		try {
-			Thread.sleep(25);
+			Thread.sleep(50);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -260,7 +265,6 @@ public class LightLocalizerTester {
 			if (lineDetected()) {
 				angleAtLines[currLineDetected] = odometer.getXYT()[2];
 				currLineDetected++;
-				Sound.beep();
 			}
 			try {
 				Thread.sleep(50);

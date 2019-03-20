@@ -77,8 +77,7 @@ public class ColourDetection {
 		boolean correctCan = sweepCan(desiredColour);//Check the can colour
 		//Beep twice if we found the correct can
 		if (correctCan) {
-			Sound.beep();
-			Sound.beep();
+			for (int i=0;i<10;i++) Sound.beep();
 		}
 		reverseAwayFromCan();
 		return correctCan;
@@ -110,7 +109,7 @@ public class ColourDetection {
 			printCanColour();//Check the can colour
 			reverseAwayFromCan();
 			Thread.sleep(3000);
-			Sound.beep();
+//			Sound.beep();
 		}
 
 	}
@@ -313,7 +312,7 @@ public class ColourDetection {
 		}
 
 		//Stop the car
-		Sound.beep();
+//		Sound.beep();
 		Vehicle.setMotorSpeeds(0, 0);
 	}
 	

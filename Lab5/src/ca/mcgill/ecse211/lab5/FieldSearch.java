@@ -28,9 +28,6 @@ public class FieldSearch {
 	// Ultrasonic poller
 	private UltrasonicPoller usPoller;
 
-	// desired can colour
-	private static final int DESIRED_CAN_COLOUR = 1;
-
 	//Sweep speed:
 	private final int sweepSpeed = 100;
 
@@ -71,7 +68,7 @@ public class FieldSearch {
 	 * 
 	 * 
 	 */
-	public void startSearch() throws InterruptedException, OdometerExceptions {
+	public void startSearch(int desiredCanColour) throws InterruptedException, OdometerExceptions {
 
 		//Keep track of the coordinate we terminate the search at.
 		double finalX;
@@ -128,7 +125,7 @@ public class FieldSearch {
 			Thread.sleep(20);
 			Navigator.turnTo(targetLocation[0], sweepSpeed, true);
 
-			if (scanForCan(targetLocation[0])) {
+			if (scanForCan(targetLocation[0],desiredCanColour)) {
 				Sound.beep();
 				break;
 			}
@@ -140,7 +137,7 @@ public class FieldSearch {
 
 			Navigator.turnTo(targetLocation[1], sweepSpeed, true);
 
-			if (scanForCan(targetLocation[1])) {
+			if (scanForCan(targetLocation[1],desiredCanColour)) {
 				Sound.beep();
 				break;
 			}
@@ -163,7 +160,7 @@ public class FieldSearch {
 
 				if (currDistance < 8) {
 					Vehicle.setMotorSpeeds(0, 0);
-					complete = ColourDetection.checkCanColour(DESIRED_CAN_COLOUR);
+					complete = ColourDetection.checkCanColour(desiredCanColour);
 					if (complete) {
 						break;
 					}
@@ -230,7 +227,7 @@ public class FieldSearch {
 		return error < 0.5;
 	}
 
-	private boolean scanForCan(double targetLocation) throws InterruptedException {
+	private boolean scanForCan(double targetLocation, int desiredCanColour) throws InterruptedException {
 		//Sound.beep();
 		usSensor.fetchSample(usData,0);	
 		int currentDistance = (int) (usData[0] * 100.0);
@@ -249,7 +246,7 @@ public class FieldSearch {
 		if (filter >= maxFilter) {
 			Vehicle.setMotorSpeeds(0, 0);
 			Thread.sleep(50);
-			if (ColourDetection.checkCanColour(DESIRED_CAN_COLOUR)) {
+			if (ColourDetection.checkCanColour(desiredCanColour)) {
 				Sound.beep();
 				return true;
 			}

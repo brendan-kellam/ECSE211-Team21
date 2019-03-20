@@ -124,6 +124,8 @@ public final class Lab5 {
 		Tile tunnelLR = Board.Config.tunnelLL;
 		Tile tunnelUR = Board.Config.tunnelUR;
 		
+		int desiredCanColour = Board.Config.greenTeam;
+		
 		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
 		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
 		
@@ -146,6 +148,9 @@ public final class Lab5 {
 
         Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
         
+        //Beep 5 times
+        for (int i=0;i<5;i++) Sound.beep();
+        
         int LLx = (int) (Board.Config.searchAreaLL.getLowerLeft().getX() / Board.TILE_SIZE);
         int LLy = (int) (Board.Config.searchAreaLL.getLowerLeft().getY() / Board.TILE_SIZE);
         int URx = (int) (Board.Config.searchAreaUR.getUpperRight().getX() / Board.TILE_SIZE);
@@ -157,9 +162,9 @@ public final class Lab5 {
         // Search the field
         FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
         
-        fieldSearch.startSearch();
-        
-		Sound.beep();
+        fieldSearch.startSearch(desiredCanColour);
+        //Beep 5 times
+        for (int i=0;i<5;i++) Sound.beep();
 		
 		pollerSystem.stop();
 
