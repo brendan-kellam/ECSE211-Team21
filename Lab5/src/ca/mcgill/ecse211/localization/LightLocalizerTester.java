@@ -31,7 +31,7 @@ public class LightLocalizerTester {
 	/**
 	 * Measured value for the sensor location
 	 */
-	private static final double SENSOR_LOCATION = 10;
+	private static final double SENSOR_LOCATION = 9.7;
 
 
 	/*
@@ -132,19 +132,26 @@ public class LightLocalizerTester {
 			case NE: 
 			{
 				offset = 0; // Should be at the desired offset
+				//THIS ONE IS GOOD
 			}
+			break;
 			case SE:
 			{
 				offset = 195; // Add this to reach the desired( offset should be around 180)
 			}
+			break;
 			case SW:
 			{
+
 				offset = 100; // Add this to reach the desired 180~( offset should be around 100 )
 			}
+			break;
 			case NW:
 			{
 				offset = -80; //Add this to make us reach the desired 360~ ( offset should be around -90 )
+				//THIS ONE IS GOOD
 			}
+			break;
 			}
 		}
 
@@ -164,7 +171,7 @@ public class LightLocalizerTester {
 		angleCorr = 270 + (arcY/2) - (headingAtLine[0]); 
 
 		//Maybe there's an error here:
-		odometer.setXYT(currX, currY, (odometer.getXYT()[2] + angleCorr) % 360);
+		odometer.setXYT(currX - 1, currY, (odometer.getXYT()[2] + angleCorr) % 360);
 
 		//If we're not near the origin, get there.
 		if (!isNearGridIntersection(currX,currY)) {

@@ -61,6 +61,7 @@ public class ColourDetection {
 	private static final int approachDistance = 3;
 	private static int retreatDistance = 16;
 
+	private static boolean performScan;
 	/**
 	 * This method will compare the colour of the detect can to the desired colour
 	 * @param desiredColour The desired colour to verify
@@ -68,8 +69,11 @@ public class ColourDetection {
 	 * @throws InterruptedException 
 	 */
 	public static boolean checkCanColour(int desiredColour) throws InterruptedException {
-
+		performScan = true;
 		approachCan(); //Approach the can
+		if (!performScan) {
+			return false;
+		}
 		boolean correctCan = sweepCan(desiredColour);//Check the can colour
 		//Beep twice if we found the correct can
 		if (correctCan) {
@@ -284,13 +288,22 @@ public class ColourDetection {
 		usSensor.fetchSample(usData,0);	
 		int currentDistance = (int) (usData[0] * 100.0);
 
+		long startTime = System.currentTimeMillis();
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED); 
 		//Drive forward slowly.
-		while (currentDistance > approachDistance ) {
+		while (currentDistance > approachDistance  && performScan) {
 			//Read the sensor values.
 			usSensor.fetchSample(usData, 0); 
 			currentDistance = (int) (usData[0] * 100.0);
+
+			//FAULT TOLERANCE:
+			long currTime = System.currentTimeMillis();
+			if (currTime - startTime > 4000) { //If we travel for 4 seconds and haven't found a can, end the routine
+				performScan = false;
+			}
+			
+			//Put the thread to sleep
 			try {
 				Thread.sleep(20);
 			} catch (InterruptedException e) {
