@@ -84,7 +84,9 @@ public class FieldSearch {
 		finalX  = firstWaypoint.getX();
 		finalY = firstWaypoint.getY();
 
-		Navigator.travelTo((Lab5.LLx) * TILE_SIZE, (Lab5.LLy) * TILE_SIZE, true, true);
+		Navigator.travelTo((searchArea.getBottomLeft().getX()) * TILE_SIZE, (searchArea.getBottomLeft().getY()) * TILE_SIZE, true, true);
+		
+		
 		for (int i=0;i<3;i++) {
 			Sound.beep();
 		}
@@ -259,18 +261,20 @@ public class FieldSearch {
 
 	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
 
-		//		Sound.beep();
-		Navigator.turnTo(0);
-		//		Sound.beep();
-		Navigator.travelTo(finalX, (Lab5.URy)  * TILE_SIZE - TILE_SIZE/2, true, false); //works well
-		//		Sound.beep();
-		Navigator.turnTo(90);
-		//		Sound.beep();
-		Navigator.travelTo((Lab5.URx) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
-		//		Sound.beep();
-		Navigator.turnTo(45);
-		//		Sound.beep();
-		Navigator.travelTo((Lab5.URx) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
+	    Navigator.travelTo(searchArea.getTopRight().getX() * TILE_SIZE, searchArea.getTopRight().getY() * TILE_SIZE, true, true);
+//	    
+//		//		Sound.beep();
+//		Navigator.turnTo(0);
+//		//		Sound.beep();
+//		Navigator.travelTo(finalX, (searchArea.getTopRight().getY())  * TILE_SIZE - TILE_SIZE/2, true, false); //works well
+//		//		Sound.beep();
+//		Navigator.turnTo(90);
+//		//		Sound.beep();
+//		Navigator.travelTo((Lab5.URx) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
+//		//		Sound.beep();
+//		Navigator.turnTo(45);
+//		//		Sound.beep();
+//		Navigator.travelTo((Lab5.URx) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
 	}
 
 	/**

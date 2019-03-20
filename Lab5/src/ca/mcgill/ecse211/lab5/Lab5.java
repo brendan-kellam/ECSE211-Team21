@@ -34,8 +34,6 @@ public final class Lab5 {
 	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
 	// Lower left and upper right corner definitions [0,8]
-	public static final int LLx = 2, LLy = 2;
-	public static final int URx = 5, URy = 5;
 
 	/**
 	 * Represents a given MenuOption
@@ -81,10 +79,7 @@ public final class Lab5 {
 
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
-		// Starting corner [0, 3]
-		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
-		// Search the field
-		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
+		
 
 		// Initialize logging
 		Log.setLogging(true, false, false, false, false);
@@ -113,6 +108,8 @@ public final class Lab5 {
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
         Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
+        
+        
 
 
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
@@ -147,9 +144,20 @@ public final class Lab5 {
         Navigator.travelSpecificDistance(5.0);
         uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
 
-        Navigator.travelTo(6 * Board.TILE_SIZE, 9 * Board.TILE_SIZE, true, true);
+        Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
         
-        ColourDetection.checkCanColour(2);
+        int LLx = (int) (Board.Config.searchAreaLL.getLowerLeft().getX() / Board.TILE_SIZE);
+        int LLy = (int) (Board.Config.searchAreaLL.getLowerLeft().getY() / Board.TILE_SIZE);
+        int URx = (int) (Board.Config.searchAreaUR.getUpperRight().getX() / Board.TILE_SIZE);
+        int URy = (int) (Board.Config.searchAreaUR.getUpperRight().getY() / Board.TILE_SIZE);
+
+        
+        // Starting corner [0, 3]
+        SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
+        // Search the field
+        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
+        
+        fieldSearch.startSearch();
         
 		Sound.beep();
 		
