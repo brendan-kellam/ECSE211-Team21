@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.lab5;
+package ca.mcgill.ecse211.main;
 
 import java.util.ArrayList;
 import java.util.List;

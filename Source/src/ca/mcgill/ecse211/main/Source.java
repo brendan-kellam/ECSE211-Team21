@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.lab5;
+package ca.mcgill.ecse211.main;
 
 import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
@@ -29,7 +29,7 @@ import lejos.robotics.SampleProvider;
  * Main entry point class for Lab4
  */
 
-public final class Lab5 {
+public final class Source {
 
 	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
