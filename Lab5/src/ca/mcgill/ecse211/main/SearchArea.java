@@ -1,9 +1,9 @@
-package ca.mcgill.ecse211.lab5;
+package ca.mcgill.ecse211.main;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import ca.mcgill.ecse211.lab5.FieldSearch.StartingCorner;
+import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
 import ca.mcgill.ecse211.util.Board;
 import lejos.robotics.geometry.Point;
 
