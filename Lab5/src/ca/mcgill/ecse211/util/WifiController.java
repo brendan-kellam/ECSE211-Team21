@@ -19,10 +19,11 @@ public class WifiController {
     private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
     
     private static int redTeam;
-    private static int redCorner;
-    
-
     private static int greenTeam;
+    
+    private static int redCorner;
+    private static int greenCorner;
+
     private static Tile redLL;
     private static Tile redUR;
     private static Tile islandLL;
@@ -38,8 +39,10 @@ public class WifiController {
             Map data = conn.getData();
             
             redTeam = getInt(data, "RedTeam");
-            redCorner = getInt(data, "RedCorner");
             greenTeam = getInt(data, "GreenTeam");
+            
+            redCorner = getInt(data, "RedCorner");
+            greenCorner = getInt(data, "GreenCorner");
             
             redLL =    Tile.lowerLeft(getInt(data, "Red_LL_x"),     getInt(data, "Red_LL_y"));
             redUR =    Tile.upperRight(getInt(data, "Red_UR_x"),    getInt(data, "Red_UR_y"));            
