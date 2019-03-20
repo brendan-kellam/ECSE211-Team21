@@ -101,7 +101,7 @@ public final class Lab5 {
 //		odoCorrectionThread.start();
 
 		
-		PollerSystem pollerSystem = new PollerSystem();
+		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
 		pollerSystem.addPoller(odometer);
 		pollerSystem.start();
