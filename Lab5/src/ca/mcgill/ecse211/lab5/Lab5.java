@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.localization.LightLocalizer;
+import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -61,19 +62,9 @@ public final class Lab5 {
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.6));
 		Vehicle.LEFT_MOTOR.setAcceleration(200);
 		Vehicle.RIGHT_MOTOR.setAcceleration(200);
-
-		// ----- Configuration ------
-        WifiController.fetchGameplayData();
-        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
-
-		// Target can [1, 4]
-		int TR = 3;
-
+        
 		// Starting corner
-		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
-
-		// Starting corner [0, 3]
-		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
+	
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
@@ -88,6 +79,10 @@ public final class Lab5 {
 		// Create new display object
 //		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
+		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
+
+		// Starting corner [0, 3]
+		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
 		// Search the field
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
 
@@ -112,6 +107,15 @@ public final class Lab5 {
 		// Start ultrasonic poller thread 
 		Thread usThread = new Thread(usPoller);
 		usThread.start();
+		
+		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
+		LightLocalizerTester uc = new LightLocalizerTester(odometer);
+		
+		
+		// ----- Configuration ------
+//        WifiController.fetchGameplayData();
+//        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
+
 
 		// Sleep to allow Display to initialize
 		try {
@@ -143,16 +147,14 @@ public final class Lab5 {
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
 //			odoDisplayThread.start(); 
 
-			
-			FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-
-			LightLocalizer uc = new LightLocalizer(odometer);
-
 			ul.usLocalize();
 			uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
 			
-			Tile tunnelLR = WifiController.getTunnelLL();
-			Tile tunnelUR = WifiController.getTunnelUR();
+//			Tile tunnelLR = WifiController.getTunnelLL();
+//			Tile tunnelUR = WifiController.getTunnelUR();
+			
+			Tile tunnelLR = Tile.lowerRight(3, 3); // y between 3 and 4
+			Tile tunnelUR = Tile.upperLeft(5, 4);   // x between 2 and 3
 			
 			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 			
@@ -161,8 +163,7 @@ public final class Lab5 {
 			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 			
 	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
-
-		
+//			fieldSearch.startSearch();
 		}
 
 		Sound.beep();

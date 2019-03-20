@@ -71,7 +71,7 @@ public class FieldSearch {
 	 * 
 	 * 
 	 */
-	public void startSearch(int desiredColour) throws InterruptedException, OdometerExceptions {
+	public void startSearch() throws InterruptedException, OdometerExceptions {
 
 		//Keep track of the coordinate we terminate the search at.
 		double finalX;

@@ -20,13 +20,13 @@ import lejos.robotics.SampleProvider;
 //TODO: make it so that after initiali localization, coordinates are set to 1.1
 
 
-public class LightLocalizer {
+public class LightLocalizerTester {
 
 	/**
 	 * Speed constants for localization
 	 */
 	private static final int FORWARD_SPEED = 180;
-	private static final int ROTATE_SPEED = 160;
+	private static final int ROTATE_SPEED = 120;
 
 	/**
 	 * Measured value for the sensor location
@@ -40,6 +40,7 @@ public class LightLocalizer {
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private EV3LargeRegulatedMotor leftMotor = Vehicle.LEFT_MOTOR;
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
+	
 
 	/*
 	 * Odometer and colour sensor.
@@ -49,13 +50,13 @@ public class LightLocalizer {
 	/**
 	 * RGB Threshold
 	 */
-	private static final float RGB_DELTA_THRESHOLD = 0.034f;
+	private static final float RGB_DELTA_THRESHOLD = 0.015f;
 	/**
 	 * Normalized intensity readings from the R, G, B values
 	 */
-	private float[] curRGB;
-	private float[] lastRGB;
-
+	private SensorMode sensorColour;
+	private float curIntensity;
+	
 	/**
 	 * Color sensor provider
 	 */
@@ -63,9 +64,12 @@ public class LightLocalizer {
 
 	// Is line detected
 	private boolean lineDetected = true;
-
+	
 	// Final heading
 	private float offset = 0;
+
+	// Final heading
+	private float finalHeading = 0;
 	/*
 	 * Heading states:
 	 */
@@ -76,10 +80,9 @@ public class LightLocalizer {
 		NW, // angle between 270 and 360, final heading is 270 
 	}
 
-	public LightLocalizer(Odometer odometer)  throws OdometerExceptions {
+	public LightLocalizerTester(Odometer odometer)  throws OdometerExceptions {
 		this.odometer = odometer;
-		this.csProvider = Vehicle.COLOR_SENSOR_BACK.getRGBMode();
-		this.curRGB = new float[csProvider.sampleSize()];
+		sensorColour = Vehicle.COLOR_SENSOR_BACK.getRedMode(); //Red sensor is best based on what we learned in lab 2	
 	}
 
 
@@ -90,10 +93,14 @@ public class LightLocalizer {
 	 * @param y the y coordinate of the tile
 	 * @throws OdometerExceptions
 	 */
+	/**
+	 * Uses the light sensor to localize around a coordinate.
+	 * @param x the x coordinate of the tile
+	 * @param y the y coordinate of the tile
+	 * @throws OdometerExceptions
+	 */
 	public void lightLocalize(double x, double y) throws OdometerExceptions {
 
-		//Initialize the previous RGB values as the current ones for the sake of line detection
-		this.lastRGB = this.curRGB;
 
 		//Necessary local variables
 		double currX, currY, arcX, arcY,angleCorr;
@@ -136,7 +143,7 @@ public class LightLocalizer {
 			}
 			case NW:
 			{
-				offset = -90; //Add this to make us reach the desired 360~ ( offset should be around -90 )
+				offset = -80; //Add this to make us reach the desired 360~ ( offset should be around -90 )
 			}
 			}
 		}
@@ -157,12 +164,12 @@ public class LightLocalizer {
 		angleCorr = 270 + (arcY/2) - (headingAtLine[0]); 
 
 		//Maybe there's an error here:
-		odometer.setXYT(currX - 2, currY-2, (odometer.getXYT()[2] + angleCorr) % 360);
+		odometer.setXYT(currX, currY, (odometer.getXYT()[2] + angleCorr) % 360);
 
 		//If we're not near the origin, get there.
 		if (!isNearGridIntersection(currX,currY)) {
 			Navigator.travelTo(0, 0, true, true,FORWARD_SPEED);
-			odometer.setTheta(odometer.getXYT()[2]-12); // 17 is a magic number
+			odometer.setTheta(odometer.getXYT()[2]-17); // 17 is a magic number
 
 			try {
 				Thread.sleep(25);
@@ -205,24 +212,19 @@ public class LightLocalizer {
 
 		Navigator.turnTo(Navigator.getDestAngle(x,y));
 		//Drive more or less NEAR the coordinate
-
-		leftMotor.forward();
-		rightMotor.forward();
 		while (!lineDetected()) {
-			try {
-				Thread.sleep(35);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			leftMotor.forward();
+			rightMotor.forward();
 		}
+
 
 		leftMotor.stop(true);
 		rightMotor.stop();
 
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
 	}
 
 
@@ -239,8 +241,6 @@ public class LightLocalizer {
 		int currLineDetected = 0;
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
-		leftMotor.setAcceleration(4000);
-		rightMotor.setAcceleration(4000);
 
 		while (currLineDetected < 4) {
 			//Rotate ass first in place to find the next line.
@@ -294,8 +294,8 @@ public class LightLocalizer {
 
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
 	}
 
 	private static boolean isNearGridIntersection(double x, double y) {
@@ -304,45 +304,25 @@ public class LightLocalizer {
 	}
 
 	private boolean lineDetected() {
-		// Fetch the current RGB intensity sample
-		csProvider.fetchSample(curRGB, 0);
-
-		// If a line has already been detected
-		if (lineDetected) {
-			// Reset the last RGB to the current
-			lastRGB = curRGB.clone();
-			lineDetected = false;
-		}
-
-		// Get RGB components for last reading and currect
-		float r1 = lastRGB[0];
-		float g1 = lastRGB[1];
-		float b1 = lastRGB[2];
-
-		float r2 = curRGB[0];
-		float g2 = curRGB[1];
-		float b2 = curRGB[2];
-
-		// Compute difference in each component
-		float rdiff = r2 - r1;
-		float gdiff = g2 - g1;
-		float bdiff = b2 - b1;
-
-		// Compute delta between the r, g, b components of the last reading and the current reading
-		float delta = (float) Math.sqrt(rdiff*rdiff + gdiff*gdiff + bdiff*bdiff);
-
-		// update last RGB value
-		lastRGB = curRGB.clone();
-
-		// If color delta is significant
-		if (delta > RGB_DELTA_THRESHOLD) {
-			lineDetected = true;
+		//Get the current intensity. On the blue board, the value is roughyl 350.
+		curIntensity = fetchLightSample();
+		if (curIntensity < 0.34) {
 			return true;
 		}
 		return false;
 	}
 
 
+	/**
+	 * 
+	 * @return the intensity of the light sensor
+	 */
+	private float fetchLightSample() {
+		float[] intensity = new float[sensorColour.sampleSize()];
+		sensorColour.fetchSample(intensity, 0);
+		return intensity[0];
+	}
+	
 	/**
 	 * Determine vehicle's heading </br>
 	 * 

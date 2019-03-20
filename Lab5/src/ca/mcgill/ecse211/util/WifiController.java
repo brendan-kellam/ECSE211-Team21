@@ -12,7 +12,7 @@ import lejos.hardware.Button;
 public class WifiController {
 
     // ** Set these as appropriate for your team and current situation **//
-    private static final String SERVER_IP = "192.168.2.21";
+    private static final String SERVER_IP = "192.168.2.58";
     private static final int TEAM_NUMBER = 21;
 
     // Enable/disable printing of debug info from the WiFi class
