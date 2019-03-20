@@ -59,7 +59,7 @@ public final class Lab5 {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.6));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.3));
 		Vehicle.LEFT_MOTOR.setAcceleration(200);
 		Vehicle.RIGHT_MOTOR.setAcceleration(200);
         
@@ -96,25 +96,23 @@ public final class Lab5 {
 			e1.printStackTrace();
 		}
 
-		// Start Odometer Thread
-		Thread odoThread = new Thread(odometer);
-		odoThread.start();
-
 		// Start odometer correction thread
 //		Thread odoCorrectionThread = new Thread(odoCorrection);
 //		odoCorrectionThread.start();
 
-		// Start ultrasonic poller thread 
-		Thread usThread = new Thread(usPoller);
-		usThread.start();
+		
+		PollerSystem pollerSystem = new PollerSystem();
+		pollerSystem.addPoller(usPoller);
+		pollerSystem.addPoller(odometer);
+		pollerSystem.start();
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 		LightLocalizerTester uc = new LightLocalizerTester(odometer);
 		
 		
 		// ----- Configuration ------
-//        WifiController.fetchGameplayData();
-//        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
+        WifiController.fetchGameplayData();
+        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
 
 
 		// Sleep to allow Display to initialize
@@ -150,23 +148,28 @@ public final class Lab5 {
 			ul.usLocalize();
 			uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
 			
-//			Tile tunnelLR = WifiController.getTunnelLL();
-//			Tile tunnelUR = WifiController.getTunnelUR();
+		    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+
 			
-			Tile tunnelLR = Tile.lowerRight(3, 3); // y between 3 and 4
-			Tile tunnelUR = Tile.upperLeft(5, 4);   // x between 2 and 3
+			Tile tunnelLR = WifiController.getTunnelLL();
+			Tile tunnelUR = WifiController.getTunnelUR();
 			
 			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 			
-			uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
-			Thread.sleep(3000);
-			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+			//uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+			Thread.sleep(500);
 			
+//			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
+			//Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+	        
+			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
 	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
 //			fieldSearch.startSearch();
 		}
 
 		Sound.beep();
+		
+		pollerSystem.stop();
 
 		// Wait
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);

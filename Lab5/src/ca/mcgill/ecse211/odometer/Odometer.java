@@ -11,9 +11,9 @@
 package ca.mcgill.ecse211.odometer;
 
 import ca.mcgill.ecse211.hardware.Vehicle;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import ca.mcgill.ecse211.util.Poller;
 
-public class Odometer extends OdometerData implements Runnable {
+public class Odometer extends OdometerData implements Poller {
 
   private OdometerData odoData;
   private static Odometer odo = null; // Returned as singleton
@@ -71,56 +71,39 @@ public class Odometer extends OdometerData implements Runnable {
    * This method is where the logic for the odometer will run. Use the methods provided from the
    * OdometerData class to implement the odometer.
    */
-  // run method (required for Thread)
-  public void run() {
-    long updateStart, updateEnd;
+    @Override
+    public void update() {
 
-    while (true) {
-      
-      updateStart = System.currentTimeMillis();
+        // Get tachometer count from left and right encoders
+        nowTachoL = Vehicle.LEFT_MOTOR.getTachoCount();
+        nowTachoR = Vehicle.RIGHT_MOTOR.getTachoCount();
 
-      // Get tachometer count from left and right encoders
-      nowTachoL = Vehicle.LEFT_MOTOR.getTachoCount();
-      nowTachoR = Vehicle.RIGHT_MOTOR.getTachoCount();
-
-      double dx, dy;
-      double deltaD;
-      double deltaT;
-      
-      double distL = (PI / 180) * (nowTachoL - lastTachoL) * Vehicle.getConfig().getWheelRadius(); // Displacement of left wheel (Lamda * rL)
-      double distR = (PI / 180) * (nowTachoR - lastTachoR) * Vehicle.getConfig().getWheelRadius(); // Displacement of right wheel (Phi * rR)
-      
-      // Update tachometer counts
-      lastTachoL = nowTachoL;
-      lastTachoR = nowTachoR;
-      
-      // Total vehicle displacement
-      deltaD = 0.5 * (distL + distR);
-      
-      // Change in heading
-      deltaT = (distL - distR) / Vehicle.getConfig().getTrackWidth();
-      
-      double curTheta = Math.toRadians(odo.getXYT()[2]);
-      double phi = curTheta + deltaT*0.5;
-      
-      // Compute change in x & y
-      dx = deltaD * Math.sin(phi);
-      dy = deltaD * Math.cos(phi);
-      
-      // Update odometer values
-      odo.update(dx, dy, Math.toDegrees(deltaT));
-
-      // this ensures that the odometer only runs once every period
-      updateEnd = System.currentTimeMillis();
-      
-      if (updateEnd - updateStart < ODOMETER_PERIOD) {
-        try {
-          Thread.sleep(ODOMETER_PERIOD - (updateEnd - updateStart));
-        } catch (InterruptedException e) {
-          // there is nothing to be done
-        }
-      }
+        double dx, dy;
+        double deltaD;
+        double deltaT;
+        
+        double distL = (PI / 180) * (nowTachoL - lastTachoL) * Vehicle.getConfig().getWheelRadius(); // Displacement of left wheel (Lamda * rL)
+        double distR = (PI / 180) * (nowTachoR - lastTachoR) * Vehicle.getConfig().getWheelRadius(); // Displacement of right wheel (Phi * rR)
+        
+        // Update tachometer counts
+        lastTachoL = nowTachoL;
+        lastTachoR = nowTachoR;
+        
+        // Total vehicle displacement
+        deltaD = 0.5 * (distL + distR);
+        
+        // Change in heading
+        deltaT = (distL - distR) / Vehicle.getConfig().getTrackWidth();
+        
+        double curTheta = Math.toRadians(odo.getXYT()[2]);
+        double phi = curTheta + deltaT*0.5;
+        
+        // Compute change in x & y
+        dx = deltaD * Math.sin(phi);
+        dy = deltaD * Math.cos(phi);
+        
+        // Update odometer values
+        odo.update(dx, dy, Math.toDegrees(deltaT));
     }
-  }
 
 }

@@ -32,15 +32,22 @@ public class Navigator {
 	 */
 	public static void travelTo(double x, double y, boolean stop, boolean turn, int speed) throws OdometerExceptions {
 
-		Log.log(Log.Sender.Navigator, "TargetX: " + x + " | TargetY: " + y + " | curX: " + Odometer.getX() + " | curY: " + Odometer.getY());
 
+        Log.log(Log.Sender.Navigator, "TargetX: " + x + " | TargetY: " + y + " | curX: " + Odometer.getX() + " | curY: " + Odometer.getY());
+
+	    
 		// If turn is enabled
 		if (turn) {
 			double minAngle;
 			minAngle = getDestAngle(x, y);
+			
+	        Log.log(Log.Sender.Navigator, "Before Turn Theta: " + Odometer.getTheta());
+			
 			turnTo(minAngle, speed, false);
+			
+	        Log.log(Log.Sender.Navigator, "After Turn Theta: " + Odometer.getTheta());
 		}
-
+		
 		// Compute distance
 		double distX = Math.abs(x - Odometer.getX());
 		double distY = Math.abs(y - Odometer.getY());

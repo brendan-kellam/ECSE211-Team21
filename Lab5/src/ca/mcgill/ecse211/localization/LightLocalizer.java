@@ -31,7 +31,7 @@ public class LightLocalizer {
 	/**
 	 * Measured value for the sensor location
 	 */
-	private static final double SENSOR_LOCATION = 9.3;
+	private static final double SENSOR_LOCATION = 9.8;
 
 
 	/*
@@ -221,8 +221,8 @@ public class LightLocalizer {
 
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6.5), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-6.5), false);
 	}
 
 

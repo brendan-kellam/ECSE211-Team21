@@ -31,7 +31,7 @@ public class LightLocalizerTester {
 	/**
 	 * Measured value for the sensor location
 	 */
-	private static final double SENSOR_LOCATION = 9.3;
+	private static final double SENSOR_LOCATION = 10;
 
 
 	/*
@@ -169,7 +169,7 @@ public class LightLocalizerTester {
 		//If we're not near the origin, get there.
 		if (!isNearGridIntersection(currX,currY)) {
 			Navigator.travelTo(0, 0, true, true,FORWARD_SPEED);
-			odometer.setTheta(odometer.getXYT()[2]-17); // 17 is a magic number
+			odometer.setTheta(odometer.getXYT()[2]-15); // 17 is a magic number
 
 			try {
 				Thread.sleep(25);
@@ -212,19 +212,22 @@ public class LightLocalizerTester {
 
 		Navigator.turnTo(Navigator.getDestAngle(x,y));
 		//Drive more or less NEAR the coordinate
-		while (!lineDetected()) {
-			leftMotor.forward();
-			rightMotor.forward();
-		}
-
+		Vehicle.setMotorSpeeds(130, 130);
+		while (!lineDetected()) ;
 
 		leftMotor.stop(true);
 		rightMotor.stop();
 
+		try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), false);
 	}
 
 
@@ -294,8 +297,8 @@ public class LightLocalizerTester {
 
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
-		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-8), false);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), false);
 	}
 
 	private static boolean isNearGridIntersection(double x, double y) {
@@ -306,7 +309,7 @@ public class LightLocalizerTester {
 	private boolean lineDetected() {
 		//Get the current intensity. On the blue board, the value is roughyl 350.
 		curIntensity = fetchLightSample();
-		if (curIntensity < 0.34) {
+		if (curIntensity < 0.30) {
 			return true;
 		}
 		return false;
