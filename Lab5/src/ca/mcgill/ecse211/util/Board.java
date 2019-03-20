@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.util;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerData;
 
-public class Board {
+public final class Board {
     
     /** 
      * Represents the physical board with grid lines
@@ -133,9 +133,27 @@ public class Board {
         }       
     }
     
-    public static class Config {
+    /**
+     * 
+     */
+    public static final class Config {
         
+        public enum STARTING_CORNER {
+            BOTTOM_LEFT,
+            BOTTOM_RIGHT,
+            UPPER_RIGHT,
+            UPPER_LEFT
+        }
         
+        public static Tile startingAreaLL;
+        public static Tile startingAreaUR;
+        public static Tile islandLL;
+        public static Tile islandUR;
+        public static Tile searchAreaLL;
+        public static Tile searchAreaUR;
+        public static Tile tunnelLL;
+        public static Tile tunnelUR;
+        public static STARTING_CORNER corner;
     }
     
 }
