@@ -50,7 +50,7 @@ public class WifiController {
                 Board.Config.searchAreaUR = Tile.upperRight(getInt(data, "SZR_UR_x"), getInt(data, "SZR_UR_y"));
                 
                 tnLLX = getInt(data, "TNR_LL_x");
-                tnLLY = getInt(data, "TNR_LL_x");
+                tnLLY = getInt(data, "TNR_LL_y");
                 tnURX = getInt(data, "TNR_UR_x"); 
                 tnURY = getInt(data, "TNR_UR_y");
             }
@@ -66,7 +66,7 @@ public class WifiController {
                 Board.Config.searchAreaUR = Tile.upperRight(getInt(data, "SZG_UR_x"), getInt(data, "SZG_UR_y"));
                 
                 tnLLX = getInt(data, "TNG_LL_x");
-                tnLLY = getInt(data, "TNG_LL_x");
+                tnLLY = getInt(data, "TNG_LL_y");
                 tnURX = getInt(data, "TNG_UR_x");
                 tnURY = getInt(data, "TNG_UR_y");
                 

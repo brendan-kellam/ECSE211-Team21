@@ -129,17 +129,14 @@ public final class Lab5 {
 		
 		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 		
-		//uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+		
 		Thread.sleep(500);
 		
-//			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
-		//Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-        
+		
 		Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
         Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
-//			fieldSearch.startSearch();
         
-        //Navigator.travelTo(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY(), true, true);
+        
         
         Navigator.travelSpecificDistance(5.0);
         uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
