@@ -48,6 +48,7 @@ public class WifiController {
             tunnelLL = Tile.lowerRight(getInt(data, "TNR_LL_x"),     getInt(data, "TNR_LL_y"));            
             tunnelUR = Tile.upperLeft(getInt(data, "TNR_UR_x"),    getInt(data, "TNR_UR_y"));            
             
+            
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }

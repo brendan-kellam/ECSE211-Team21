@@ -142,7 +142,15 @@ public final class Lab5 {
         Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
 //			fieldSearch.startSearch();
         
+        //Navigator.travelTo(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY(), true, true);
+        
+        Navigator.travelSpecificDistance(5.0);
+        uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
 
+        Navigator.travelTo(6 * Board.TILE_SIZE, 9 * Board.TILE_SIZE, true, true);
+        
+        ColourDetection.checkCanColour(2);
+        
 		Sound.beep();
 		
 		pollerSystem.stop();
