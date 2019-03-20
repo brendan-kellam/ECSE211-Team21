@@ -265,6 +265,7 @@ public class LightLocalizerTester {
 			if (lineDetected()) {
 				angleAtLines[currLineDetected] = odometer.getXYT()[2];
 				currLineDetected++;
+				Sound.beep();
 			}
 			try {
 				Thread.sleep(50);

@@ -41,7 +41,7 @@ public class FieldSearch {
 
 	// Add a filter for can detection:
 	private static int filter = 0;
-	private static final int maxFilter = 15;
+	private static final int maxFilter = 12;
 	// Search area
 	private SearchArea searchArea;
 
@@ -82,11 +82,6 @@ public class FieldSearch {
 		finalY = firstWaypoint.getY();
 
 		Navigator.travelTo((searchArea.getBottomLeft().getX()) * TILE_SIZE, (searchArea.getBottomLeft().getY()) * TILE_SIZE, true, true);
-		
-		
-		for (int i=0;i<3;i++) {
-			Sound.beep();
-		}
 		//Travel to the first waypoint, denoted (Lx+0.5tile, Ly+0.tile)
 		try {
 			Navigator.travelTo(firstWaypoint.getX(), firstWaypoint.getY(), true, true);
@@ -126,7 +121,6 @@ public class FieldSearch {
 			Navigator.turnTo(targetLocation[0], sweepSpeed, true);
 
 			if (scanForCan(targetLocation[0],desiredCanColour)) {
-				Sound.beep();
 				break;
 			}
 
@@ -138,7 +132,6 @@ public class FieldSearch {
 			Navigator.turnTo(targetLocation[1], sweepSpeed, true);
 
 			if (scanForCan(targetLocation[1],desiredCanColour)) {
-				Sound.beep();
 				break;
 			}
 
@@ -170,10 +163,6 @@ public class FieldSearch {
 			}
 
 			if (complete) {
-				Sound.twoBeeps();
-				Sound.twoBeeps();
-				Sound.twoBeeps();
-				Sound.twoBeeps();
 				break;
 			}
 
@@ -185,9 +174,9 @@ public class FieldSearch {
 
 		goToFinal(finalX,finalY);
 		LCD.drawString(":) :) :)", 6, 0);
-		for (int i=0;i<3;i++) {
-			Sound.beep();
-		}
+//		for (int i=0;i<3;i++) {
+//			Sound.beep();
+//		}
 	}
 
 	/**
@@ -247,12 +236,12 @@ public class FieldSearch {
 			Vehicle.setMotorSpeeds(0, 0);
 			Thread.sleep(50);
 			if (ColourDetection.checkCanColour(desiredCanColour)) {
-				Sound.beep();
+//				Sound.beep();
 				return true;
 			}
 			filter = 0;
 		}
-		Sound.twoBeeps();
+//		Sound.twoBeeps();
 		return false;
 	}
 

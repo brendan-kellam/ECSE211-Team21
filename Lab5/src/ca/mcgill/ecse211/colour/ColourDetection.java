@@ -29,6 +29,8 @@ public class ColourDetection {
 	private static float[] usData = new float[usDistance.sampleSize()];
 	
 
+	private static int filter = 0;
+	private static final int maxfilter = 10;
 
 	//One motor for the light sensor.
 	public static final EV3MediumRegulatedMotor lightSensorMotor = Vehicle.FRONT_COLOUR_SENSOR_MOTOR;

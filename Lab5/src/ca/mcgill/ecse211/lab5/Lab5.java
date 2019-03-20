@@ -118,13 +118,10 @@ public final class Lab5 {
 		ul.usLocalize();
 		uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
 		
-	    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-
-		
 		Tile tunnelLR = Board.Config.tunnelLL;
 		Tile tunnelUR = Board.Config.tunnelUR;
 		
-		int desiredCanColour = Board.Config.greenTeam;
+		int desiredCanColour = 1;
 		
 		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
 		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
@@ -136,11 +133,12 @@ public final class Lab5 {
 		
 		
 		Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
-        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
         
-        
-        
-        Navigator.travelSpecificDistance(5.0);
+		int ya = (int) (Board.Config.tunnelLL.getLowerLeft().getY() / Board.TILE_SIZE);
+		
+		
+		Navigator.travelTo(tunnelUR.getCenter().getX()+5, tunnelUR.getCenter().getY()+5-ya, true, true, 200);	
+
         uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
 
         Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
