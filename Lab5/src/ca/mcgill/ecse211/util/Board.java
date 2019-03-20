@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.util;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerData;
 
-public class Board {
+public final class Board {
     
     /** 
      * Represents the physical board with grid lines
@@ -31,51 +31,26 @@ public class Board {
         W
     }
     
-    // Tile length (cm)
-    private double tileLength;
-
-    
-    // Width in tiles
-    private int boardWidthInTiles;
-    
-    // Height in tiles
-    private int boardHeightInTiles;
-    
     // Minimum tile multiple
     private static final double MIN_TILE_MULTIPLE = 0.5;
     
+    // Tile size
     public static final double TILE_SIZE = 30.48;
-            
-    /**
-     * Constructs a square board and sets tile length and board dimensions
-     * 
-     * @param tileLength
-     * @param boardWidthInTiles
-     * @throws IllegalArgumentException
-     */
-    public Board(double tileLength, int boardLengthInTiles) throws IllegalArgumentException {
-        this(tileLength, boardLengthInTiles, boardLengthInTiles);
-    }
     
-    public Board(double tileLength, int boardWidthInTiles, int boardHeightInTiles) throws IllegalArgumentException {
-        
-        // Check invalid arguments
-        if (tileLength <= 0) {
-            throw new IllegalArgumentException("Cannot define a tile with 0 or negative length");
-        }
-        
-        if (boardWidthInTiles <= 1) {
-            throw new IllegalArgumentException("Cannot define a board that's less than 2xn");
-        }
-        
-        if (boardHeightInTiles <= 1) {
-            throw new IllegalArgumentException("Cannot define a board that's less than nx2");
-        }
-        
-        this.tileLength = tileLength;
-        this.boardWidthInTiles = boardWidthInTiles;
-        this.boardHeightInTiles = boardHeightInTiles;
-    }
+    /**
+     * Board width. 
+     * 
+     * @see <a href="https://mycourses2.mcgill.ca/d2l/le/content/372671/viewContent/4289469/View">Project Spec</a>
+     */
+    public static final int BOARD_WIDTH = 15;
+    
+    /**
+     * Board height. 
+     * 
+     * @see <a href="https://mycourses2.mcgill.ca/d2l/le/content/372671/viewContent/4289469/View">Project Spec</a>
+     */
+    public static final int BOARD_HEIGHT = 9;
+    
     
     /**
      * Determine vehicle's heading </br>
@@ -157,18 +132,28 @@ public class Board {
             odometer.setX(pos);
         }       
     }
-
-    public int getBoardWidthInTiles() {
-        return boardWidthInTiles;
-    }
     
-    public int getBoardHeightInTiles() {
-        return boardHeightInTiles;
+    /**
+     * 
+     */
+    public static final class Config {
+        
+        public enum STARTING_CORNER {
+            BOTTOM_LEFT,
+            BOTTOM_RIGHT,
+            UPPER_RIGHT,
+            UPPER_LEFT
+        }
+        
+        public static Tile startingAreaLL;
+        public static Tile startingAreaUR;
+        public static Tile islandLL;
+        public static Tile islandUR;
+        public static Tile searchAreaLL;
+        public static Tile searchAreaUR;
+        public static Tile tunnelLL;
+        public static Tile tunnelUR;
+        public static STARTING_CORNER corner;
     }
-    
-    public double getTileLength() {
-        return tileLength;
-    }
-    
     
 }
