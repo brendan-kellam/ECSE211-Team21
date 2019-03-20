@@ -12,7 +12,7 @@ import lejos.hardware.Button;
 public class WifiController {
 
     // ** Set these as appropriate for your team and current situation **//
-    private static final String SERVER_IP = "192.168.2.21";
+    private static final String SERVER_IP = "192.168.2.50";
     private static final int TEAM_NUMBER = 21;
 
     // Enable/disable printing of debug info from the WiFi class
@@ -48,11 +48,11 @@ public class WifiController {
             tunnelLL = Tile.lowerRight(getInt(data, "TNR_LL_x"),     getInt(data, "TNR_LL_y"));            
             tunnelUR = Tile.upperLeft(getInt(data, "TNR_UR_x"),    getInt(data, "TNR_UR_y"));            
             
+            
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
         
-        Button.waitForAnyPress();
     }
     
     private static int getInt(Map data, String key) {

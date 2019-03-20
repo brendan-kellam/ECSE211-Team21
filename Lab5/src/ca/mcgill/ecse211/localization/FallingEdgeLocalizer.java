@@ -13,7 +13,8 @@ public class FallingEdgeLocalizer {
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private double TRACK = Vehicle.getConfig().getTrackWidth();
-	public static final int ROTATE_SPEED = 150;
+	
+	public static final int ROTATE_SPEED = 300;
 
     private UltrasonicPoller usPoller; // Ultrasonic poller
 	private Odometer odometer; // Odometer
@@ -32,6 +33,8 @@ public class FallingEdgeLocalizer {
 	public void usLocalize() {
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.setAcceleration(6000);
+		rightMotor.setAcceleration(6000);
 		fallingEdge();
 	}
 
@@ -42,34 +45,27 @@ public class FallingEdgeLocalizer {
 	private void fallingEdge() {
 
 		double angle1, angle2, turnAngle;
-
+		leftMotor.backward();
+		rightMotor.forward();
+		
 		//Rotate to face away from the wall:
-		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
-			leftMotor.backward();
-			rightMotor.forward();
-		}
+		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) ;
+		leftMotor.backward();
+		rightMotor.forward();
 		
 		//Rotate to face the wall
-		while (usPoller.getDistance() > distFallingEdge) {
-			leftMotor.backward();
-			rightMotor.forward();
-		}
+		while (usPoller.getDistance() > distFallingEdge);
 		
 		angle1 = odometer.getXYT()[2]; //Keep track of the first angle detected.
 
+		leftMotor.forward();
+		rightMotor.backward();
 		//Rotate to face away from the wall
-		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
-			leftMotor.forward();
-			rightMotor.backward();
-		}
-
+		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge);
+		leftMotor.forward();
+		rightMotor.backward();
 		//Rotate to face the other wall
-		while (usPoller.getDistance() > distFallingEdge) {
-			leftMotor.forward();
-			rightMotor.backward();
-		}
-		
-
+		while (usPoller.getDistance() > distFallingEdge);
 		angle2 = odometer.getXYT()[2]; //Keep track of the second angle detected.
 
 		double dTheta = 0;
@@ -77,7 +73,6 @@ public class FallingEdgeLocalizer {
 		//Case 1: The first angle is smaller than the second=>The second angle comes after the first in a clockwise manner with 0 being 0 degrees
 		if (angle1 < angle2) {
 			dTheta = 45 - (angle1 + angle2) / 2;
-
 		} 
 
 		//Case 2: The first angle is greater than the second=>The second angle comes BEFORE the first in a clockwise manner with 0 being 0 degrees.
@@ -86,13 +81,13 @@ public class FallingEdgeLocalizer {
 		}
 //
 		dTheta-=2;
-		turnAngle = dTheta + odometer.getXYT()[2];
+		turnAngle = dTheta + odometer.getXYT()[2] - 45; // face 45 degrees
 		
 		//Face 0 degrees.
 		leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, turnAngle), true);
 		rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, turnAngle), false);
 		//Set theta to 0(the x and y coordinates are wrong for now.)
-		odometer.setXYT(0.0, 0.0, 0.0);
+		odometer.setXYT(0.0, 0.0, 45.0);
 	}
 
 

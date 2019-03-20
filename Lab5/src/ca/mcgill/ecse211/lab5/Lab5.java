@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.localization.LightLocalizer;
+import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -58,22 +59,12 @@ public final class Lab5 {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.6));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.3));
 		Vehicle.LEFT_MOTOR.setAcceleration(200);
 		Vehicle.RIGHT_MOTOR.setAcceleration(200);
-
-		// ----- Configuration ------
-        WifiController.fetchGameplayData();
-        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
-
-		// Target can [1, 4]
-		int TR = 3;
-
+        
 		// Starting corner
-		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
-
-		// Starting corner [0, 3]
-		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
+	
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
@@ -88,11 +79,15 @@ public final class Lab5 {
 		// Create new display object
 //		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
+		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
+
+		// Starting corner [0, 3]
+		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
 		// Search the field
 		FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
 
 		// Initialize logging
-		Log.setLogging(true, true, true, true, true);
+		Log.setLogging(true, false, false, false, false);
 
 		// Set logging to write to file
 		try {
@@ -101,71 +96,64 @@ public final class Lab5 {
 			e1.printStackTrace();
 		}
 
-		// Start Odometer Thread
-		Thread odoThread = new Thread(odometer);
-		odoThread.start();
-
 		// Start odometer correction thread
 //		Thread odoCorrectionThread = new Thread(odoCorrection);
 //		odoCorrectionThread.start();
 
-		// Start ultrasonic poller thread 
-		Thread usThread = new Thread(usPoller);
-		usThread.start();
+		
+		PollerSystem pollerSystem = PollerSystem.getInstance();
+		pollerSystem.addPoller(usPoller);
+		pollerSystem.addPoller(odometer);
+		pollerSystem.start();
+		
+		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
+		LightLocalizerTester uc = new LightLocalizerTester(odometer);
+		
+		
+		// ----- Configuration ------
+        WifiController.fetchGameplayData();
+        Log.log(Sender.usSensor, "Tunnel LL: " + WifiController.getTunnelLL());
 
-		// Sleep to allow Display to initialize
-		try {
-			Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		// Get user option
-		MenuOption option;
-		while ((option = getUserChoice()) == MenuOption.INVALID);
-
-		Sound.twoBeeps();
-		if (option == MenuOption.TEST_COLOURS){
-			ColourDetection.forDemoOneToAnalyzeCansOneAfterEachOther();	
-		}	
-
-		else {
-			// Start Display thread.
-			//This is here so the display thread doesn't run during colour testing
-
-			// Sleep to allow Display to initialize
-			try {
-				Thread.sleep(DISPLAY_INIT_SLEEP_TIME);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
 //			odoDisplayThread.start(); 
 
-			
-			FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-
-			LightLocalizer uc = new LightLocalizer(odometer);
-
-			ul.usLocalize();
-			uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
-			
-			Tile tunnelLR = WifiController.getTunnelLL();
-			Tile tunnelUR = WifiController.getTunnelUR();
-			
-			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-			
-			uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
-			Thread.sleep(3000);
-			Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-			
-	        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
+		ul.usLocalize();
+		uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
+		
+	    while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 
 		
-		}
+		Tile tunnelLR = WifiController.getTunnelLL();
+		Tile tunnelUR = WifiController.getTunnelUR();
+		
+		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
+		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
+		
+		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+		
+		//uc.lightLocalize(tunnelLR.getUpperLeft().getX(), tunnelLR.getUpperLeft().getY());
+		Thread.sleep(500);
+		
+//			Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
+		//Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+        
+		Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
+        Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
+//			fieldSearch.startSearch();
+        
+        //Navigator.travelTo(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY(), true, true);
+        
+        Navigator.travelSpecificDistance(5.0);
+        uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
 
+        Navigator.travelTo(6 * Board.TILE_SIZE, 9 * Board.TILE_SIZE, true, true);
+        
+        ColourDetection.checkCanColour(2);
+        
 		Sound.beep();
+		
+		pollerSystem.stop();
 
 		// Wait
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);

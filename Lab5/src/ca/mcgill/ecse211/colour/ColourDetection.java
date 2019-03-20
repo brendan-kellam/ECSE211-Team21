@@ -18,7 +18,7 @@ import lejos.robotics.SampleProvider;
 
 public class ColourDetection {
 	// Default speed when approaching can
-	private static final int APPROACH_SPEED = 60; //Make sure it's not too fast.
+	private static final int APPROACH_SPEED = 100; //Make sure it's not too fast.
 
 	// Default speed when backing up from can
 	private static final int BACKUP_SPEED = -75; //Make sure it's not too slow.
@@ -285,13 +285,18 @@ public class ColourDetection {
 		int currentDistance = (int) (usData[0] * 100.0);
 
 		// Drive forward slowly.
-		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED);
+		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED); 
 		//Drive forward slowly.
-
 		while (currentDistance > approachDistance ) {
 			//Read the sensor values.
 			usSensor.fetchSample(usData, 0); 
 			currentDistance = (int) (usData[0] * 100.0);
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		//Stop the car
