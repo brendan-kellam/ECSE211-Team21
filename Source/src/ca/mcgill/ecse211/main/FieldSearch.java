@@ -70,6 +70,8 @@ public class FieldSearch {
 	 */
 	public void startSearch(int desiredCanColour) throws InterruptedException, OdometerExceptions {
 
+		ColourDetection cd = new ColourDetection(desiredCanColour);
+		
 		//Keep track of the coordinate we terminate the search at.
 		double finalX;
 		double finalY;
@@ -120,7 +122,7 @@ public class FieldSearch {
 			Thread.sleep(20);
 			Navigator.turnTo(targetLocation[0], sweepSpeed, true);
 
-			if (scanForCan(targetLocation[0],desiredCanColour)) {
+			if (scanForCan(targetLocation[0],cd)) {
 				break;
 			}
 
@@ -131,7 +133,7 @@ public class FieldSearch {
 
 			Navigator.turnTo(targetLocation[1], sweepSpeed, true);
 
-			if (scanForCan(targetLocation[1],desiredCanColour)) {
+			if (scanForCan(targetLocation[1],cd)) {
 				break;
 			}
 
@@ -144,8 +146,6 @@ public class FieldSearch {
 			Navigator.travelToNonBlocking(destinationX, destinationY);
 			//While travelling
 
-			//TODO: GONNA MAKE A PROBLEM WHERE THE CAR STOPS MOVING
-
 			while (!withinError(destinationX,destinationY)) {
 				usSensor.fetchSample(usData, 0);
 				int currDistance = (int) (usData[0] * 100);
@@ -153,7 +153,7 @@ public class FieldSearch {
 
 				if (currDistance < 8) {
 					Vehicle.setMotorSpeeds(0, 0);
-					complete = ColourDetection.checkCanColour(desiredCanColour);
+					complete = cd.checkCanColour();
 					if (complete) {
 						break;
 					}
@@ -216,7 +216,7 @@ public class FieldSearch {
 		return error < 0.5;
 	}
 
-	private boolean scanForCan(double targetLocation, int desiredCanColour) throws InterruptedException {
+	private boolean scanForCan(double targetLocation, ColourDetection cd) throws InterruptedException {
 		//Sound.beep();
 		usSensor.fetchSample(usData,0);	
 		int currentDistance = (int) (usData[0] * 100.0);
@@ -235,7 +235,7 @@ public class FieldSearch {
 		if (filter >= maxFilter) {
 			Vehicle.setMotorSpeeds(0, 0);
 			Thread.sleep(50);
-			if (ColourDetection.checkCanColour(desiredCanColour)) {
+			if (cd.checkCanColour()) {
 //				Sound.beep();
 				return true;
 			}
