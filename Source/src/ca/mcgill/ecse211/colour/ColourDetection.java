@@ -17,9 +17,9 @@ import lejos.robotics.SampleProvider;
 //Sweep twice, one for each side. Sum, then average.
 
 public class ColourDetection {
-	
+
 	// Default speed when approaching can
-	private final int APPROACH_SPEED = 130; //Make sure it's not too fast.
+	private final int APPROACH_SPEED = 120; //Make sure it's not too fast.
 
 	// Default speed when backing up from can
 	private final int BACKUP_SPEED = -75; //Make sure it's not too slow.
@@ -57,7 +57,7 @@ public class ColourDetection {
 	 * Number of values the light sensor will read.
 	 */
 	private final int numReadings = 18;
-	
+
 	/**
 	 * Sweep angle for the light sensor's motor.
 	 */
@@ -70,7 +70,7 @@ public class ColourDetection {
 	private final int approachDistance = 3;
 	private int retreatDistance = 12; // This may be modified in the test
 
-	
+
 	/*
 	 * We'll have to convert the colour integer value to a COLOUR NAME
 	 */
@@ -80,21 +80,21 @@ public class ColourDetection {
 		GREEN,
 		YELLOW
 	}
-	
+
 	private Colour desiredColour;
-	
+
 	/*
 	 * If we drive too long, we no longer wnat to perform a scan
 	 */
 	private boolean performScan;
-	
+
 	/*
 	 * Constructor for the colour detection; make the desired colour
 	 */
 	public ColourDetection(int desiredIntegerOfCan) {
 		this.desiredColour = colourValueOf(desiredIntegerOfCan);
 	}
-	
+
 	/**
 	 * This method will compare the colour of the detect can to the desired colour
 	 * @param desiredColour The desired colour to verify
@@ -104,18 +104,18 @@ public class ColourDetection {
 	public boolean checkCanColour() {
 		this.performScan = true;
 		approachCan(); //Approach the can
-		
+
 		if (!performScan) {
 			return false;
 		}
-		
+
 		boolean correctCan = sweepCan(this.desiredColour);
-		
+
 		//Beep twice if we found the correct can
 		if (correctCan) {
 			for (int i=0;i<10;i++) Sound.beep();
 		}
-		
+
 		reverseAwayFromCan();
 		return correctCan;
 
@@ -173,7 +173,7 @@ public class ColourDetection {
 		if ( (red - green > 12) && (red - blue > 15) && (green - blue < 15)) { // Red can
 			return Colour.RED;
 		}
-		
+
 		return Colour.BLUE;
 	}
 
@@ -184,7 +184,7 @@ public class ColourDetection {
 	 * @return the colour that occurs most often from the sample.
 	 */
 	private int[] countColours(Colour[] colourSamples) {
-		
+
 		int[] occurrenceOfColour = {0,0,0,0,0};
 
 		for (int i=0;i<colourSamples.length;i++) {
@@ -244,7 +244,8 @@ public class ColourDetection {
 		long startTime = System.currentTimeMillis();
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED); 
-		
+
+		this.performScan = true;
 		while (currentDistance > approachDistance  && performScan) {
 			//Read the sensor values.
 			usSensor.fetchSample(usData, 0); 
@@ -286,7 +287,7 @@ public class ColourDetection {
 		Vehicle.setMotorSpeeds(0, 0);
 
 	}
-	
+
 	/**
 	 * Convert an integer index into a desired colour value
 	 * @param desiredIntegerOfCan
@@ -315,7 +316,7 @@ public class ColourDetection {
 			return Colour.BLUE;
 		}
 	}
-	
+
 	/*
 	 * Just to make the other methods a little lighter.
 	 */
@@ -327,7 +328,7 @@ public class ColourDetection {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/////////////////////FOR TESTING PURPOSES///////////////////////////////////////
 	/**
 	 * This method will check the colour of a can that it has detected.
@@ -338,23 +339,13 @@ public class ColourDetection {
 	public void testCanColours () {
 		retreatDistance = 8;
 		while (true) {
-			LCD.clear();
-			usSensor.fetchSample(usData,0);	
-			int currentDistance = (int) (usData[0] * 100.0);
-			LCD.drawString("No object detected", 0, 0);
-			while (currentDistance > 15 ) {
-				//Read the sensor values.
-				usSensor.fetchSample(usData, 0); 
-				currentDistance = (int) (usData[0] * 100.0);
-			}
-
-			LCD.clear();
-			LCD.drawString("Object Detected", 0, 0);
-			approachCan(); //Approach the can
-			testSweep();//Check the can colour
-			reverseAwayFromCan();
-			sleep(3000);
-			//			Sound.beep();
+			while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+				LCD.clear();
+				LCD.drawString("Object Detected", 0, 0);
+				approachCan(); //Approach the can
+				testSweep();//Check the can colour
+				reverseAwayFromCan();
+				Sound.beep();
 		}
 
 	}
@@ -397,14 +388,13 @@ public class ColourDetection {
 		greenAvg = greenAvg/numReadings;
 		blueAvg = blueAvg/numReadings;
 
-		////////////////////////////////
-		//THESE LCD ARE JUST FOR DISPLAY AND TESTING. Can remove from final.
+		//////////////////////////////////////////////////////////
 		LCD.clear();
 		LCD.drawString("Red: " + redAvg, 0, 0);
 		LCD.drawString("Green: " + greenAvg, 0, 1);
 		LCD.drawString("Blue: " + blueAvg, 0, 2);
 		Log.log(Sender.colourDetection, "red Average = " + redAvg + " | green Average = " + greenAvg + " | blue Average = " + blueAvg);
-		////////////////////////////////
+		//////////////////////////////////////////////////////////
 
 		//Bring the sensor back to its original.
 		colourSensorMotor.rotate(-sweepAngle);
@@ -414,6 +404,5 @@ public class ColourDetection {
 		LCD.drawString("The can colour is: " ,0,5);
 		LCD.drawString(mostCommonColour.toString(), 2, 6);
 	}
-
 
 }

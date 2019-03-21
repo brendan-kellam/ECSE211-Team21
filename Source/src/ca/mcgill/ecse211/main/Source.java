@@ -2,6 +2,8 @@ package ca.mcgill.ecse211.main;
 
 import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
+
+import ca.mcgill.ecse211.Test;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.localization.LightLocalizer;
@@ -44,6 +46,7 @@ public final class Source {
 		INVALID
 	}
 
+	public static final boolean TESTING = true;
 
 	/**
 	 * Main entry of program
@@ -54,6 +57,12 @@ public final class Source {
 	public static void main(String[] args) throws OdometerExceptions, InterruptedException {
 
 
+		if (TESTING) {
+			Test tester = new Test();
+			tester.test();
+			return;
+		}
+		
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
@@ -103,13 +112,11 @@ public final class Source {
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 		LightLocalizerTester uc = new LightLocalizerTester(odometer);
-		
+
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
         Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
-        
-        
 
 
 //			Thread odoDisplayThread = new Thread(odometryDisplay);

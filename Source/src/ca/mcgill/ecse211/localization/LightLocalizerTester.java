@@ -16,10 +16,6 @@ import lejos.hardware.sensor.SensorMode;
 import lejos.robotics.SampleProvider;
 
 
-//TODO: ADD the ability to localize at any coordinate, and still have perfect heading!
-//TODO: make it so that after initiali localization, coordinates are set to 1.1
-
-
 public class LightLocalizerTester {
 
 	/**
@@ -40,7 +36,7 @@ public class LightLocalizerTester {
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private EV3LargeRegulatedMotor leftMotor = Vehicle.LEFT_MOTOR;
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
-	
+
 
 	/*
 	 * Odometer and colour sensor.
@@ -50,26 +46,21 @@ public class LightLocalizerTester {
 	/**
 	 * RGB Threshold
 	 */
-	private static final float RGB_DELTA_THRESHOLD = 0.015f;
+	private static final float DIFF_THRESHOLD = 0.015f;
+
 	/**
 	 * Normalized intensity readings from the R, G, B values
 	 */
 	private SensorMode sensorColour;
 	private float curIntensity;
-	
-	/**
-	 * Color sensor provider
-	 */
-	private SampleProvider csProvider;
+
 
 	// Is line detected
 	private boolean lineDetected = true;
-	
+
 	// Final heading
 	private float offset = 0;
 
-	// Final heading
-	private float finalHeading = 0;
 	/*
 	 * Heading states:
 	 */
@@ -111,49 +102,45 @@ public class LightLocalizerTester {
 			origin = true;
 		}
 
-		if (origin) {	
-			goNearCoordinate(x,y); //Blocking method,goes near the origin so that we can find the lines there
-		}
 
-		else {
-			goNearCoordinate(x,y);
-			Heading entranceHeading = getHeading();
-			
-			/*
-			 * 
+		goNearCoordinate(x,y);
+		Heading entranceHeading = getHeading();
+
+		/*
+		 * 
 	        NE, // entrance angle between 0 and 90, final heading is ~<90 after correcting
 	        SE, // entrance angle between 90 and 180, final heading is ~<180 after correcting
 	        SW, // entrance angle between 180 and 270, final heading is ~<270 after correcting 
 	        NW, // enrtance angle between 270 and 360, final heading is ~<360 after correcting 
-			 */
-			
-		//It thinks it's facing (90 - tiny amount) upon ending, but it's actually facing ^:
-			switch (entranceHeading) {
-			case NE: 
-			{
-				offset = 0; // Should be at the desired offset
-				//THIS ONE IS GOOD
-			}
-			break;
-			case SE:
-			{
-				offset = 195; // Add this to reach the desired( offset should be around 180)
-			}
-			break;
-			case SW:
-			{
+		 */
 
-				offset = 100; // Add this to reach the desired 180~( offset should be around 100 )
-			}
-			break;
-			case NW:
-			{
-				offset = -80; //Add this to make us reach the desired 360~ ( offset should be around -90 )
-				//THIS ONE IS GOOD
-			}
-			break;
-			}
+		//It thinks it's facing (90 - tiny amount) upon ending, but it's actually facing ^:
+		switch (entranceHeading) {
+		case NE: 
+		{
+			offset = 0; // Should be at the desired offset
+			//THIS ONE IS GOOD
 		}
+		break;
+		case SE:
+		{
+			offset = 195; // Add this to reach the desired( offset should be around 180)
+		}
+		break;
+		case SW:
+		{
+
+			offset = 100; // Add this to reach the desired 180~( offset should be around 100 )
+		}
+		break;
+		case NW:
+		{
+			offset = -80; //Add this to make us reach the desired 360~ ( offset should be around -90 )
+			//THIS ONE IS GOOD
+		}
+		break;
+		}
+
 
 		DetectIntersectionLines(headingAtLine); //Detect all 4 lines that meet at the origin
 
@@ -205,7 +192,7 @@ public class LightLocalizerTester {
 		LCD.drawString("x: " + odometer.getXYT()[0], 0, 0);
 		LCD.drawString("y: " + odometer.getXYT()[1], 0, 1);
 		LCD.drawString("Theta: " + odometer.getXYT()[2], 0, 2);
-		
+
 		try {
 			Thread.sleep(50);
 		} catch (InterruptedException e) {
@@ -231,11 +218,11 @@ public class LightLocalizerTester {
 		rightMotor.stop();
 
 		try {
-            Thread.sleep(30);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+			Thread.sleep(30);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// Move backwards so our light sensor can scan the cross at the origin while rotating
 		//May want to adjust this value.
 		leftMotor.rotate(convertDistance(WHEEL_RAD, -SENSOR_LOCATION-7), true);
@@ -318,7 +305,7 @@ public class LightLocalizerTester {
 		return error < 2;
 	}
 
-	private boolean lineDetected() {
+	public boolean lineDetected() {
 		//Get the current intensity. On the blue board, the value is roughyl 350.
 		curIntensity = fetchLightSample();
 		if (curIntensity < 0.30) {
@@ -337,7 +324,7 @@ public class LightLocalizerTester {
 		sensorColour.fetchSample(intensity, 0);
 		return intensity[0];
 	}
-	
+
 	/**
 	 * Determine vehicle's heading </br>
 	 * 
