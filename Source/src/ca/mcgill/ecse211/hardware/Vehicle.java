@@ -142,7 +142,7 @@ public final class Vehicle {
       }
     }
 
-    public static <T extends Number> void setAcceleration(int leftSpeed, int rightSpeed) {
+    public static void setAcceleration(int leftSpeed, int rightSpeed) {
         RIGHT_MOTOR.setAcceleration(rightSpeed);
         LEFT_MOTOR.setAcceleration(leftSpeed);
     }
