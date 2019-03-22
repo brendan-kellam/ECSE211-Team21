@@ -141,5 +141,9 @@ public final class Vehicle {
         RIGHT_MOTOR.forward();
       }
     }
-    
+
+    public static <T extends Number> void setAcceleration(int leftSpeed, int rightSpeed) {
+        RIGHT_MOTOR.setAcceleration(rightSpeed);
+        LEFT_MOTOR.setAcceleration(leftSpeed);
+    }
 }
