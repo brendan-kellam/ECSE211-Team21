@@ -15,10 +15,10 @@ public final class Vehicle {
     
     //////////////// MOTORS TO DRIVE VEHICLE ////////////////
     public static final EV3LargeRegulatedMotor LEFT_MOTOR =
-        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D")); // was A
     
     public static final EV3LargeRegulatedMotor RIGHT_MOTOR =
-        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A")); 
     /////////////////////////////////////////////////////////
     
     //////////////// MOTOR FOR THE COLOUR SENSOR ////////////
@@ -34,11 +34,15 @@ public final class Vehicle {
     ////////////////////////////////////////////////////////
 
     ////////////////ULTRASONIC ////////////////
-    public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(LocalEV3.get().getPort("S3"));
+    public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(LocalEV3.get().getPort("S3")); 
     ////////////////////////////////////////////
     
     ////////////////COLOR ////////////////
-    public static final EV3ColorSensor COLOR_SENSOR_BACK = new EV3ColorSensor(LocalEV3.get().getPort("S4"));
+    public static final EV3ColorSensor COLOR_SENSOR_RIGHT = new EV3ColorSensor(LocalEV3.get().getPort("S4")); // This will become right
+    //////////////////////////////////////
+    
+    ////////////////COLOR ////////////////
+    public static final EV3ColorSensor COLOR_SENSOR_BACK = new EV3ColorSensor(LocalEV3.get().getPort("S1")); // This is left
     //////////////////////////////////////
     
     ////////////////COLOR SENSOR FOR COLOUR DETECTION ////////////////
@@ -142,8 +146,13 @@ public final class Vehicle {
       }
     }
 
-    public static void setAcceleration(int leftSpeed, int rightSpeed) {
-        RIGHT_MOTOR.setAcceleration(rightSpeed);
-        LEFT_MOTOR.setAcceleration(leftSpeed);
+    /**
+     * Set the left and right accelerations for LEFT_MOTOR and RIGHT_MOTOR
+     * @param leftSpeed
+     * @param rightSpeed
+     */
+    public static void setAcceleration(int leftAcceleration, int rightAcceleration) {
+        RIGHT_MOTOR.setAcceleration(rightAcceleration);
+        LEFT_MOTOR.setAcceleration(leftAcceleration);
     }
 }

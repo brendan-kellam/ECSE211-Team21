@@ -66,7 +66,7 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 14.3));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.7));
 		Vehicle.LEFT_MOTOR.setAcceleration(200);
 		Vehicle.RIGHT_MOTOR.setAcceleration(200);
         

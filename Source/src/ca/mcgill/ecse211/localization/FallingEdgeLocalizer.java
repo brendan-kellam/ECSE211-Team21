@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.localization;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 
@@ -21,12 +22,12 @@ public class FallingEdgeLocalizer {
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private double TRACK = Vehicle.getConfig().getTrackWidth();
 
-	public static final int ROTATE_SPEED = 300;
+	public static final int ROTATE_SPEED = 400;
 
 	private UltrasonicPoller usPoller; // Ultrasonic poller
 	private Odometer odometer; // Odometer
 
-	private static final int distFallingEdge = 30;
+	private static final int distFallingEdge = 39;
 	private static final int tolFallingEdge = 2;
 
 	public FallingEdgeLocalizer(Odometer odometer,UltrasonicPoller usPoller) {
@@ -49,6 +50,7 @@ public class FallingEdgeLocalizer {
 	 */
 	private void fallingEdge() {
 
+
 		double angle1, angle2, turnAngle;
 		boolean facingWall = true;
 		/*
@@ -56,12 +58,12 @@ public class FallingEdgeLocalizer {
 		 */
 		Vehicle.setMotorSpeeds(-ROTATE_SPEED, ROTATE_SPEED);// Block until no wall detected
 		block(facingWall);
-		
+
 		/*
 		 * Rotate to obtain the angle at the first wall
 		 */
-//		Vehicle.setMotorSpeeds(-ROTATE_SPEED, ROTATE_SPEED); // maybe not needed
-		
+		Vehicle.setMotorSpeeds(-ROTATE_SPEED, ROTATE_SPEED); // maybe not needed
+
 		//Rotate to face the wall
 		block(!facingWall); // Block until left wall detected
 		angle1 = odometer.getXYT()[2]; //Keep track of the first angle detected.
@@ -72,7 +74,7 @@ public class FallingEdgeLocalizer {
 		Vehicle.setMotorSpeeds(ROTATE_SPEED, -ROTATE_SPEED);
 		block(facingWall);// Get above the tolerance zone so we can rotate to the other wall
 
-//		Vehicle.setMotorSpeeds(ROTATE_SPEED, -ROTATE_SPEED); //maybe not needed
+		Vehicle.setMotorSpeeds(ROTATE_SPEED, -ROTATE_SPEED); //maybe not needed
 		block(!facingWall);// Block until no wall detected
 		while (usPoller.getDistance() > distFallingEdge); 
 
@@ -83,9 +85,9 @@ public class FallingEdgeLocalizer {
 		//Face to face 45 degrees.
 		leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, turnAngle), true);
 		rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, turnAngle), false);
-		
+
 		//Set theta to 0(the x and y coordinates are wrong for now.)
-		odometer.setXYT(0.0, 0.0, 45.0);
+		odometer.setXYT(0.0, 0.0, 0.0);
 	}
 
 	/**
@@ -94,12 +96,25 @@ public class FallingEdgeLocalizer {
 	 */
 	private void block(boolean facingWall) {
 		if (facingWall) {
-			while (usPoller.getDistance() < distFallingEdge + tolFallingEdge); 
+			while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
+				Log.log(Log.Sender.USLocalization, usPoller.getDistance() + " Is the distance when facing the wall");
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}; 
 		}
 		else {
-			while (usPoller.getDistance() > distFallingEdge); 	
+			while (usPoller.getDistance() > distFallingEdge) {
+				Log.log(Log.Sender.USLocalization, usPoller.getDistance() + " Is the distance when NOT facing the wall");
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
-		
+		}
 	}
 
 	/**
@@ -120,9 +135,9 @@ public class FallingEdgeLocalizer {
 		else {
 			dTheta = 225 - (angle1 + angle2) / 2;
 		}
-		
+
 		dTheta-=2; // Magic number
-		return dTheta + odometer.getXYT()[2] - 45; // face 45 degrees
+		return dTheta + odometer.getXYT()[2]; // face 0 degrees
 	}
 
 	/**
@@ -136,7 +151,7 @@ public class FallingEdgeLocalizer {
 	private static int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
-	
+
 	/**
 	 * Converts a desired angle into a required distance to rotate for each wheel.
 	 * @param radius wheel radius in cm

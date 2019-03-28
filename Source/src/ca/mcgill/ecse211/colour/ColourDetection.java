@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.colour;
 
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.odometer.Odometer;
+import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Log.Sender;
 import lejos.hardware.Button;
@@ -25,18 +26,10 @@ public class ColourDetection {
 	private final int BACKUP_SPEED = -75; //Make sure it's not too slow.
 
 	/*
-	 * Initialize the ultrasonic sensor
+	 * 
 	 */
-	private static final SensorModes usSensor = Vehicle.US_SENSOR; 
-	private static SampleProvider usDistance = usSensor.getMode("Distance"); 
-	private static float[] usData = new float[usDistance.sampleSize()];
-
-	/*
-	 * TODO: Consider implementing a filter when advancing:
-	 */
-	private final int filter = 0;
-	private final int maxfilter = 10;
-
+	private UltrasonicPoller usPoller;
+	
 	/**
 	 * Colour sensor motor
 	 */
@@ -56,7 +49,7 @@ public class ColourDetection {
 	/**
 	 * Number of values the light sensor will read.
 	 */
-	private final int numReadings = 18;
+	private final int numReadings = 10;
 
 	/**
 	 * Sweep angle for the light sensor's motor.
@@ -67,7 +60,7 @@ public class ColourDetection {
 	 * How close do we need to get to the can? 
 	 * How far do we want to be once the scan terminates? 
 	 */
-	private final int approachDistance = 3;
+	private final int approachDistance = 4;
 	private int retreatDistance = 12; // This may be modified in the test
 
 
@@ -91,12 +84,15 @@ public class ColourDetection {
 	/*
 	 * Constructor for the colour detection; make the desired colour
 	 */
-	public ColourDetection(int desiredIntegerOfCan) {
+	public ColourDetection(int desiredIntegerOfCan, UltrasonicPoller usPoller) {
 		this.desiredColour = colourValueOf(desiredIntegerOfCan);
+		this.usPoller = usPoller;
 	}
+	
+	
 
 	/**
-	 * This method will compare the colour of the detect can to the desired colour
+	 * Call this method when a can is identified.This method will compare the colour of the detect can to the desired colour
 	 * @param desiredColour The desired colour to verify
 	 * @return true if the can is the desired colour, false otherwise.
 	 * @throws InterruptedException 
@@ -114,11 +110,11 @@ public class ColourDetection {
 		//Beep twice if we found the correct can
 		if (correctCan) {
 			for (int i=0;i<10;i++) Sound.beep();
+			return correctCan;
 		}
 
 		reverseAwayFromCan();
 		return correctCan;
-
 	}
 
 
@@ -237,20 +233,12 @@ public class ColourDetection {
 	 * Approach the can within the specified distance "approachDistance"
 	 */
 	private void approachCan() {	
-
-		usSensor.fetchSample(usData,0);	
-		int currentDistance = (int) (usData[0] * 100.0);
-
 		long startTime = System.currentTimeMillis();
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED); 
 
 		this.performScan = true;
-		while (currentDistance > approachDistance  && performScan) {
-			//Read the sensor values.
-			usSensor.fetchSample(usData, 0); 
-			currentDistance = (int) (usData[0] * 100.0);
-
+		while (usPoller.getDistance() > approachDistance  && performScan) {
 			//FAULT TOLERANCE:
 			long currTime = System.currentTimeMillis();
 			if (currTime - startTime > 4000) { //If we travel for 4 seconds and haven't found a can, end the routine
@@ -258,7 +246,6 @@ public class ColourDetection {
 			}
 			sleep(20);
 		}
-
 		//Stop the car
 		Vehicle.setMotorSpeeds(0, 0);
 	}
@@ -271,21 +258,13 @@ public class ColourDetection {
 	 */
 	private void reverseAwayFromCan() {
 
-		// Back away
 		Vehicle.setMotorSpeeds(BACKUP_SPEED, BACKUP_SPEED);
 		sleep(250);
-		usSensor.fetchSample(usData,0);	
-		int currentDistance = (int) (usData[0] * 100.0);
 		//Retreat until we have enough space. 
-		while (currentDistance < retreatDistance ) {
-			//Read the sensor values.
-			usSensor.fetchSample(usData, 0); 
-			currentDistance = (int) (usData[0] * 100.0);
-		}
+		while (usPoller.getDistance() < retreatDistance );
 
 		//Stop the car
 		Vehicle.setMotorSpeeds(0, 0);
-
 	}
 
 	/**
@@ -347,7 +326,6 @@ public class ColourDetection {
 				reverseAwayFromCan();
 				Sound.beep();
 		}
-
 	}
 
 	/**
@@ -355,53 +333,31 @@ public class ColourDetection {
 	 */
 	private void testSweep() { 
 
+		//PROBLEM: THE SCANNER TAKES LONG.
+		
+//		colourSensorMotor.setSpeed(200);
 		Colour colours[] = new Colour[numReadings];
-		float redAvg = 0;
-		float greenAvg = 0;
-		float blueAvg = 0;
+		
 		for (int sample=0;sample<numReadings;sample++) {
 
 			csProvider.fetchSample(curRGB, 0);
-
 			float red = curRGB[0] * 1000; 
 			float green = curRGB[1] * 1000;
 			float blue =  curRGB[2] * 1000;
 
 			//Just to log the data. Can remove from final results.
-			redAvg += curRGB[0] * 1000; 
-			greenAvg += curRGB[1] * 1000; 
-			blueAvg += curRGB[2] * 1000; 
-
-			/////////////// Purely for logging purposes //////////////
-			Log.log(Sender.colourDetection, "red = " + red + " | green = " + green + " | blue = " + blue);
-			//////////////////////////////////////////////////////////
-
 			//Determine the colour of the sample, hold it in the array.
 			colours[sample] = determineColourForSample(red,green,blue);
-
 			//Rotate to the next sample if there is one.
 			colourSensorMotor.rotate(sweepAngle/numReadings);
 		}
-
-		//Just to log the data:
-		redAvg = redAvg/numReadings;
-		greenAvg = greenAvg/numReadings;
-		blueAvg = blueAvg/numReadings;
-
-		//////////////////////////////////////////////////////////
-		LCD.clear();
-		LCD.drawString("Red: " + redAvg, 0, 0);
-		LCD.drawString("Green: " + greenAvg, 0, 1);
-		LCD.drawString("Blue: " + blueAvg, 0, 2);
-		Log.log(Sender.colourDetection, "red Average = " + redAvg + " | green Average = " + greenAvg + " | blue Average = " + blueAvg);
-		//////////////////////////////////////////////////////////
-
+		
 		//Bring the sensor back to its original.
 		colourSensorMotor.rotate(-sweepAngle);
-
 		//Determine the most common colour from the samples.
 		Colour mostCommonColour = mostCommonColour(colours);
-		LCD.drawString("The can colour is: " ,0,5);
+		LCD.clear();
+		LCD.drawString("The can colour is: " , 0,5);
 		LCD.drawString(mostCommonColour.toString(), 2, 6);
 	}
 

@@ -305,18 +305,24 @@ public class LightLocalizerTester {
 		return error < 2;
 	}
 
+	/*
+	 * Returns true if the intensity is less than the black line.
+	 */
 	public boolean lineDetected() {
 		//Get the current intensity. On the blue board, the value is roughyl 350.
-		curIntensity = fetchLightSample();
-		if (curIntensity < 0.30) {
-			return true;
-		}
-		return false;
+		return fetchLightSample() < 0.30;
 	}
+	
+	/*
+	 * Returns true if the intensity is the intensity of the bridge
+	 */
+	public boolean bridgeDetected() {
+		//Get the current intensity. On the blue board, the value is roughyl 350.
+		return fetchLightSample() > 0.365;
+	}
+	
 
-
-	/**
-	 * 
+	 /* 
 	 * @return the intensity of the light sensor
 	 */
 	private float fetchLightSample() {

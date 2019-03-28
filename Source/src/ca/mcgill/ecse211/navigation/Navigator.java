@@ -192,9 +192,19 @@ public class Navigator {
 		int dist = EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), distance);
 		Vehicle.LEFT_MOTOR.rotate(dist, true);
 		Vehicle.RIGHT_MOTOR.rotate(dist, false);
-
 	}
 
+	/**
+	 * Travel a specific distance forward, with a desired speed
+	 * @param distance
+	 */
+	public static void travelSpecificDistance(double distance, int speed) {
+		// Set motor speed and rotate
+		Vehicle.setMotorSpeeds(speed, speed);
+		int dist = EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), distance);
+		Vehicle.LEFT_MOTOR.rotate(dist, true);
+		Vehicle.RIGHT_MOTOR.rotate(dist, false);
+	}
 	/**
 	 * Optional turnTo. Uses DEFAULT_SPEED </br>
 	 * NOTE: <b> BLOCKING METHOD </b>
@@ -204,6 +214,17 @@ public class Navigator {
 	 */
 	public static void turnTo(double targetAngle) {
 		turnTo(targetAngle, DEFAULT_ROTATION_SPEED, false);
+	}
+	
+	/**
+	 * Optional turnTo. Uses DEFAULT_SPEED </br>
+	 * NOTE: <b> BLOCKING METHOD </b>
+	 * 
+	 * @param targetAngle
+	 * @param stop
+	 */
+	public static void turnTo(double targetAngle,int speed) {
+		turnTo(targetAngle, speed, false);
 	}
 
 	/**

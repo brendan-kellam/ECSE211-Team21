@@ -2,12 +2,16 @@ package ca.mcgill.ecse211;
 
 import java.io.FileNotFoundException;
 
+import ca.mcgill.ecse211.claw.Claw;
+import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
+import ca.mcgill.ecse211.main.SearchArea;
+import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
@@ -23,27 +27,27 @@ public class Test {
 
 	private static Odometer odometer;
 	private static UltrasonicPoller usPoller;
-	
+	private static OdometryCorrection odoCorrection;
+
 	////////////////////////////////////////////////////////////////////////
-	private final double TRACK = 14.3; 
-	
+	private final double TRACK = 17.73; 
+
 	//TODO: make sure this track value changes as the project's track changes
 	//TODO: If you would like to test various track values, change the value above^
 	////////////////////////////////////////////////////////////////////////
-	
+
 	public Test() throws OdometerExceptions {
 
 		// Create new vehicle configuration
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, TRACK));
-		Vehicle.LEFT_MOTOR.setAcceleration(200);
-		Vehicle.RIGHT_MOTOR.setAcceleration(200);
 
+		Vehicle.setAcceleration(200, 200);
 		// Starting corner
 		// Create odometer
 		odometer = Odometer.getOdometer();
 
 		// Create odometery correction | disable correction
-		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_BACK);
+		odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_BACK);
 		odoCorrection.disableCorrection();
 
 		// Create ultrasonic poller
@@ -54,13 +58,12 @@ public class Test {
 
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
-
 		// Initialize logging
-		Log.setLogging(true, false, false, false, false);
+		Log.setLogging(true, true, true, true, true);
 
 		// Set logging to write to file
 		try {
-			Log.setLogWriter("Lab5" + ".log");
+			Log.setLogWriter("TEST" + ".log");
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
@@ -91,20 +94,143 @@ public class Test {
 		 * ONLY UNCOMMENT THE ONE YOU'RE TESTING
 		 */
 
-//		testLineDetection();
-//		testUSLocalization();
-//		testLocalizationAtOrigin();
-//		testLocalizationNE(); //Test localization when driving northeast
-//		testLocalizationNW(); //Test localization when driving northwest
-//		testLocalizationSE(); //Test localization when driving southeast
-//		testLocalizationSW(); //Test localization when driving southwest
-		testColourDetection();
-
+		//		testLineDetection();
+				testUSLocalization();
+		//		testLocalizationAtOrigin();
+		//		testLocalizationNE(); //Test localization when driving northeast
+		//		testLocalizationNW(); //Test localization when driving northwest
+		//		testLocalizationSE(); //Test localization when driving southeast
+		//		testLocalizationSW(); //Test localization when driving southwest
+//				testTunnelNavigationWithCan();
+		//		testForward();
+//				testTunnelNavigation();
+//		testClawGrab();
+//				testColourDetection();
+//				testScanThenGrab();
+//				testTrackValue();
 		// Wait so that we can measure
-		drawOdoValues();
+		//		drawOdoValues();
+
+		//		testTime();
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
 
+
+	/**
+	 * Test the time it takes to get between 2 grid lines
+	 */
+	private void testTime() {
+		Weigh weigh = new Weigh(odometer);
+		Thread thread = new Thread(weigh);
+		Vehicle.setMotorSpeeds(300, 300);
+		thread.run();
+		while (thread.isAlive());
+		Vehicle.setMotorSpeeds(0, 0);
+	}
+
+	private boolean testCanSearch() throws InterruptedException {
+		//Sound.beep();
+		int filter = 0;
+		int maxFilter = 12;
+		int maxDistance = 30;
+		int sweepSpeed = 100;
+		
+		ColourDetection cd = new ColourDetection(1,usPoller);
+		
+		odometer.setXYT(0, 0, 0);
+
+		Navigator.turnTo(90, sweepSpeed, true);
+		
+		while (filter < maxFilter && Math.abs(Odometer.getTheta()) < 90)  {
+			Thread.sleep(20);
+			if (usPoller.getDistance() < maxDistance) {
+				filter++;
+			}
+		}
+
+		Vehicle.setMotorSpeeds(0, 0);
+		//Can detected:
+		if (filter >= maxFilter) {
+			if (cd.checkCanColour()) {
+				claw.gra
+			}
+			filter = 0;
+		}
+//		Sound.twoBeeps();
+		return false;
+	}
+	/**
+	 * Test the track value
+	 * @throws InterruptedException
+	 */
+	private void testTrackValue() throws InterruptedException {
+
+		Vehicle.setAcceleration(300, 300);
+		for (int i = 1; i <= 4; i++) {
+			// turn 90 degrees clockwise
+			Navigator.turnTo(90 * i % 360,250);
+			Thread.sleep(200);
+		}
+	}
+
+	/**
+	 * Tunnel navgitation with can. Will grab a can directly ahead of it, then travel through a tunnel directly ahead of it.
+	 * @throws OdometerExceptions
+	 */
+	private void testTunnelNavigationWithCan() throws OdometerExceptions {
+		Claw claw = new Claw(usPoller);
+		claw.grab();
+		testTunnelNavigation();
+	}
+
+	/**
+	 * Tunnel navigation.  
+	 * @throws OdometerExceptions
+	 */
+	private void testTunnelNavigation() throws OdometerExceptions {
+
+		LightLocalizerTester uc = new LightLocalizerTester(odometer);
+		//Cheat the beginning.
+		Vehicle.setAcceleration(3000, 3000);
+		//Cheat the beginning.
+		Navigator.travelSpecificDistance(75,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed());
+//		while (!uc.bridgeDetected());
+		Vehicle.setMotorSpeeds(550, 550);
+		while (uc.bridgeDetected());
+
+		Vehicle.setMotorSpeeds(0, 0);
+
+	}
+
+	/**
+	 * Test the claw grab
+	 * @throws InterruptedException
+	 */
+	private void testClawGrab() throws InterruptedException {
+		Claw claw = new Claw(usPoller);
+		//		claw.approachCan();
+
+		while (true) {
+			while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+			claw.grab();
+			Thread.sleep(5000);
+			claw.release();
+			Sound.beep();
+		}
+	}
+
+	/**
+	 * Scan a can then grab it
+	 */
+	private void testScanThenGrab() {
+
+		ColourDetection cd = new ColourDetection(1, usPoller);	
+		Claw claw = new Claw(usPoller);
+
+		if (cd.checkCanColour()){
+			claw.grab();
+		}
+	}
 	////////////////////////////////////////////////////////////////////////////
 	/*
 	 * Test the line detection:
@@ -126,7 +252,7 @@ public class Test {
 	 * Test the ultrasonic localization:
 	 * This will use the falling edge localization technique to scan walls and face 45 degrees
 	 */
-	private void testUSLocalization() {
+	private void testUSLocalization() throws InterruptedException {
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 		ul.usLocalize();
 	}
@@ -135,7 +261,7 @@ public class Test {
 	/*
 	 * Test localization at the origin. This will rotate, scan every line, and then face 0 degrees
 	 */
-	private LightLocalizerTester testLocalizationAtOrigin() throws OdometerExceptions {
+	private LightLocalizerTester testLocalizationAtOrigin() throws OdometerExceptions, InterruptedException {
 		testUSLocalization();
 		LightLocalizerTester uc = new LightLocalizerTester(odometer);
 		uc.lightLocalize(Board.TILE_SIZE, Board.TILE_SIZE);
@@ -199,10 +325,15 @@ public class Test {
 	 * the robot will advance and detect the colour, then print it to the display. It will do this infinitely. 
 	 */
 	private void testColourDetection() {
-		ColourDetection cd = new ColourDetection(1);
+		ColourDetection cd = new ColourDetection(1,usPoller);		
 		cd.testCanColours();
+
+
 	}
 
+	/**
+	 * Draw the odometer values on the display
+	 */
 	private void drawOdoValues() {
 		LCD.clear();
 		LCD.drawString("X value: " + odometer.getXYT()[0], 0, 0);

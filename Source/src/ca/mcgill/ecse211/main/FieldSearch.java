@@ -70,7 +70,7 @@ public class FieldSearch {
 	 */
 	public void startSearch(int desiredCanColour) throws InterruptedException, OdometerExceptions {
 
-		ColourDetection cd = new ColourDetection(desiredCanColour);
+		ColourDetection cd = new ColourDetection(desiredCanColour,usPoller);
 		
 		//Keep track of the coordinate we terminate the search at.
 		double finalX;
@@ -216,6 +216,13 @@ public class FieldSearch {
 		return error < 0.5;
 	}
 
+	/**
+	 * Scan for a can near a given location.
+	 * @param targetLocation
+	 * @param cd
+	 * @return
+	 * @throws InterruptedException
+	 */
 	private boolean scanForCan(double targetLocation, ColourDetection cd) throws InterruptedException {
 		//Sound.beep();
 		usSensor.fetchSample(usData,0);	
