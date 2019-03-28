@@ -6,6 +6,7 @@ import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
+import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.main.FieldSearch;
@@ -27,7 +28,10 @@ public class Test {
 
 	private static Odometer odometer;
 	private static UltrasonicPoller usPoller;
+	
 	private static OdometryCorrection odoCorrection;
+	private static ColorSensor left;
+	private static ColorSensor right;
 
 	////////////////////////////////////////////////////////////////////////
 	private final double TRACK = 17.73; 
@@ -68,10 +72,8 @@ public class Test {
 			e1.printStackTrace();
 		}
 
-		// Start odometer correction thread
-		//		Thread odoCorrectionThread = new Thread(odoCorrection);
-		//		odoCorrectionThread.start();
-
+		
+		left = new ColorSensor(Vehicle.COLOR_SENSOR_BACK, 0.1f);
 
 		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
@@ -152,7 +154,7 @@ public class Test {
 		//Can detected:
 		if (filter >= maxFilter) {
 			if (cd.checkCanColour()) {
-				claw.gra
+				//claw.gra
 			}
 			filter = 0;
 		}
