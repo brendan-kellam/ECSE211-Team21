@@ -17,6 +17,15 @@ public class Navigator {
 
 	// Theta threshold
 	private static final double THETA_THRESHOLD = 3;
+	
+	/**
+	 * Private constructor: Prevent instances of Navigator existing.
+	 * 
+	 * Navigator contains <b>static methods</b> only!
+	 */
+	private Navigator() {
+		
+	}
 
 	/**
 	 * Travel to a specific location in space <br>

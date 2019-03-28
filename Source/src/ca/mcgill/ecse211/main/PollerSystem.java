@@ -63,14 +63,18 @@ public class PollerSystem implements Runnable {
             
             long updateEnd = System.currentTimeMillis();
             
-            if (updateEnd - updateStart < POLLER_PERIOD) {
-              try {
-                Thread.sleep(POLLER_PERIOD - (updateEnd - updateStart));
-              } catch (InterruptedException e) {
-              }
-            }
+            sleep(updateStart, updateEnd);
         }
         
+    }
+    
+    private void sleep(long updateStart, long updateEnd) {
+    	if (updateEnd - updateStart < POLLER_PERIOD) {
+            try {
+              Thread.sleep(POLLER_PERIOD - (updateEnd - updateStart));
+            } catch (InterruptedException e) {
+            }
+          }
     }
     
     /**
