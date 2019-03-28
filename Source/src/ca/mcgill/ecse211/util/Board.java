@@ -78,6 +78,27 @@ public final class Board {
         }
     }
     
+    /**
+     * Convert a heading to a angle
+     * 
+     * @param Robot heading
+     * @return angle representing the heading
+     */
+    public static double getHeadingAngle(Heading heading) {
+        switch (heading) {
+        case N:
+            return 0;
+        case E:
+            return 90;
+        case S:
+            return 180;
+        case W:
+            return 270;
+        }
+        
+        return 0;
+    }
+    
     
     /**
      * Snaps to a given gridline.
