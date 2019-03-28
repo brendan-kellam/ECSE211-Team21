@@ -10,8 +10,8 @@
 
 package ca.mcgill.ecse211.odometer;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.util.Poller;
+import ca.mcgill.ecse211.util.Vehicle;
 
 public class Odometer extends OdometerData implements Poller {
 

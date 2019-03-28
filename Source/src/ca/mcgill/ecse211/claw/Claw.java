@@ -1,7 +1,7 @@
 package ca.mcgill.ecse211.claw;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
-import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.sensor.UltrasonicPoller;
+import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 public class Claw {

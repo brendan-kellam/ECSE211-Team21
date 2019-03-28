@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.ultrasonic;
+package ca.mcgill.ecse211.sensor;
 
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Poller;

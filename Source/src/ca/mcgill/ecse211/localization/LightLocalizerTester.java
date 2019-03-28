@@ -1,19 +1,13 @@
 package ca.mcgill.ecse211.localization;
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.util.Board;
-import ca.mcgill.ecse211.util.EV3Math;
-import ca.mcgill.ecse211.util.Log;
-import ca.mcgill.ecse211.util.Board.Heading;
+import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
-import lejos.robotics.SampleProvider;
 
 
 public class LightLocalizerTester {

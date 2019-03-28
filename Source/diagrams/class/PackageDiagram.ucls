@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.2.3" icons="true" automaticImage="PNG" always-add-relationships="false" generalizations="true" 
+  realizations="true" associations="true" dependencies="false" nesting-relationships="true" router="FAN">  
+  <package id="1" language="java" name="ca.mcgill.ecse211.main" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/main" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="50" width="157" x="64" y="37"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="2" language="java" name="ca.mcgill.ecse211.claw" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/claw" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="50" width="156" x="373" y="37"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="3" language="java" name="ca.mcgill.ecse211.localization" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/localization" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="50" width="193" x="104" y="127"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="4" language="java" name="ca.mcgill.ecse211.sensor" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/sensor" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="461" y="239"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="5" language="java" name="ca.mcgill.ecse211.odometer" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/odometer" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="192" y="322"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="6" language="java" name="ca.mcgill.ecse211.navigation" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/navigation" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="179" y="232"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <package id="7" language="java" name="ca.mcgill.ecse211.util" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/util" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="133" y="515"/>    
+    <display autosize="true" stereotype="true" sort-features="false" accessors="true"/>  
+  </package>  
+  <dependency id="8">    
+    <bendpoint x="73" y="127"/>    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <dependency id="9">    
+    <bendpoint x="300" y="217"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="10">    
+    <bendpoint x="352" y="307"/>    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="11">    
+    <bendpoint x="572" y="127"/>    
+    <bendpoint x="572" y="217"/>    
+    <bendpoint x="572" y="307"/>    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="12">    
+    <bendpoint x="348" y="127"/>    
+    <bendpoint x="342" y="217"/>    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="13">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <dependency id="14">    
+    <bendpoint x="76" y="307"/>    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="15">    
+    <bendpoint x="31" y="127"/>    
+    <bendpoint x="31" y="217"/>    
+    <bendpoint x="31" y="307"/>    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="16">    
+    <bendpoint x="327" y="127"/>    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="17">    
+    <bendpoint x="382" y="127"/>    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="18">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="19">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="20">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="21">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <dependency id="22">    
+    <bendpoint x="52" y="127"/>    
+    <bendpoint x="52" y="217"/>    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="23">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <dependency id="24">    
+    <bendpoint x="321" y="217"/>    
+    <bendpoint x="321" y="307"/>    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    sort-features="false" accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

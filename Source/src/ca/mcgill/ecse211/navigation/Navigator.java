@@ -1,10 +1,10 @@
 package ca.mcgill.ecse211.navigation;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Vehicle;
 
 /**
  * Facade for performing navigation tasks 

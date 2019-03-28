@@ -1,34 +1,25 @@
 package ca.mcgill.ecse211.main;
 
-import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.Test;
-import ca.mcgill.ecse211.colour.ColourDetection;
-import ca.mcgill.ecse211.hardware.Vehicle;
-import ca.mcgill.ecse211.light.ColorSensor;
-import ca.mcgill.ecse211.localization.LightLocalizer;
-import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.sensor.ColorSensor;
+import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
-import ca.mcgill.ecse211.util.Display;
-import ca.mcgill.ecse211.util.EV3Math;
-import ca.mcgill.ecse211.util.Log;
-import ca.mcgill.ecse211.util.WifiController;
 import ca.mcgill.ecse211.util.Board.Heading;
+import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Log.Sender;
 import ca.mcgill.ecse211.util.Tile;
+import ca.mcgill.ecse211.util.Vehicle;
+import ca.mcgill.ecse211.util.WifiController;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.robotics.SampleProvider;
 
 /**
  * Main entry point class for Lab4

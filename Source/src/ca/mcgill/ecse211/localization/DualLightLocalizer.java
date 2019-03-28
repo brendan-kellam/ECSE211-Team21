@@ -1,13 +1,12 @@
 package ca.mcgill.ecse211.localization;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
-import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.Board.Heading;
-import lejos.hardware.Sound;
 import lejos.hardware.motor.BaseRegulatedMotor;
 
 /**
@@ -25,7 +24,7 @@ public class DualLightLocalizer {
     
     
     /**
-     * Default constructor. Accepts two {@link ca.mcgill.ecse211.light.ColorSensor ColorSensor} objects representing the
+     * Default constructor. Accepts two {@link ca.mcgill.ecse211.sensor.ColorSensor ColorSensor} objects representing the
      * left and right mounted color sensors.
      * 
      * @param leftSensor
@@ -87,7 +86,7 @@ public class DualLightLocalizer {
     
     /**
      * Represents a concurrent routine that will move a given {@link lejos.hardware.motor.BaseRegulatedMotor BaseRegulatedMotor} 
-     * forward until a given {@link ca.mcgill.ecse211.light.ColorSensor ColorSensor} detects a line.
+     * forward until a given {@link ca.mcgill.ecse211.sensor.ColorSensor ColorSensor} detects a line.
      */
     class LineRunner implements Runnable {
        
