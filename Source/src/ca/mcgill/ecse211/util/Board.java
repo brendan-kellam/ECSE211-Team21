@@ -109,12 +109,12 @@ public final class Board {
      * @param position
      * @param odometer
      */
-    public static void snapToGridLine(double[] position, Odometer odometer) {
+    public static void snapToGridLine(Odometer odometer) {
         
         // Get x, y, theta
-        double x = position[0];
-        double y = position[1];
-        double theta = Math.toRadians(position[2]);
+        double x = Odometer.getX();
+        double y = Odometer.getY();
+        double theta = Odometer.getTheta();
         
         // Fills the new position of the robot after correction
         double pos; 
