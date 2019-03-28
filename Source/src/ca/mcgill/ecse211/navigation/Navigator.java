@@ -187,11 +187,7 @@ public class Navigator {
 	 * @param distance
 	 */
 	public static void travelSpecificDistance(double distance) {
-		// Set motor speed and rotate
-		Vehicle.setMotorSpeeds(DEFAULT_SPEED, DEFAULT_SPEED);
-		int dist = EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), distance);
-		Vehicle.LEFT_MOTOR.rotate(dist, true);
-		Vehicle.RIGHT_MOTOR.rotate(dist, false);
+	    travelSpecificDistance(distance, DEFAULT_SPEED);
 	}
 
 	/**

@@ -6,8 +6,10 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.Test;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
+import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.localization.LightLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
+import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -19,6 +21,7 @@ import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.WifiController;
+import ca.mcgill.ecse211.util.Board.Heading;
 import ca.mcgill.ecse211.util.Log.Sender;
 import ca.mcgill.ecse211.util.Tile;
 import lejos.hardware.Button;
@@ -46,7 +49,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
 
 	/**
 	 * Main entry of program
@@ -111,8 +114,14 @@ public final class Source {
 		pollerSystem.start();
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-		LightLocalizerTester uc = new LightLocalizerTester(odometer);
+		//LightLocalizerTester uc = new LightLocalizerTester(odometer);
 
+		
+		ColorSensor leftCS = new ColorSensor(Vehicle.COLOR_SENSOR_LEFT, 0.3f);
+        ColorSensor rightCS = new ColorSensor(Vehicle.COLOR_SENSOR_RIGHT, 0.3f);
+		
+		DualLightLocalizer dll = new DualLightLocalizer(leftCS, rightCS);
+		
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
@@ -122,8 +131,10 @@ public final class Source {
 //			Thread odoDisplayThread = new Thread(odometryDisplay);
 //			odoDisplayThread.start(); 
 
-		ul.usLocalize();
-		uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
+		//ul.usLocalize();
+		
+		//uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
+		dll.localize(Heading.N);
 		
 		Tile tunnelLR = Board.Config.tunnelLL;
 		Tile tunnelUR = Board.Config.tunnelUR;
@@ -135,18 +146,18 @@ public final class Source {
 		
 		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 		
+	    dll.localize(Heading.N);
+	    
+	    Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
 		
 		Thread.sleep(500);
 		
-		
-		Log.log(Log.Sender.avoidance, "HELLOO: X: " + Odometer.getX() + " | Y: " + Odometer.getY() + " | T: " + Odometer.getTheta());
-        
-		int ya = (int) (Board.Config.tunnelLL.getLowerLeft().getY() / Board.TILE_SIZE);
-		
-		
-		Navigator.travelTo(tunnelUR.getCenter().getX()+5, tunnelUR.getCenter().getY()+5-ya, true, true, 200);	
+		Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
 
-        uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
+	    dll.localize(Heading.S);
+		
+        //uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
+		
 
         Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
         

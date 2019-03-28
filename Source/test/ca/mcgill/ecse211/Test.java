@@ -19,6 +19,7 @@ import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
@@ -41,6 +42,8 @@ public class Test {
 	//TODO: If you would like to test various track values, change the value above^
 	////////////////////////////////////////////////////////////////////////
 
+	private boolean displayEnabled = true;
+	
 	public Test() throws OdometerExceptions {
 
 		// Create new vehicle configuration
@@ -92,6 +95,13 @@ public class Test {
 
 		Sound.beep(); // Beep when ready
 		//Press escape to start
+		    
+		if (displayEnabled) {
+		    Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+	        Thread odoDisplayThread = new Thread(odometryDisplay);
+	        odoDisplayThread.start(); 
+		}
+		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		Sound.beepSequenceUp();
 		
@@ -133,7 +143,11 @@ public class Test {
     	    Vehicle.LEFT_MOTOR.setAcceleration(6000);
     	    Vehicle.RIGHT_MOTOR.setAcceleration(6000);
     	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
-    	    dll.localize(Board.Heading.N);
+    	    try {
+                dll.localize(Board.Heading.N);
+            } catch (OdometerExceptions e1) {
+                e1.printStackTrace();
+            }
     	    Sound.beepSequence();
     	    
     	    try {

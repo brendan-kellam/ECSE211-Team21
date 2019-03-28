@@ -3,23 +3,26 @@ package ca.mcgill.ecse211.localization;
 import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.navigation.Navigator;
+import ca.mcgill.ecse211.odometer.Odometer;
+import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Board.Heading;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.BaseRegulatedMotor;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 /**
- * Blocking routine to 
+ * Routine to localize to a arbitrary position
  */
 public class DualLightLocalizer {
 
     
     /**
-     * Left and right color sensors
+     * Left and right line runners
      */
-    private ColorSensor leftSensor;
-    private ColorSensor rightSensor;
+    private LineRunner leftRunner;
+    private LineRunner rightRunner;
+    
+    
     
     /**
      * Default constructor. Accepts two {@link ca.mcgill.ecse211.light.ColorSensor ColorSensor} objects representing the
@@ -29,27 +32,50 @@ public class DualLightLocalizer {
      * @param rightSensor
      */
     public DualLightLocalizer(ColorSensor leftSensor, ColorSensor rightSensor) {
-        this.leftSensor = leftSensor;
-        this.rightSensor = rightSensor;
+        this.leftRunner = new LineRunner(leftSensor, Vehicle.LEFT_MOTOR, 100);
+        this.rightRunner = new LineRunner(rightSensor, Vehicle.RIGHT_MOTOR, 100);
     }
     
     /**
-     * Localize to a line
+     * Localize to a grid intersection
+     * @throws OdometerExceptions 
      */
-    public void localize(Heading heading) {
+    public void localize(Heading heading) throws OdometerExceptions {
         
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
-        LineRunner l = new LineRunner(leftSensor, Vehicle.LEFT_MOTOR, 100);
-        LineRunner r = new LineRunner(rightSensor, Vehicle.RIGHT_MOTOR, 100);
+        travelToLine();
         
-        Thread lThread = new Thread(l);
-        Thread rThread = new Thread(r);
+        Board.snapToGridLine(Odometer.getOdometer());
+        
+        Navigator.travelSpecificDistance(-13, -100);
+        
+        Navigator.turnTo(Odometer.getTheta() + 90.0);
+        
+        travelToLine();
+        
+        Board.snapToGridLine(Odometer.getOdometer());
+        
+        Navigator.travelSpecificDistance(-13, -100);
+        
+        Navigator.turnTo(Board.getHeadingAngle(heading));
+        
+    }
+    
+    /**
+     * Travel to a line, stopping when the two LineRunners
+     */
+    private void travelToLine() {
+        
+        
+        Thread lThread = new Thread(leftRunner);
+        Thread rThread = new Thread(rightRunner);
         
         lThread.start();
         rThread.start();
         
+        // Wait on these threads to complete
         try {
             lThread.join();
             rThread.join();
@@ -57,87 +83,66 @@ public class DualLightLocalizer {
             e.printStackTrace();
         }
         
-        
-        
-        /*
-        boolean left = false, right = false; 
-        
-        // Begin by advancing forward until either the left or right sensor detects a line
-        Vehicle.setMotorSpeeds(50, 50);
-        while (!( (left = leftSensor.lineDetected()) || (right = rightSensor.lineDetected()) )) {
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Sound.twoBeeps();
-
-        // If both sensors detected a line
-        if (left && right) {
-            Vehicle.setMotorSpeeds(0, 0);
-        }
-        
-        // Left detected
-        else if (left) {
-            Vehicle.LEFT_MOTOR.stop();
-            while (!rightSensor.lineDetected()) {
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            Vehicle.RIGHT_MOTOR.stop();
-        }
-        
-        // right detected
-        else if (right) {
-            Vehicle.RIGHT_MOTOR.stop();
-            while (!leftSensor.lineDetected()) {
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            Vehicle.LEFT_MOTOR.stop();
-        }
-        
-        */
-        
     }
-
+    
+    /**
+     * Represents a concurrent routine that will move a given {@link lejos.hardware.motor.BaseRegulatedMotor BaseRegulatedMotor} 
+     * forward until a given {@link ca.mcgill.ecse211.light.ColorSensor ColorSensor} detects a line.
+     */
     class LineRunner implements Runnable {
+       
+        // Amount of time to sleep during color sensor polling
+        private static final int SLEEP_TIME = 30;
         
         private ColorSensor sensor;
-        private EV3LargeRegulatedMotor motor;
+        private BaseRegulatedMotor motor;
         private float speed;
         
-        public LineRunner(ColorSensor sensor, EV3LargeRegulatedMotor motor, float speed) {
+        /**
+         * Construct a new LineRunner
+         * 
+         * @param sensor - color sensor to poll from
+         * @param motor - motor to move until detection
+         * @param speed
+         * 
+         * @throws IllegalArgumentException - 
+         */
+        public LineRunner(ColorSensor sensor, BaseRegulatedMotor motor, float speed) throws IllegalArgumentException {
             this.sensor = sensor;
-            this.motor = motor;      
+            this.motor = motor;   
+            
+            if (speed == 0) {
+                throw new IllegalArgumentException("A speed other than 0 must be specified.");
+            }
+            
             this.speed = speed;
         }
 
+        /**
+         * Concurrent run - Move motor forward until line detection
+         */
         @Override
         public void run() {
             
             motor.setSpeed(speed);
-            motor.forward();
             
+            // Change rotation direction dependent on the speed
+            if (speed > 0) {
+                motor.forward();
+            } else {
+                motor.backward();
+            }
+            
+            // Continuously check for line
             while (!sensor.lineDetected()) {
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
             
             motor.stop();
-            
-            Sound.beep();
         }
         
     }
