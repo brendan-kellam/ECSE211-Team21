@@ -6,6 +6,7 @@ import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.colour.ColourDetection;
 import ca.mcgill.ecse211.hardware.Vehicle;
+import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.main.FieldSearch;
@@ -18,7 +19,9 @@ import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
@@ -27,7 +30,10 @@ public class Test {
 
 	private static Odometer odometer;
 	private static UltrasonicPoller usPoller;
+	
 	private static OdometryCorrection odoCorrection;
+	private static ColorSensor left;
+	private static ColorSensor right;
 
 	////////////////////////////////////////////////////////////////////////
 	private final double TRACK = 17.73; 
@@ -36,6 +42,8 @@ public class Test {
 	//TODO: If you would like to test various track values, change the value above^
 	////////////////////////////////////////////////////////////////////////
 
+	private boolean displayEnabled = true;
+	
 	public Test() throws OdometerExceptions {
 
 		// Create new vehicle configuration
@@ -47,7 +55,7 @@ public class Test {
 		odometer = Odometer.getOdometer();
 
 		// Create odometery correction | disable correction
-		odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_BACK);
+		odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_LEFT);
 		odoCorrection.disableCorrection();
 
 		// Create ultrasonic poller
@@ -68,10 +76,9 @@ public class Test {
 			e1.printStackTrace();
 		}
 
-		// Start odometer correction thread
-		//		Thread odoCorrectionThread = new Thread(odoCorrection);
-		//		odoCorrectionThread.start();
-
+		
+		left = new ColorSensor(Vehicle.COLOR_SENSOR_LEFT, 0.3f);
+		right = new ColorSensor(Vehicle.COLOR_SENSOR_RIGHT, 0.3f);
 
 		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
@@ -88,14 +95,27 @@ public class Test {
 
 		Sound.beep(); // Beep when ready
 		//Press escape to start
+		    
+		if (displayEnabled) {
+		    Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+	        Thread odoDisplayThread = new Thread(odometryDisplay);
+	        odoDisplayThread.start(); 
+		}
+		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-
+		Sound.beepSequenceUp();
+		
 		/**
 		 * ONLY UNCOMMENT THE ONE YOU'RE TESTING
 		 */
 
 		//		testLineDetection();
-				testUSLocalization();
+		//		testUSLocalization();
+		        testDualLocalization();
+		
+//		        testLineDetection();
+		       // testColorSensors();
+		        //testColorSensorLineDetection(right);
 		//		testLocalizationAtOrigin();
 		//		testLocalizationNE(); //Test localization when driving northeast
 		//		testLocalizationNW(); //Test localization when driving northwest
@@ -115,6 +135,64 @@ public class Test {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
 
+	
+	private void testDualLocalization() {
+	    while (true) {
+	        Sound.beepSequenceUp();
+	        
+    	    Vehicle.LEFT_MOTOR.setAcceleration(6000);
+    	    Vehicle.RIGHT_MOTOR.setAcceleration(6000);
+    	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
+    	    try {
+                dll.localize(Board.Heading.N);
+            } catch (OdometerExceptions e1) {
+                e1.printStackTrace();
+            }
+    	    Sound.beepSequence();
+    	    
+    	    try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }   
+	    }
+	}
+	
+	private void testColorSensorLineDetection(ColorSensor sensor) {
+	    
+	    while (true) {
+	        if (sensor.lineDetected()) {
+	            Sound.playTone(900, 300);
+	        }
+	        
+            try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+ 	    }
+	    
+	}
+	
+	private void testColorSensors() {
+	    while (true) {
+	        
+	        if (left.lineDetected()) {
+                Sound.playTone(900, 300);
+            }
+	        
+	        if (right.lineDetected()) {
+	            Sound.playTone(400, 300);
+	        }
+	        
+	        try {
+                Thread.sleep(30);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+	    }
+	    
+	}
 
 	/**
 	 * Test the time it takes to get between 2 grid lines
@@ -152,7 +230,7 @@ public class Test {
 		//Can detected:
 		if (filter >= maxFilter) {
 			if (cd.checkCanColour()) {
-				claw.gra
+				//claw.gra
 			}
 			filter = 0;
 		}
@@ -237,15 +315,15 @@ public class Test {
 	 * This will make the robot drive forward, beep when it crosses a line, and then drive back and repeat.
 	 */
 	private static void testLineDetection() throws InterruptedException, OdometerExceptions {
-		int speed = 200;
-		LightLocalizerTester uc = new LightLocalizerTester(odometer);
+		int speed = 100;
 		while (true) {
 			Vehicle.setMotorSpeeds(speed, speed);
-			if (uc.lineDetected()) {
-				Sound.beep();
-				Thread.sleep(300);
-				speed = -speed;
+			while (!left.lineDetected() || !right.lineDetected()) {
+				Thread.sleep(30);
 			}
+			
+            Sound.beep();
+            speed = -speed;
 		}
 	}
 	/*

@@ -101,8 +101,7 @@ public class OdometryCorrection implements Runnable {
           // If color delta is significant
           if (delta > RGB_DELTA_THRESHOLD) {
         	      	      	  
-        	  double[] position = odometer.getXYT();
-        	  Board.snapToGridLine(position, odometer);
+        	  Board.snapToGridLine(odometer);
               Sound.playTone(800, 100);
         	  
         	try {

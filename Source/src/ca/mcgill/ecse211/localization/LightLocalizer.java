@@ -78,7 +78,7 @@ public class LightLocalizer {
 
 	public LightLocalizer(Odometer odometer)  throws OdometerExceptions {
 		this.odometer = odometer;
-		this.csProvider = Vehicle.COLOR_SENSOR_BACK.getRGBMode();
+		this.csProvider = Vehicle.COLOR_SENSOR_LEFT.getRGBMode();
 		this.curRGB = new float[csProvider.sampleSize()];
 	}
 
