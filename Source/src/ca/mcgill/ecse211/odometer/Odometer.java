@@ -10,8 +10,8 @@
 
 package ca.mcgill.ecse211.odometer;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.util.Poller;
+import ca.mcgill.ecse211.util.Vehicle;
 
 public class Odometer extends OdometerData implements Poller {
 
@@ -22,8 +22,6 @@ public class Odometer extends OdometerData implements Poller {
   private int lastTachoR;
   private int nowTachoL;
   private int nowTachoR;
-
-  private static final long ODOMETER_PERIOD = 25; // odometer update period in ms
   private static final double PI = 3.14159;
 
   /**

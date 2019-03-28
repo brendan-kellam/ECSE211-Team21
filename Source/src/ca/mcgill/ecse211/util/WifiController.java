@@ -1,13 +1,8 @@
 package ca.mcgill.ecse211.util;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.json.simple.parser.ParseException;
-
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
-import lejos.hardware.Button;
 
 public class WifiController {
 

@@ -1,11 +1,10 @@
 package ca.mcgill.ecse211.localization;
 
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.robotics.SampleProvider;
 
 public class FallingEdgeLocalizer {
 

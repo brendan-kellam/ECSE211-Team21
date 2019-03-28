@@ -1,20 +1,14 @@
 package ca.mcgill.ecse211.main;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-import ca.mcgill.ecse211.colour.ColourDetection;
-import ca.mcgill.ecse211.hardware.Vehicle;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.sensor.ColourDetection;
+import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.Board.Heading;
-import ca.mcgill.ecse211.util.Log.Sender;
-import ca.mcgill.ecse211.util.EV3Math;
-import ca.mcgill.ecse211.util.Log;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;

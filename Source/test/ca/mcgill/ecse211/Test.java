@@ -4,9 +4,6 @@ import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.claw.Weigh;
-import ca.mcgill.ecse211.colour.ColourDetection;
-import ca.mcgill.ecse211.hardware.Vehicle;
-import ca.mcgill.ecse211.light.ColorSensor;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.main.FieldSearch;
@@ -14,13 +11,16 @@ import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.main.SearchArea;
 import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
 import ca.mcgill.ecse211.navigation.Navigator;
+import ca.mcgill.ecse211.odometer.OdometerDisplay;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import ca.mcgill.ecse211.ultrasonic.UltrasonicPoller;
+import ca.mcgill.ecse211.sensor.ColorSensor;
+import ca.mcgill.ecse211.sensor.ColourDetection;
+import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
-import ca.mcgill.ecse211.util.Display;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -97,7 +97,7 @@ public class Test {
 		//Press escape to start
 		    
 		if (displayEnabled) {
-		    Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
+		    OdometerDisplay odometryDisplay = new OdometerDisplay(Vehicle.LCD_DISPLAY);
 	        Thread odoDisplayThread = new Thread(odometryDisplay);
 	        odoDisplayThread.start(); 
 		}

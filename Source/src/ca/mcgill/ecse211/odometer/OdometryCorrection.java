@@ -6,7 +6,6 @@ package ca.mcgill.ecse211.odometer;
 import ca.mcgill.ecse211.util.Board;
 import lejos.hardware.Sound;
 import lejos.hardware.sensor.EV3ColorSensor;
-
 import lejos.robotics.SampleProvider;
 
 public class OdometryCorrection implements Runnable {

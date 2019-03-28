@@ -1,6 +1,5 @@
-package ca.mcgill.ecse211.light;
+package ca.mcgill.ecse211.sensor;
 
-import ca.mcgill.ecse211.util.Poller;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 

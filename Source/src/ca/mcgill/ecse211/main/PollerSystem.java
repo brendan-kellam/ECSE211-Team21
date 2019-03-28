@@ -2,7 +2,8 @@ package ca.mcgill.ecse211.main;
 
 import java.util.ArrayList;
 import java.util.List;
-import ca.mcgill.ecse211.util.*;
+
+import ca.mcgill.ecse211.util.Poller;
 
 /**
  * Singleton system that creates and manages the polling thread. The primary directive of the poller system is to issue periodic update
@@ -63,14 +64,18 @@ public class PollerSystem implements Runnable {
             
             long updateEnd = System.currentTimeMillis();
             
-            if (updateEnd - updateStart < POLLER_PERIOD) {
-              try {
-                Thread.sleep(POLLER_PERIOD - (updateEnd - updateStart));
-              } catch (InterruptedException e) {
-              }
-            }
+            sleep(updateStart, updateEnd);
         }
         
+    }
+    
+    private void sleep(long updateStart, long updateEnd) {
+    	if (updateEnd - updateStart < POLLER_PERIOD) {
+            try {
+              Thread.sleep(POLLER_PERIOD - (updateEnd - updateStart));
+            } catch (InterruptedException e) {
+            }
+          }
     }
     
     /**

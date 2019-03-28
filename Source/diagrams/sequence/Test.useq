@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence-diagram version="1.2.3" icons="true" automaticImage="PNG" generate-combined-fragments="true">  
+  <object id="1" language="java" name="ca.mcgill.ecse211.main.Source" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/main/Source.java" binary="false" label="source" type="class" 
+    autoSize="true">    
+    <position height="-1" width="-1" x="373" y="0"/>    
+    <execution id="2">      
+      <position height="63" width="104" x="5" y="100"/>    
+    </execution>  
+  </object>  
+  <object id="5" language="java" name="ca.mcgill.ecse211.main.PollerSystem" project="Team21Final" 
+    file="/Team21Final/src/ca/mcgill/ecse211/main/PollerSystem.java" binary="false" label="pollerSystem" type="class" 
+    autoSize="true">    
+    <position height="0" width="0" x="0" y="0"/>    
+    <execution id="4">      
+      <position height="21" width="104" x="113" y="121"/>    
+    </execution>  
+  </object>  
+  <message id="3" operation="getInstance():ca.mcgill.ecse211.main.PollerSystem" asynchronous="false">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </message>
+</sequence-diagram>
