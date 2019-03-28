@@ -73,7 +73,7 @@ public class LightLocalizerTester {
 
 	public LightLocalizerTester(Odometer odometer)  throws OdometerExceptions {
 		this.odometer = odometer;
-		sensorColour = Vehicle.COLOR_SENSOR_BACK.getRedMode(); //Red sensor is best based on what we learned in lab 2	
+		sensorColour = Vehicle.COLOR_SENSOR_LEFT.getRedMode(); //Red sensor is best based on what we learned in lab 2	
 	}
 
 
