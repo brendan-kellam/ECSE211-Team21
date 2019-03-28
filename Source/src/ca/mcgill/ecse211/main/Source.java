@@ -77,7 +77,7 @@ public final class Source {
 		Odometer odometer = Odometer.getOdometer();
 
 		// Create odometery correction | disable correction
-		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_BACK);
+		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_LEFT);
 		odoCorrection.disableCorrection();
 
 		// Create ultrasonic poller
