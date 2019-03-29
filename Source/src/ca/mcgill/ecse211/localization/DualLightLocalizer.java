@@ -7,6 +7,7 @@ import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.Board.Heading;
+import lejos.hardware.Sound;
 import lejos.hardware.motor.BaseRegulatedMotor;
 
 /**
@@ -16,12 +17,15 @@ public class DualLightLocalizer {
 
     
     /**
-     * Left and right line runners
+     * Left and right color sensors
      */
-    private LineRunner leftRunner;
-    private LineRunner rightRunner;
+    private ColorSensor leftSensor;
+    private ColorSensor rightSensor;
     
-    
+    /**
+     * Speed of dual localization
+     */
+    private final int SPEED = 200;
     
     /**
      * Default constructor. Accepts two {@link ca.mcgill.ecse211.sensor.ColorSensor ColorSensor} objects representing the
@@ -31,42 +35,72 @@ public class DualLightLocalizer {
      * @param rightSensor
      */
     public DualLightLocalizer(ColorSensor leftSensor, ColorSensor rightSensor) {
-        this.leftRunner = new LineRunner(leftSensor, Vehicle.LEFT_MOTOR, 100);
-        this.rightRunner = new LineRunner(rightSensor, Vehicle.RIGHT_MOTOR, 100);
+        this.leftSensor = leftSensor;
+        this.rightSensor = rightSensor;
     }
     
     /**
      * Localize to a grid intersection
      * @throws OdometerExceptions 
      */
-    public void localize(Heading heading) throws OdometerExceptions {
+    public void localizeToIntersection(Heading heading) throws OdometerExceptions {
         
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
-        travelToLine();
+        travelToLine(SPEED);
         
+        Navigator.travelSpecificDistance(-13, -SPEED);
+        Board.snapToHeading(Odometer.getOdometer());
         Board.snapToGridLine(Odometer.getOdometer());
-        
-        Navigator.travelSpecificDistance(-13, -100);
         
         Navigator.turnTo(Odometer.getTheta() + 90.0);
         
-        travelToLine();
+        travelToLine(SPEED);
         
+        Navigator.travelSpecificDistance(-13, -SPEED);
+        Board.snapToGridLine(Odometer.getOdometer());
+        Board.snapToHeading(Odometer.getOdometer());
+                
+    }
+    
+    public boolean localizeToSquare(Heading heading, Heading finalHeading) throws OdometerExceptions {
+        // Start by turning to the given heading
+        Navigator.turnTo(Board.getHeadingAngle(heading));
+        
+        travelToLine(SPEED);
+        
+        double diff = Board.TILE_SIZE - 4;
+        
+        Navigator.travelSpecificDistance(-diff, -SPEED);
+        
+        Board.snapToHeading(Odometer.getOdometer());
         Board.snapToGridLine(Odometer.getOdometer());
         
-        Navigator.travelSpecificDistance(-13, -100);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         
-        Navigator.turnTo(Board.getHeadingAngle(heading));
+        Navigator.turnTo(90.0);
+        
+        travelToLine(-SPEED);
+        
+        Board.snapToGridLine(Odometer.getOdometer());
+        Board.snapToHeading(Odometer.getOdometer());
+        
+        return Board.getHeading(Odometer.getTheta()) == finalHeading;
         
     }
     
     /**
      * Travel to a line, stopping when the two LineRunners
      */
-    private void travelToLine() {
+    private void travelToLine(float speed) {
         
+        LineRunner leftRunner = new LineRunner(leftSensor, Vehicle.LEFT_MOTOR, speed);
+        LineRunner rightRunner = new LineRunner(rightSensor, Vehicle.RIGHT_MOTOR, speed);
         
         Thread lThread = new Thread(leftRunner);
         Thread rThread = new Thread(rightRunner);
@@ -84,66 +118,6 @@ public class DualLightLocalizer {
         
     }
     
-    /**
-     * Represents a concurrent routine that will move a given {@link lejos.hardware.motor.BaseRegulatedMotor BaseRegulatedMotor} 
-     * forward until a given {@link ca.mcgill.ecse211.sensor.ColorSensor ColorSensor} detects a line.
-     */
-    class LineRunner implements Runnable {
-       
-        // Amount of time to sleep during color sensor polling
-        private static final int SLEEP_TIME = 30;
-        
-        private ColorSensor sensor;
-        private BaseRegulatedMotor motor;
-        private float speed;
-        
-        /**
-         * Construct a new LineRunner
-         * 
-         * @param sensor - color sensor to poll from
-         * @param motor - motor to move until detection
-         * @param speed
-         * 
-         * @throws IllegalArgumentException - 
-         */
-        public LineRunner(ColorSensor sensor, BaseRegulatedMotor motor, float speed) throws IllegalArgumentException {
-            this.sensor = sensor;
-            this.motor = motor;   
-            
-            if (speed == 0) {
-                throw new IllegalArgumentException("A speed other than 0 must be specified.");
-            }
-            
-            this.speed = speed;
-        }
-
-        /**
-         * Concurrent run - Move motor forward until line detection
-         */
-        @Override
-        public void run() {
-            
-            motor.setSpeed(speed);
-            
-            // Change rotation direction dependent on the speed
-            if (speed > 0) {
-                motor.forward();
-            } else {
-                motor.backward();
-            }
-            
-            // Continuously check for line
-            while (!sensor.lineDetected()) {
-                try {
-                    Thread.sleep(SLEEP_TIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            motor.stop();
-        }
-        
-    }
+    
     
 }

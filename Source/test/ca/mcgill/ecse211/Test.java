@@ -6,6 +6,7 @@ import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
+import ca.mcgill.ecse211.localization.LineRunner;
 import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.main.SearchArea;
@@ -21,6 +22,7 @@ import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Vehicle;
+import ca.mcgill.ecse211.util.WifiController;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -57,7 +59,6 @@ public class Test {
 		// Create new vehicle configuration
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, TRACK));
 
-		Vehicle.setAcceleration(200, 200);
 		// Starting corner
 		// Create odometer
 		odometer = Odometer.getOdometer();
@@ -74,7 +75,7 @@ public class Test {
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
 		// Initialize logging
-		Log.setLogging(true, true, true, true, true);
+		Log.setLogging(true, true, true, true, true, true);
 
 		// Set logging to write to file
 		try {
@@ -126,6 +127,16 @@ public class Test {
 		//		        testLineDetection();
 		// testColorSensors();
 		//testColorSensorLineDetection(right);
+//				testUSLocalization();
+//		        testDualLocalization();
+		//		testUSLocalization();
+//		        testDualLocalization();
+		        testLocalizeToSquare();
+//		        testShuffle();
+		
+//		        testLineDetection();
+		       // testColorSensors();
+		        //testColorSensorLineDetection(right);
 		//		testLocalizationAtOrigin();
 		//		testLocalizationNE(); //Test localization when driving northeast
 		//		testLocalizationNW(); //Test localization when driving northwest
@@ -145,7 +156,6 @@ public class Test {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
 
-
 	private void testTimeWithCan() throws InterruptedException {
 		ColourDetection cd = new ColourDetection(3, usPoller);	
 		Claw claw = new Claw(usPoller);
@@ -161,26 +171,74 @@ public class Test {
 		}		
 	}
 
+	
+	private void testLocalizeToSquare() {
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
+        try {
+            dll.localizeToSquare(Board.Heading.N, Board.Heading.E);
+        } catch (OdometerExceptions e1) {
+            e1.printStackTrace();
+        }
+        Sound.beepSequence();
+        
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }   
+	}
+	
+	private void testTunnelOrientation() {
+	    
+	    
+	    if (WifiController.getOrientation(0, 0, 2, 1) == WifiController.TUNNEL_ORIENTATION.VERTICAL) {
+	        Sound.buzz();
+	    } else {
+	        Sound.beep();
+	    }
+	    
+	}
+	
+	private void testShuffle() {
+	    while (true) {
+	        Navigator.turnTo(90);
+	        
+	        try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+	        
+	        Navigator.turnTo(0);
+	        
+	        try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+	    }
+	    
+	}
+	
 	private void testDualLocalization() {
-		while (true) {
-			Sound.beepSequenceUp();
-
-			Vehicle.LEFT_MOTOR.setAcceleration(6000);
-			Vehicle.RIGHT_MOTOR.setAcceleration(6000);
-			DualLightLocalizer dll = new DualLightLocalizer(left, right);
-			try {
-				dll.localize(Board.Heading.N);
-			} catch (OdometerExceptions e1) {
-				e1.printStackTrace();
-			}
-			Sound.beepSequence();
-
-			try {
-				Thread.sleep(4000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}   
-		}
+	    
+        Sound.beepSequenceUp();
+        
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
+	    try {
+            dll.localizeToIntersection(Board.Heading.N);
+        } catch (OdometerExceptions e1) {
+            e1.printStackTrace();
+        }
+	    Sound.beepSequence();
+	    
+	    try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }   
 	}
 
 	private void testColorSensorLineDetection(ColorSensor sensor) {

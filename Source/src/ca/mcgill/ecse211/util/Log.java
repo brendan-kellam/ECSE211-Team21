@@ -12,7 +12,7 @@ public class Log {
 	static PrintStream writer = System.out;
 
 	public static enum Sender {
-		odometer, Navigator, usSensor, avoidance, USLocalization, colourDetection
+		odometer, Navigator, usSensor, avoidance, USLocalization, colourDetection, board
 	}
 
 	static boolean printOdometer;
@@ -20,6 +20,7 @@ public class Log {
 	static boolean printUsSensor;
 	static boolean printAvoidance;
 	static boolean printColour;
+	static boolean printBoard;
 
 	public static void log(Sender sender, String message) {
 		long timestamp = System.currentTimeMillis() % 100000;
@@ -42,15 +43,19 @@ public class Log {
 		if (sender == Sender.colourDetection && printColour) {
 	        writer.println("CD::" + timestamp + ": " + message);
 		}
+		if (sender == Sender.board && printBoard) {
+		    writer.println("BD::" + timestamp + ": " + message);
+		}
 
 	}
 
-	public static void setLogging(boolean nav, boolean odom, boolean us,boolean avoid,boolean colourDetect) {
+	public static void setLogging(boolean nav, boolean odom, boolean us,boolean avoid,boolean colourDetect, boolean board) {
 		printNavigator = nav;
 		printOdometer = odom;
 		printUsSensor = us;
 		printAvoidance = avoid;
 		printColour = colourDetect;
+		printBoard = board;
 	}
 
 	public static void setLogWriter(String filename) throws FileNotFoundException {

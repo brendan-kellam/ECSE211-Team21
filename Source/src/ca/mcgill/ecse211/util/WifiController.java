@@ -3,17 +3,18 @@ package ca.mcgill.ecse211.util;
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
+import lejos.hardware.Sound;
 
 public class WifiController {
 
     // ** Set these as appropriate for your team and current situation **//
-    private static final String SERVER_IP = "192.168.2.27";
+    private static final String SERVER_IP = "192.168.2.9";
     private static final int TEAM_NUMBER = 21;
 
     // Enable/disable printing of debug info from the WiFi class
     private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
     
-    private enum TUNNEL_ORIENTATION {
+    public enum TUNNEL_ORIENTATION {
         HORIZONTAL,
         VERTICAL
     }
@@ -73,7 +74,7 @@ public class WifiController {
             if (getOrientation(tnLLX, tnLLY, tnURX, tnURY) == TUNNEL_ORIENTATION.HORIZONTAL) {
                 Board.Config.tunnelLL = Tile.lowerRight(tnLLX, tnLLY);
                 Board.Config.tunnelUR = Tile.upperLeft(tnURX, tnURY);
-            
+                           
             // Vertical
             } else {
                 Board.Config.tunnelLL = Tile.upperLeft(tnLLX, tnLLY);
@@ -83,14 +84,19 @@ public class WifiController {
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
-        
     }
     
     private static int getInt(Map data, String key) {
         return ((Long) data.get(key)).intValue();
     }
     
-    private static TUNNEL_ORIENTATION getOrientation(int llx, int lly, int urx, int ury) {
+    public static TUNNEL_ORIENTATION getOrientation(int llx, int lly, int urx, int ury) {
+        
+        // Sanity check
+        if (Math.abs(llx - urx) >= 2 && Math.abs(lly - ury) >= 2) {
+            throw new IllegalArgumentException("The tunnel is a rectangle with dimension 2x1");
+        }
+        
         if (Math.abs(llx - urx) > Math.abs(lly - ury)) {
             return TUNNEL_ORIENTATION.HORIZONTAL;
         } else {

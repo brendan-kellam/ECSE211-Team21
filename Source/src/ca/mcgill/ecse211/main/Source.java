@@ -40,7 +40,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
 
 	/**
 	 * Main entry of program
@@ -60,9 +60,9 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.7));
-		Vehicle.LEFT_MOTOR.setAcceleration(200);
-		Vehicle.RIGHT_MOTOR.setAcceleration(200);
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.73));
+		Vehicle.LEFT_MOTOR.setAcceleration(3000);
+		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
         
 		// Starting corner
 	
@@ -77,36 +77,24 @@ public final class Source {
 		// Create ultrasonic poller
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
-		// Create new display object
-//		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
-
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
-		
-
 		// Initialize logging
-		Log.setLogging(true, false, false, false, false);
+		Log.setLogging(true, true, true, true, true, true);
 
 		// Set logging to write to file
 		try {
-			Log.setLogWriter("Lab5" + ".log");
+			Log.setLogWriter("FinalProj" + ".log");
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
 
-		// Start odometer correction thread
-//		Thread odoCorrectionThread = new Thread(odoCorrection);
-//		odoCorrectionThread.start();
-
-		
 		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
 		pollerSystem.addPoller(odometer);
 		pollerSystem.start();
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-		//LightLocalizerTester uc = new LightLocalizerTester(odometer);
-
 		
 		ColorSensor leftCS = new ColorSensor(Vehicle.COLOR_SENSOR_LEFT, 0.3f);
         ColorSensor rightCS = new ColorSensor(Vehicle.COLOR_SENSOR_RIGHT, 0.3f);
@@ -118,34 +106,37 @@ public final class Source {
         WifiController.fetchGameplayData();
         Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
 
-
-//			Thread odoDisplayThread = new Thread(odometryDisplay);
-//			odoDisplayThread.start(); 
-
-		//ul.usLocalize();
 		
-		//uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
-		dll.localize(Heading.N);
+        //ul.usLocalize();
+		//dll.localize(Heading.N);
+        
+        Navigator.turnTo(0);
+        //Navigator.travelSpecificDistance(7);
+        
+		Odometer.getOdometer().setX(Board.TILE_SIZE);
+		Odometer.getOdometer().setY(Board.TILE_SIZE);
+		
+		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
+		
+		Sound.beepSequence();
 		
 		Tile tunnelLR = Board.Config.tunnelLL;
 		Tile tunnelUR = Board.Config.tunnelUR;
-		
+				
 		int desiredCanColour = 1;
 		
 		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
 		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
 		
-		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+		Navigator.travelTo(tunnelLR.getCenter().getX()+5, tunnelLR.getCenter().getY()+5, true, true, 200);
 		
-	    dll.localize(Heading.N);
+	    while (!dll.localizeToSquare(Heading.N, Heading.E));
 	    
-	    Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-		
-		Thread.sleep(500);
-		
+	    Thread.sleep(5000);
+	    
 		Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
-
-	    dll.localize(Heading.S);
+		
+	    dll.localizeToSquare(Heading.N, Heading.E);
 		
         //uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
 		
