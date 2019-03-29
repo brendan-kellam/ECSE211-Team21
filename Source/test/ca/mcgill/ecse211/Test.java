@@ -25,6 +25,9 @@ import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
+import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.SampleProvider;
 
 public class Test {
 
@@ -103,15 +106,15 @@ public class Test {
 		}
 		
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-		Sound.beepSequenceUp();
+//		Sound.beepSequenceUp();
 		
 		/**
 		 * ONLY UNCOMMENT THE ONE YOU'RE TESTING
 		 */
 
 		//		testLineDetection();
-		//		testUSLocalization();
-		        testDualLocalization();
+				testUSLocalization();
+//		        testDualLocalization();
 		
 //		        testLineDetection();
 		       // testColorSensors();

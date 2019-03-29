@@ -4,6 +4,7 @@ import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Vehicle;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
 public class FallingEdgeLocalizer {
@@ -26,8 +27,8 @@ public class FallingEdgeLocalizer {
 	private UltrasonicPoller usPoller; // Ultrasonic poller
 	private Odometer odometer; // Odometer
 
-	private static final int distFallingEdge = 39;
-	private static final int tolFallingEdge = 2;
+	private static final int distFallingEdge = 30;
+	private static final int tolFallingEdge = 10;
 
 	public FallingEdgeLocalizer(Odometer odometer,UltrasonicPoller usPoller) {
 		this.odometer = odometer;
@@ -37,8 +38,11 @@ public class FallingEdgeLocalizer {
 	/**
 	 * Check which ultrasonic localization we want to use
 	 * Set the acceleration to a ridiculous amount to speed up the process
+	 * @throws InterruptedException 
 	 */
-	public void usLocalize() {
+	public void usLocalize() throws InterruptedException {
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 		Vehicle.setAcceleration(6000, 6000);
 		fallingEdge();
 	}
@@ -46,47 +50,71 @@ public class FallingEdgeLocalizer {
 
 	/**
 	 *Localize the robot's position using the falling edge method. In this case, it faces away from the wall for most of the orienting.
+	 * @throws InterruptedException 
 	 */
-	private void fallingEdge() {
+	private void fallingEdge() throws InterruptedException {
 
+		double angle1;
+		double angle2;
+		double turnAngle;
 
-		double angle1, angle2, turnAngle;
-		boolean facingWall = true;
-		/*
-		 * Rotate to face away from a potential wall, then rotate back to obtain angle of right wall
-		 */
-		Vehicle.setMotorSpeeds(-ROTATE_SPEED, ROTATE_SPEED);// Block until no wall detected
-		block(facingWall);
-
-		/*
-		 * Rotate to obtain the angle at the first wall
-		 */
-		Vehicle.setMotorSpeeds(-ROTATE_SPEED, ROTATE_SPEED); // maybe not needed
-
+		//Rotate to face away from the wall:
+		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
+			leftMotor.backward();
+			rightMotor.forward();
+			Thread.sleep(25);
+		}
+		
+			Thread.sleep(50);
 		//Rotate to face the wall
-		block(!facingWall); // Block until left wall detected
+		while (usPoller.getDistance() > distFallingEdge) {
+			leftMotor.backward();
+			rightMotor.forward();
+
+			Thread.sleep(25);
+		}
+			Thread.sleep(50);
 		angle1 = odometer.getXYT()[2]; //Keep track of the first angle detected.
 
-		/*
-		 * Rotate to face the other wall to obtain the angle at the other wall
-		 */
-		Vehicle.setMotorSpeeds(ROTATE_SPEED, -ROTATE_SPEED);
-		block(facingWall);// Get above the tolerance zone so we can rotate to the other wall
+		//Rotate to face away from the wall
+		while (usPoller.getDistance() < distFallingEdge + tolFallingEdge) {
+			leftMotor.forward();
+			rightMotor.backward();
+			Thread.sleep(25);
+		}
+		Thread.sleep(50);
+		//Rotate to face the other wall
+		while (usPoller.getDistance() > distFallingEdge) {
+			leftMotor.forward();
+			rightMotor.backward();
 
-		Vehicle.setMotorSpeeds(ROTATE_SPEED, -ROTATE_SPEED); //maybe not needed
-		block(!facingWall);// Block until no wall detected
-		while (usPoller.getDistance() > distFallingEdge); 
+			Thread.sleep(25);
+		}
+		
 
 		angle2 = odometer.getXYT()[2]; //Keep track of the second angle detected.
 
-		turnAngle = getTurnAngle(angle1,angle2);
+		double dTheta = 0;
+		//Compute the angle:
+		//Case 1: The first angle is smaller than the second=>The second angle comes after the first in a clockwise manner with 0 being 0 degrees
+		if (angle1 < angle2) {
+			dTheta = 45 - (angle1 + angle2) / 2;
 
-		//Face to face 45 degrees.
+		} 
+
+		//Case 2: The first angle is greater than the second=>The second angle comes BEFORE the first in a clockwise manner with 0 being 0 degrees.
+		else if (angle1 > angle2) {
+			dTheta = 225 - (angle1 + angle2) / 2;
+		}
+//
+		dTheta-=2;
+		turnAngle = dTheta + odometer.getXYT()[2];
+		//Face 0 degrees.
 		leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, turnAngle), true);
 		rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, turnAngle), false);
-
 		//Set theta to 0(the x and y coordinates are wrong for now.)
 		odometer.setXYT(0.0, 0.0, 0.0);
+
 	}
 
 	/**
