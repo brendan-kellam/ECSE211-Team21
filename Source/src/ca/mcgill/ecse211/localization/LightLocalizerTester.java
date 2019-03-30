@@ -31,7 +31,6 @@ public class LightLocalizerTester {
 	private EV3LargeRegulatedMotor leftMotor = Vehicle.LEFT_MOTOR;
 	private EV3LargeRegulatedMotor rightMotor = Vehicle.RIGHT_MOTOR;
 
-
 	/*
 	 * Odometer and colour sensor.
 	 */

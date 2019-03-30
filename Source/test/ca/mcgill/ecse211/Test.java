@@ -24,19 +24,24 @@ import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
+import lejos.robotics.EncoderMotor;
 import lejos.robotics.SampleProvider;
 
 public class Test {
 
 	private static Odometer odometer;
 	private static UltrasonicPoller usPoller;
-	
+
 	private static OdometryCorrection odoCorrection;
 	private static ColorSensor left;
 	private static ColorSensor right;
+	private static PollerSystem pollerSystem;
 
 	////////////////////////////////////////////////////////////////////////
 	private final double TRACK = 17.73; 
@@ -45,8 +50,8 @@ public class Test {
 	//TODO: If you would like to test various track values, change the value above^
 	////////////////////////////////////////////////////////////////////////
 
-	private boolean displayEnabled = true;
-	
+	private boolean displayEnabled = false;
+
 	public Test() throws OdometerExceptions {
 
 		// Create new vehicle configuration
@@ -60,7 +65,6 @@ public class Test {
 		// Create odometery correction | disable correction
 		odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_LEFT);
 		odoCorrection.disableCorrection();
-
 		// Create ultrasonic poller
 		usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
@@ -79,11 +83,12 @@ public class Test {
 			e1.printStackTrace();
 		}
 
-		
+
 		left = new ColorSensor(Vehicle.COLOR_SENSOR_LEFT, 0.3f);
 		right = new ColorSensor(Vehicle.COLOR_SENSOR_RIGHT, 0.3f);
 
-		PollerSystem pollerSystem = PollerSystem.getInstance();
+
+		pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
 		pollerSystem.addPoller(odometer);
 		pollerSystem.start();
@@ -98,39 +103,41 @@ public class Test {
 
 		Sound.beep(); // Beep when ready
 		//Press escape to start
-		    
+
 		if (displayEnabled) {
-		    OdometerDisplay odometryDisplay = new OdometerDisplay(Vehicle.LCD_DISPLAY);
-	        Thread odoDisplayThread = new Thread(odometryDisplay);
-	        odoDisplayThread.start(); 
+			OdometerDisplay odometryDisplay = new OdometerDisplay(Vehicle.LCD_DISPLAY);
+			Thread odoDisplayThread = new Thread(odometryDisplay);
+			odoDisplayThread.start(); 
 		}
-		
+
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-//		Sound.beepSequenceUp();
-		
+		//		Sound.beepSequenceUp();
+
 		/**
 		 * ONLY UNCOMMENT THE ONE YOU'RE TESTING
 		 */
 
+
 		//		testLineDetection();
-				testUSLocalization();
-//		        testDualLocalization();
-		
-//		        testLineDetection();
-		       // testColorSensors();
-		        //testColorSensorLineDetection(right);
+		//				testUSLocalization();
+		//		        testDualLocalization();
+		//		testTime();
+		testTimeWithCan();
+		//		        testLineDetection();
+		// testColorSensors();
+		//testColorSensorLineDetection(right);
 		//		testLocalizationAtOrigin();
 		//		testLocalizationNE(); //Test localization when driving northeast
 		//		testLocalizationNW(); //Test localization when driving northwest
 		//		testLocalizationSE(); //Test localization when driving southeast
 		//		testLocalizationSW(); //Test localization when driving southwest
-//				testTunnelNavigationWithCan();
+		//				testTunnelNavigationWithCan();
 		//		testForward();
-//				testTunnelNavigation();
-//		testClawGrab();
-//				testColourDetection();
-//				testScanThenGrab();
-//				testTrackValue();
+		//				testTunnelNavigation();
+		//		testClawGrab();
+		//				testColourDetection();
+		//				testScanThenGrab();
+		//				testTrackValue();
 		// Wait so that we can measure
 		//		drawOdoValues();
 
@@ -138,75 +145,98 @@ public class Test {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
 
-	
+
+	private void testTimeWithCan() throws InterruptedException {
+		ColourDetection cd = new ColourDetection(2, usPoller);	
+		Claw claw = new Claw(usPoller);
+
+
+		while (true) {
+			while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+			if (cd.checkCanColour()){
+				claw.grab();
+				testTime();
+				claw.release();
+			}
+		}		
+	}
+
 	private void testDualLocalization() {
-	    while (true) {
-	        Sound.beepSequenceUp();
-	        
-    	    Vehicle.LEFT_MOTOR.setAcceleration(6000);
-    	    Vehicle.RIGHT_MOTOR.setAcceleration(6000);
-    	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
-    	    try {
-                dll.localize(Board.Heading.N);
-            } catch (OdometerExceptions e1) {
-                e1.printStackTrace();
-            }
-    	    Sound.beepSequence();
-    	    
-    	    try {
-                Thread.sleep(4000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }   
-	    }
+		while (true) {
+			Sound.beepSequenceUp();
+
+			Vehicle.LEFT_MOTOR.setAcceleration(6000);
+			Vehicle.RIGHT_MOTOR.setAcceleration(6000);
+			DualLightLocalizer dll = new DualLightLocalizer(left, right);
+			try {
+				dll.localize(Board.Heading.N);
+			} catch (OdometerExceptions e1) {
+				e1.printStackTrace();
+			}
+			Sound.beepSequence();
+
+			try {
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}   
+		}
 	}
-	
+
 	private void testColorSensorLineDetection(ColorSensor sensor) {
-	    
-	    while (true) {
-	        if (sensor.lineDetected()) {
-	            Sound.playTone(900, 300);
-	        }
-	        
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
- 	    }
-	    
+
+		while (true) {
+			if (sensor.lineDetected()) {
+				Sound.playTone(900, 300);
+			}
+
+			try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
+
 	private void testColorSensors() {
-	    while (true) {
-	        
-	        if (left.lineDetected()) {
-                Sound.playTone(900, 300);
-            }
-	        
-	        if (right.lineDetected()) {
-	            Sound.playTone(400, 300);
-	        }
-	        
-	        try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-	    }
-	    
+		while (true) {
+
+			if (left.lineDetected()) {
+				Sound.playTone(900, 300);
+			}
+
+			if (right.lineDetected()) {
+				Sound.playTone(400, 300);
+			}
+
+			try {
+				Thread.sleep(30);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
 	 * Test the time it takes to get between 2 grid lines
+	 * @throws InterruptedException 
 	 */
-	private void testTime() {
-		Weigh weigh = new Weigh(odometer);
-		Thread thread = new Thread(weigh);
-		Vehicle.setMotorSpeeds(300, 300);
-		thread.run();
-		while (thread.isAlive());
-		Vehicle.setMotorSpeeds(0, 0);
+	private void testTime() throws InterruptedException {
+
+
+		//what a shitshow
+		//Plan:
+		//Stop the pollers
+		//close the regulated motors
+		//open the unregulated motors
+		//Apply power
+		//Weigh the shit
+		//Close the unregulated motors
+		//Open the regulated motors
+		//Start the pollers
+
+		Weigh weigh = new Weigh(pollerSystem,left);
+		weigh.weigh();
 	}
 
 	private boolean testCanSearch() throws InterruptedException {
@@ -215,13 +245,13 @@ public class Test {
 		int maxFilter = 12;
 		int maxDistance = 30;
 		int sweepSpeed = 100;
-		
+
 		ColourDetection cd = new ColourDetection(1,usPoller);
-		
+
 		odometer.setXYT(0, 0, 0);
 
 		Navigator.turnTo(90, sweepSpeed, true);
-		
+
 		while (filter < maxFilter && Math.abs(Odometer.getTheta()) < 90)  {
 			Thread.sleep(20);
 			if (usPoller.getDistance() < maxDistance) {
@@ -237,7 +267,7 @@ public class Test {
 			}
 			filter = 0;
 		}
-//		Sound.twoBeeps();
+		//		Sound.twoBeeps();
 		return false;
 	}
 	/**
@@ -275,9 +305,10 @@ public class Test {
 		Vehicle.setAcceleration(3000, 3000);
 		//Cheat the beginning.
 		Navigator.travelSpecificDistance(75,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed());
-//		while (!uc.bridgeDetected());
+		//		while (!uc.bridgeDetected());
 		Vehicle.setMotorSpeeds(550, 550);
 		while (uc.bridgeDetected());
+
 
 		Vehicle.setMotorSpeeds(0, 0);
 
@@ -305,7 +336,7 @@ public class Test {
 	 */
 	private void testScanThenGrab() {
 
-		ColourDetection cd = new ColourDetection(1, usPoller);	
+		ColourDetection cd = new ColourDetection(4, usPoller);	
 		Claw claw = new Claw(usPoller);
 
 		if (cd.checkCanColour()){
@@ -324,9 +355,9 @@ public class Test {
 			while (!left.lineDetected() || !right.lineDetected()) {
 				Thread.sleep(30);
 			}
-			
-            Sound.beep();
-            speed = -speed;
+
+			Sound.beep();
+			speed = -speed;
 		}
 	}
 	/*

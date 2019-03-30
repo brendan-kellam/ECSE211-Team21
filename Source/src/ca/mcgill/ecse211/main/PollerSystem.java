@@ -30,7 +30,6 @@ public class PollerSystem implements Runnable {
      * Private constructor. Use {@link #getInstance()} to get a instance of {@link PollerSystem}
      */
     private PollerSystem() {
-        this.pThread = new Thread(this);
     }
     
     /**
@@ -107,7 +106,7 @@ public class PollerSystem implements Runnable {
         if (running == true) {
             throw new RuntimeException("PollerSystem is already running.");
         }
-        
+        this.pThread = new Thread(this);
         running = true;
         this.pThread.start();
     }
@@ -116,13 +115,15 @@ public class PollerSystem implements Runnable {
      * Stops the polling thread
      * 
      * @throws RuntimeException
+     * @throws InterruptedException 
      */
-    public void stop() throws RuntimeException {
+    public void stop() throws RuntimeException, InterruptedException {
         if (running == false) {
             throw new RuntimeException("PollerSystem is not running.");
         }
         
         running = false;
+        pThread.join();
     }
     
     

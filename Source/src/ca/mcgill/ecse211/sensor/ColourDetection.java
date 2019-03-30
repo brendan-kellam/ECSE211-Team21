@@ -41,7 +41,7 @@ public class ColourDetection {
 	/**
 	 * Number of values the light sensor will read.
 	 */
-	private final int numReadings = 10;
+	private final int numReadings = 18;
 
 	/**
 	 * Sweep angle for the light sensor's motor.
@@ -101,7 +101,7 @@ public class ColourDetection {
 
 		//Beep twice if we found the correct can
 		if (correctCan) {
-			for (int i=0;i<10;i++) Sound.beep();
+//			for (int i=0;i<10;i++) Sound.beep();
 			return correctCan;
 		}
 

@@ -4,6 +4,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 
@@ -14,12 +15,17 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 public final class Vehicle {
     
     //////////////// MOTORS TO DRIVE VEHICLE ////////////////
-    public static final EV3LargeRegulatedMotor LEFT_MOTOR =
-        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D")); // was A
+    public static EV3LargeRegulatedMotor LEFT_MOTOR =
+        new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
     
-    public static final EV3LargeRegulatedMotor RIGHT_MOTOR =
+    public static EV3LargeRegulatedMotor RIGHT_MOTOR =
         new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A")); 
     /////////////////////////////////////////////////////////
+    
+    //////////////// UNREGULATED MOTORS FOR WEIGHING CANS ////////////////
+	public static UnregulatedMotor UNREG_LEFT_MOTOR;
+	public static UnregulatedMotor UNREG_RIGHT_MOTOR;
+
     
     //////////////// MOTOR FOR THE COLOUR SENSOR ////////////
 	public static final EV3MediumRegulatedMotor FRONT_COLOUR_SENSOR_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));

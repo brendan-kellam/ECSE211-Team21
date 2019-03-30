@@ -1,47 +1,103 @@
 package ca.mcgill.ecse211.claw;
 
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
-import ca.mcgill.ecse211.odometer.Odometer;
-import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.main.PollerSystem;
+import ca.mcgill.ecse211.sensor.ColorSensor;
+import ca.mcgill.ecse211.util.Vehicle;
+import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.LCD;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.hardware.motor.UnregulatedMotor;
 
-public class Weigh implements Runnable {
+public class Weigh {
 
-	Odometer odometer;
+	PollerSystem ps;
+	ColorSensor cs;
 	
 	public enum Weight{
 		HEAVY,
 		LIGHT
 	}
 	
-	private final int timeThreshold = 10;
+	private final int timeThreshold = 4550;
 	
-	public Weigh(Odometer odometer) {
-		this.odometer = odometer;
+	public Weigh(PollerSystem ps,ColorSensor cs) throws RuntimeException, InterruptedException {
+		this.cs = cs;
+		this.ps = ps;
 	}
 	
-	
 	/**
-	 * Begin the thread that will run until 2 lines have been detected, and compute the difference.
+	 * Drive until two lines have been detected, then compute the difference.
+	 * @throws InterruptedException 
 	 * 
 	 */
-	public void run() {
-		LightLocalizerTester lt = null;
+	public void weigh() throws InterruptedException {
+		
+		ps.stop();
+		Thread.sleep(300);
+		Vehicle.LEFT_MOTOR.close();
+		Vehicle.RIGHT_MOTOR.close();
+		Thread.sleep(500);
+		
+		Vehicle.UNREG_LEFT_MOTOR = new UnregulatedMotor(LocalEV3.get().getPort("D"));
+		Vehicle.UNREG_RIGHT_MOTOR = new UnregulatedMotor(LocalEV3.get().getPort("A"));
+		
 		long[] times = new long[2];
+		advanceThroughTwoGridLines(times);
 		
-		try {
-			lt = new LightLocalizerTester(odometer);
-		} catch (OdometerExceptions e) {
-			e.printStackTrace();
-		}
-		
-		getTimeInterval(lt, times);
+		Thread.sleep(500);
+		Vehicle.LEFT_MOTOR = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+		Vehicle.RIGHT_MOTOR = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+		Thread.sleep(500);
+		getTimeInterval(times);
 
 		int interval = (int) (times[1] - times[0]);
 		PrintTimeInterval(times,interval);
-//		DetermineWeight(interval);
+		DetermineWeight(interval);
+		ps.start();
 	}
 	
+	/**
+	 * Get the time between two grid lines
+	 * @param times
+	 * @throws InterruptedException
+	 */
+	public void advanceThroughTwoGridLines(long[] times) throws InterruptedException {
+		
+		/**
+		 * Stop the polling system since we can't run the odometer on our unregulated motors
+		 */
+		setPower(35,42);
+		
+		Vehicle.UNREG_LEFT_MOTOR.forward();
+		Vehicle.UNREG_RIGHT_MOTOR.forward();
+		
+		getTimeInterval(times);
+
+		Vehicle.UNREG_LEFT_MOTOR.stop();
+		Vehicle.UNREG_RIGHT_MOTOR.stop();
+		
+		Vehicle.UNREG_LEFT_MOTOR.close();
+		Vehicle.UNREG_RIGHT_MOTOR.close();
+
+
+	}
+	
+	/**
+	 * Set the power of the unregulated motors. There is more weight on the right side, so to compensate we will be passing a larger power value
+	 * @param leftPower 
+	 * @param rightPower
+	 */
+	private void setPower(int leftPower, int rightPower) {
+	Vehicle.UNREG_LEFT_MOTOR.setPower(leftPower);
+	Vehicle.UNREG_RIGHT_MOTOR.setPower(rightPower);
+	}
+	
+	/**
+	 * Determine the weight of a can.
+	 * @param interval the time interval between the two line detections
+	 */
 	private void DetermineWeight(int interval) {
 		if (interval> timeThreshold) {
 			LCD.drawString("HEAVY CAN", 0, 4);
@@ -61,13 +117,26 @@ public class Weigh implements Runnable {
 		LCD.drawString(interval + " is the difference in time" , 0, 2);
 	}
 
-	/*
-	 * Get the time interval between two 
+	/**
+	 * Get the time interval between two successive lines.
+	 * @param times
 	 */
-	private void getTimeInterval(LightLocalizerTester lt, long[] times) {
+	private void getTimeInterval(long[] times) {
 		for (int i=0;i<2;i++) {
-			while (!lt.lineDetected());
+			while (!cs.lineDetected()) {
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			};
+//			Sound.beep();
 			times[i] =  System.currentTimeMillis();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
