@@ -147,7 +147,7 @@ public class Test {
 
 
 	private void testTimeWithCan() throws InterruptedException {
-		ColourDetection cd = new ColourDetection(2, usPoller);	
+		ColourDetection cd = new ColourDetection(3, usPoller);	
 		Claw claw = new Claw(usPoller);
 
 
@@ -235,7 +235,7 @@ public class Test {
 		//Open the regulated motors
 		//Start the pollers
 
-		Weigh weigh = new Weigh(pollerSystem,left);
+		Weigh weigh = new Weigh(pollerSystem,right);
 		weigh.weigh();
 	}
 

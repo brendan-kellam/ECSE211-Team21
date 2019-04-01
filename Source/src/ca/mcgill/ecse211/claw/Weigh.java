@@ -20,7 +20,7 @@ public class Weigh {
 		LIGHT
 	}
 	
-	private final int timeThreshold = 4550;
+	private final int timeThreshold = 5500;
 	
 	public Weigh(PollerSystem ps,ColorSensor cs) throws RuntimeException, InterruptedException {
 		this.cs = cs;
@@ -46,11 +46,11 @@ public class Weigh {
 		long[] times = new long[2];
 		advanceThroughTwoGridLines(times);
 		
-		Thread.sleep(500);
+		Sound.beep();
+		Thread.sleep(100);
 		Vehicle.LEFT_MOTOR = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 		Vehicle.RIGHT_MOTOR = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-		Thread.sleep(500);
-		getTimeInterval(times);
+		Thread.sleep(100);
 
 		int interval = (int) (times[1] - times[0]);
 		PrintTimeInterval(times,interval);
@@ -68,7 +68,7 @@ public class Weigh {
 		/**
 		 * Stop the polling system since we can't run the odometer on our unregulated motors
 		 */
-		setPower(35,42);
+		setPower(25,30);
 		
 		Vehicle.UNREG_LEFT_MOTOR.forward();
 		Vehicle.UNREG_RIGHT_MOTOR.forward();
