@@ -2,7 +2,7 @@ package ca.mcgill.ecse211.localization;
 
 
 import ca.mcgill.ecse211.sensor.ColorSensor;
-import lejos.hardware.Sound;
+import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.motor.BaseRegulatedMotor;
 
 /**
@@ -10,13 +10,19 @@ import lejos.hardware.motor.BaseRegulatedMotor;
  * forward until a given {@link ca.mcgill.ecse211.sensor.ColorSensor ColorSensor} detects a line.
  */
 public class LineRunner implements Runnable {
-       
+    
+    
+    public static final LineRunner LEFT_RUNNER = new LineRunner(Vehicle.LEFT_CS, Vehicle.LEFT_MOTOR, 100.0f, 500);
+    public static final LineRunner RIGHT_RUNNER = new LineRunner(Vehicle.RIGHT_CS, Vehicle.RIGHT_MOTOR, 100.0f, 500);
+    
+    
     // Amount of time to sleep during color sensor polling
     private static final int SLEEP_TIME = 30;
     
     private ColorSensor sensor;
     private BaseRegulatedMotor motor;
     private float speed;
+    private long delay;
     
     /**
      * Construct a new LineRunner
@@ -27,9 +33,10 @@ public class LineRunner implements Runnable {
      * 
      * @throws IllegalArgumentException - 
      */
-    public LineRunner(ColorSensor sensor, BaseRegulatedMotor motor, float speed) throws IllegalArgumentException {
+    public LineRunner(ColorSensor sensor, BaseRegulatedMotor motor, float speed, long delay) throws IllegalArgumentException {
         this.sensor = sensor;
-        this.motor = motor;   
+        this.motor = motor;  
+        this.delay = delay;
             
         if (speed == 0) {
             throw new IllegalArgumentException("A speed other than 0 must be specified.");
@@ -37,13 +44,22 @@ public class LineRunner implements Runnable {
         
         this.speed = speed;
     }
-
+    
+    /**
+     * Start a new LineRunner thread
+     */
+    public Thread start(float speed) {
+        this.speed = speed;
+        Thread thread = new Thread(this);        
+        thread.start();
+        return thread;
+    }
+    
     /**
      * Concurrent run - Move motor forward until line detection
      */
     @Override
     public void run() {
-        
         
         motor.setSpeed(speed);
         
@@ -53,6 +69,13 @@ public class LineRunner implements Runnable {
         } else {
             motor.backward();
         }
+        
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+
         
         // Continuously check for line
         while (!sensor.lineDetected()) {

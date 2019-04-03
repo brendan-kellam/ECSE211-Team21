@@ -64,7 +64,13 @@ public class DualLightLocalizer {
                 
     }
     
-    public boolean localizeToSquare(Heading heading, Heading finalHeading) throws OdometerExceptions {
+    public enum Config {
+        FORWARD,
+        BACKWARD
+    }
+    
+    
+    public boolean localizeToSquare(Heading heading, Heading finalHeading, Config config) throws OdometerExceptions {
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
@@ -85,7 +91,11 @@ public class DualLightLocalizer {
         
         Navigator.turnTo(90.0);
         
-        travelToLine(-SPEED);
+        if (config == Config.FORWARD) {
+            travelToLine(SPEED);
+        } else {
+            travelToLine(-SPEED);
+        }
         
         Board.snapToGridLine(Odometer.getOdometer());
         Board.snapToHeading(Odometer.getOdometer());
@@ -97,16 +107,10 @@ public class DualLightLocalizer {
     /**
      * Travel to a line, stopping when the two LineRunners
      */
-    private void travelToLine(float speed) {
+    public void travelToLine(float speed) {
         
-        LineRunner leftRunner = new LineRunner(leftSensor, Vehicle.LEFT_MOTOR, speed);
-        LineRunner rightRunner = new LineRunner(rightSensor, Vehicle.RIGHT_MOTOR, speed);
-        
-        Thread lThread = new Thread(leftRunner);
-        Thread rThread = new Thread(rightRunner);
-        
-        lThread.start();
-        rThread.start();
+        Thread lThread = LineRunner.LEFT_RUNNER.start(speed);
+        Thread rThread = LineRunner.RIGHT_RUNNER.start(speed);
         
         // Wait on these threads to complete
         try {

@@ -53,7 +53,6 @@ public class Odometer extends OdometerData implements Poller {
 
   /**
    * This method is meant to ensure only one instance of the odometer is used throughout the code.
-   * s
    */
   public synchronized static Odometer getOdometer()
       throws OdometerExceptions {

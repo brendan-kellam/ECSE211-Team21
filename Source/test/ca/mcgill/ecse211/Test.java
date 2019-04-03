@@ -7,6 +7,7 @@ import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.LineRunner;
+import ca.mcgill.ecse211.localization.DualLightLocalizer.Config;
 import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.main.SearchArea;
@@ -20,6 +21,7 @@ import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.sensor.ColourDetection;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
+import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
 import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.WifiController;
@@ -131,7 +133,9 @@ public class Test {
 //		        testDualLocalization();
 		//		testUSLocalization();
 //		        testDualLocalization();
-		        testLocalizeToSquare();
+//		        testLocalizeToSquare();
+//		        testLineTravel(); 
+		        //travelTo(Board.TILE_SIZE+Board.TILE_SIZE/2, Board.TILE_SIZE+Board.TILE_SIZE/2);
 //		        testShuffle();
 		
 //		        testLineDetection();
@@ -171,12 +175,70 @@ public class Test {
 		}		
 	}
 
+	private void testLineTravel() throws OdometerExceptions {
+	    	    
+	    //double dist = Board.TILE_SIZE * 3.5;
+	    
+	   DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+       
+	   for (int i = 0; i < 4; i++) {
+	       dll.travelToLine(300);    
+	       Board.snapToHeading(Odometer.getOdometer());
+	       Board.snapToGridLine(Odometer.getOdometer());
+	       dll.travelToLine(300);
+	       Board.snapToHeading(Odometer.getOdometer());
+	       Board.snapToGridLine(Odometer.getOdometer());
+	       dll.travelToLine(300);
+	       Board.snapToHeading(Odometer.getOdometer());
+	       Board.snapToGridLine(Odometer.getOdometer());
+	       
+	       Navigator.turnTo(Odometer.getTheta() + 90.0);
+	   }
+
+	    
+	}
+	
+	private void travelTo(double x, double y) throws OdometerExceptions {
+	    
+	    double hypot = Math.hypot(x, y);
+	    double minAngle = Navigator.getDestAngle(x, y);
+	    
+	    double yComp = Math.sin(minAngle) * hypot;
+	    double xComp = Math.cos(minAngle) * hypot;
+	    
+	    double yDest = Odometer.getY() + yComp;
+	    double xDest = Odometer.getX() + xComp;
+	    
+	      DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+
+	   
+	    while (yComp >= Board.TILE_SIZE) {
+	        dll.travelToLine(300);    
+	        Board.snapToHeading(Odometer.getOdometer());
+	        Board.snapToGridLine(Odometer.getOdometer());
+	        yComp -= Board.TILE_SIZE;
+	    }
+	    
+	    Navigator.travelTo(Odometer.getX(), yDest, true, true);
+	    
+	    Navigator.turnTo(Navigator.getDestAngle(xDest, Odometer.getY()));
+	    
+	    while (xComp >= Board.TILE_SIZE) {
+            dll.travelToLine(300);    
+            Board.snapToHeading(Odometer.getOdometer());
+            Board.snapToGridLine(Odometer.getOdometer());
+            xComp -= Board.TILE_SIZE;
+        }
+	    
+       Navigator.travelTo(xDest, yDest, true, true);
+
+	}
 	
 	private void testLocalizeToSquare() {
 	    
-	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
+	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
         try {
-            dll.localizeToSquare(Board.Heading.N, Board.Heading.E);
+            dll.localizeToSquare(Board.Heading.N, Board.Heading.E, Config.FORWARD);
         } catch (OdometerExceptions e1) {
             e1.printStackTrace();
         }
@@ -226,7 +288,7 @@ public class Test {
         Sound.beepSequenceUp();
         
 	    
-	    DualLightLocalizer dll = new DualLightLocalizer(left, right);
+        DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 	    try {
             dll.localizeToIntersection(Board.Heading.N);
         } catch (OdometerExceptions e1) {
@@ -410,7 +472,7 @@ public class Test {
 		int speed = 100;
 		while (true) {
 			Vehicle.setMotorSpeeds(speed, speed);
-			while (!left.lineDetected() || !right.lineDetected()) {
+			while (!Vehicle.LEFT_CS.lineDetected() || !Vehicle.RIGHT_CS.lineDetected()) {
 				Thread.sleep(30);
 			}
 
