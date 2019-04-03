@@ -144,14 +144,28 @@ public final class Board {
             pos = TILE_SIZE * Math.round(div);
         }
         
+        String msg = "Snap to ";
+        
         // Moving in the y direction
         if (heading == Heading.N || heading == Heading.S) {
             odometer.setY(pos);
+            msg += "Y: ";
         }
         // Moving in the x direction
         else {
             odometer.setX(pos);
+            msg += "X: ";
         }       
+        
+        msg += pos;
+        
+        Log.log(Log.Sender.board, msg);
+    }
+    
+    public static void snapToHeading(Odometer odometer) {
+        Heading heading = getHeading(Odometer.getTheta());
+        
+        odometer.setTheta(getHeadingAngle(heading));
     }
     
     /**

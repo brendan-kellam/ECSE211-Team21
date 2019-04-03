@@ -5,11 +5,12 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.Test;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
+import ca.mcgill.ecse211.localization.LightLocalizerTester;
+import ca.mcgill.ecse211.localization.DualLightLocalizer.Config;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Board.Heading;
@@ -60,9 +61,9 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.7));
-		Vehicle.LEFT_MOTOR.setAcceleration(200);
-		Vehicle.RIGHT_MOTOR.setAcceleration(200);
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.73));
+		Vehicle.LEFT_MOTOR.setAcceleration(3000);
+		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
         
 		// Starting corner
 	
@@ -77,79 +78,60 @@ public final class Source {
 		// Create ultrasonic poller
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
-		// Create new display object
-//		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
-
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
-		
-
 		// Initialize logging
-		Log.setLogging(true, false, false, false, false);
+		Log.setLogging(true, true, true, true, true, true);
 
 		// Set logging to write to file
 		try {
-			Log.setLogWriter("Lab5" + ".log");
+			Log.setLogWriter("FinalProj" + ".log");
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();
 		}
 
-		// Start odometer correction thread
-//		Thread odoCorrectionThread = new Thread(odoCorrection);
-//		odoCorrectionThread.start();
-
-		
 		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
 		pollerSystem.addPoller(odometer);
 		pollerSystem.start();
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-		//LightLocalizerTester uc = new LightLocalizerTester(odometer);
-
 		
-		ColorSensor leftCS = new ColorSensor(Vehicle.COLOR_SENSOR_LEFT, 0.3f);
-        ColorSensor rightCS = new ColorSensor(Vehicle.COLOR_SENSOR_RIGHT, 0.3f);
 		
-		DualLightLocalizer dll = new DualLightLocalizer(leftCS, rightCS);
+		
+		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 		
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
         Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
 
-
-//			Thread odoDisplayThread = new Thread(odometryDisplay);
-//			odoDisplayThread.start(); 
-
-		//ul.usLocalize();
 		
-		//uc.lightLocalize(Board.TILE_SIZE,Board.TILE_SIZE);
-		dll.localize(Heading.N);
+        //ul.usLocalize();
+		//dll.localize(Heading.N);
+        
+        Navigator.turnTo(0);
+        //Navigator.travelSpecificDistance(7);
+        
+		Odometer.getOdometer().setX(Board.TILE_SIZE);
+		Odometer.getOdometer().setY(Board.TILE_SIZE);
 		
-		Tile tunnelLR = Board.Config.tunnelLL;
-		Tile tunnelUR = Board.Config.tunnelUR;
+		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 		
+		Sound.beepSequence();
+		
+		
+				
 		int desiredCanColour = 1;
 		
-		Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
-		Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
 		
-		Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
-		
-	    dll.localize(Heading.N);
+
 	    
-	    Navigator.travelTo(tunnelLR.getCenter().getX(), tunnelLR.getCenter().getY(), true, true, 200);
+		travelToTunnel(dll);	  
+        dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
+		travelThroughTunnel();
+	    dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 		
-		Thread.sleep(500);
-		
-		Navigator.travelTo(tunnelUR.getCenter().getX(), tunnelUR.getCenter().getY(), true, true, 200);	
-
-	    dll.localize(Heading.S);
-		
-        //uc.lightLocalize(tunnelUR.getUpperRight().getX(), tunnelUR.getUpperRight().getY());
-		
-
         Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
         
         //Beep 5 times
@@ -194,7 +176,58 @@ public final class Source {
 	//		// Localize
 	//		ul.localize();
 	//	}
+	
+	/**
+	 * Routine to travel to the tunnel
+	 * 
+	 * @param dll
+	 * @throws OdometerExceptions
+	 */
+	private static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
+	    
+	    // Get tunnel lower left and right
+	    Tile tunnelLR = Board.Config.tunnelLL;
+        Tile tunnelUR = Board.Config.tunnelUR;
+        
+        // Debug information
+        Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
+        Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
+        
+        
+        double targetX = tunnelLR.getLowerLeft().getX();
+        double targetY = tunnelLR.getLowerLeft().getY();
+        
+        Navigator.travelTo(Odometer.getX(), targetY, true, true);
+        dll.travelToLine(100);
+        Navigator.travelSpecificDistance(5);
+        
+        Navigator.travelTo(targetX, Odometer.getY(), true, true);
+        dll.travelToLine(100); 
+        Navigator.travelSpecificDistance(5);
+        
+        
+	}
 
+	/**
+	 * 
+	 * @throws OdometerExceptions
+	 */
+	private static void travelThroughTunnel() throws OdometerExceptions {
+
+        LightLocalizerTester uc = new LightLocalizerTester(Odometer.getOdometer());
+        
+        //Cheat the beginning.
+        Vehicle.setAcceleration(3000, 3000);
+        //Cheat the beginning.
+        Navigator.travelSpecificDistance(Board.TILE_SIZE,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed());
+
+        Vehicle.setMotorSpeeds(550, 550);
+        while (uc.bridgeDetected());
+
+        Vehicle.setMotorSpeeds(0, 0);
+
+    }
+	
 	/**
 	 * Gets the User's menu choice of either RISING or FALLING edge
 	 * 

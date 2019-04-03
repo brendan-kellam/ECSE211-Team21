@@ -26,7 +26,7 @@ public class Navigator {
 	private Navigator() {
 		
 	}
-
+	
 	/**
 	 * Travel to a specific location in space <br>
 	 * 
