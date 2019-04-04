@@ -41,7 +41,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
 
 	/**
 	 * Main entry of program
@@ -96,9 +96,6 @@ public final class Source {
 		pollerSystem.start();
 		
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
-		
-		
-		
 		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 		
 		
@@ -107,25 +104,22 @@ public final class Source {
         Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
 
 		
-        //ul.usLocalize();
-		//dll.localize(Heading.N);
+        ul.usLocalize();
+        dll.localizeToIntersection(Heading.N);
         
-        Navigator.turnTo(0);
-        //Navigator.travelSpecificDistance(7);
         
 		Odometer.getOdometer().setX(Board.TILE_SIZE);
 		Odometer.getOdometer().setY(Board.TILE_SIZE);
+		
+		dll.travelToLine(100);
 		
 		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 		
 		Sound.beepSequence();
 		
-		
 				
 		int desiredCanColour = 1;
 		
-		
-
 	    
 		travelToTunnel(dll);	  
         dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
@@ -199,12 +193,16 @@ public final class Source {
         
         Navigator.travelTo(Odometer.getX(), targetY, true, true);
         dll.travelToLine(100);
+        
         Navigator.travelSpecificDistance(5);
         
-        Navigator.travelTo(targetX, Odometer.getY(), true, true);
+        Navigator.turnTo(Navigator.getDestAngle(targetX, tunnelLR.getCenter().getY()));
+        dll.travelToLine(100);
+        
+        
+        Navigator.travelTo(targetX, tunnelLR.getCenter().getY(), true, true);
         dll.travelToLine(100); 
         Navigator.travelSpecificDistance(5);
-        
         
 	}
 
@@ -219,7 +217,7 @@ public final class Source {
         //Cheat the beginning.
         Vehicle.setAcceleration(3000, 3000);
         //Cheat the beginning.
-        Navigator.travelSpecificDistance(Board.TILE_SIZE,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed());
+        Navigator.travelSpecificDistance(Board.TILE_SIZE*2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
         Vehicle.setMotorSpeeds(550, 550);
         while (uc.bridgeDetected());
