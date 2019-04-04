@@ -144,11 +144,11 @@ public final class Source {
 
         
         // Starting corner [0, 3]
-        SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
+        SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy);
         // Search the field
-        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
+//        FieldSearch fieldSearch = new FieldSearch(searchArea,usPoller, leftSensor,right);
         
-        fieldSearch.startSearch(desiredCanColour);
+//        fieldSearch.startSearch(desiredCanColour);
         //Beep 5 times
         for (int i=0;i<5;i++) Sound.beep();
 		
