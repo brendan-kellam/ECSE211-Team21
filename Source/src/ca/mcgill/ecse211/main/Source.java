@@ -138,9 +138,9 @@ public final class Source {
 
         
         // Starting corner [0, 3]
-        SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy, SC);
+        SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy);
         // Search the field
-        FieldSearch fieldSearch = new FieldSearch(searchArea, SC, usPoller, odoCorrection);
+        FieldSearch fieldSearch = new FieldSearch(searchArea, usPoller,Vehicle.LEFT_CS,Vehicle.RIGHT_CS);
         
         fieldSearch.startSearch(desiredCanColour);
         //Beep 5 times

@@ -10,50 +10,16 @@ import lejos.robotics.geometry.Point;
 public class SearchArea {
                 
     private Point bottomLeft, bottomRight, topLeft, topRight;
-    private StartingCorner startingCorner;
     
     private Queue<Point> centerWaypoints;
     
-    public SearchArea(int LLx, int LLy, int URx, int URy, StartingCorner SC) {
+    public SearchArea(int LLx, int LLy, int URx, int URy) {
                     
-        this.startingCorner = SC;
         
-        Point bl = new Point(LLx, LLy);
-        Point br = new Point(URx, LLy);
-        Point tl = new Point(LLx, URy);
-        Point tr = new Point(URx, URy);
-                 
-        // Translate points
-        switch(startingCorner) {
-        
-        case LOWER_LEFT:
-            bottomLeft = bl;
-            bottomRight = br;
-            topLeft = tl;
-            topRight = tr;
-            break;
-            
-        case LOWER_RIGHT:
-            bottomLeft = br;
-            bottomRight = tr;
-            topLeft = bl;
-            topRight = tl;
-            break;
-            
-        case UPPER_RIGHT:
-            bottomLeft = tr;
-            bottomRight = tl;
-            topLeft = br;
-            topRight = bl;
-            break;
-            
-        case UPPER_LEFT:
-            bottomLeft = tl;
-            bottomRight = bl;
-            topLeft = tr;
-            topRight = br;
-            break;
-        }
+        bottomLeft = new Point(LLx, LLy);
+        bottomRight = new Point(URx, LLy);
+        topLeft = new Point(LLx, URy);
+        topRight = new Point(URx, URy);
                     
         this.centerWaypoints = new ArrayDeque<>();
         
@@ -87,8 +53,12 @@ public class SearchArea {
             
         }
         
-        public Point getNextWaypoint() {
+        public Point popWaypoint() {
             return centerWaypoints.poll();
+        }
+        
+        public Point peekNextWaypoint() {
+        		return centerWaypoints.peek();
         }
  
         public Point getBottomLeft() {
@@ -116,5 +86,3 @@ public class SearchArea {
         }
 
     }
-    
-

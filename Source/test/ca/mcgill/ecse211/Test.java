@@ -12,6 +12,7 @@ import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.main.SearchArea;
 import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
+import ca.mcgill.ecse211.main.NewSearch;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.OdometerDisplay;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -133,18 +134,18 @@ public class Test {
 		//		        testLineDetection();
 		// testColorSensors();
 		//testColorSensorLineDetection(right);
-//				testUSLocalization();
-//		        testDualLocalization();
+		//				testUSLocalization();
+		//		        testDualLocalization();
 		//		testUSLocalization();
-//		        testDualLocalization();
-//		        testLocalizeToSquare();
-//		        testLineTravel(); 
-		        //travelTo(Board.TILE_SIZE+Board.TILE_SIZE/2, Board.TILE_SIZE+Board.TILE_SIZE/2);
-//		        testShuffle();
-		
-//		        testLineDetection();
-		       // testColorSensors();
-		        //testColorSensorLineDetection(right);
+		//		        testDualLocalization();
+		//		        testLocalizeToSquare();
+		//		        testLineTravel(); 
+		//travelTo(Board.TILE_SIZE+Board.TILE_SIZE/2, Board.TILE_SIZE+Board.TILE_SIZE/2);
+		//		        testShuffle();
+
+		//		        testLineDetection();
+		// testColorSensors();
+		//testColorSensorLineDetection(right);
 		//		testLocalizationAtOrigin();
 		//		testLocalizationNE(); //Test localization when driving northeast
 		//		testLocalizationNW(); //Test localization when driving northwest
@@ -156,9 +157,12 @@ public class Test {
 		//		testClawGrab();
 		//				testColourDetection();
 		//				testScanThenGrab();
-		//				testTrackValue();
+		//						testTrackValue();
+//		testSearchForCan();
+		testNewSearch();
 		// Wait so that we can measure
 		//		drawOdoValues();
+//		testFallingEdgeThenLocalize();
 
 		//		testTime();
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
@@ -207,6 +211,42 @@ public class Test {
         dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 	}
 
+	private void testNewSearch() throws OdometerExceptions, InterruptedException {
+		SearchArea sa = new SearchArea(1,1,3,3);
+		Claw claw = new Claw(usPoller);
+		ColourDetection cd = new ColourDetection(1,usPoller);
+		FieldSearch ns = new FieldSearch(sa, usPoller,
+				left, right);
+		if (ns.startSearch(1)) {
+			claw.grab();
+		}
+	}
+	
+	private void testFallingEdgeThenLocalize() throws InterruptedException {
+		testUSLocalization();
+
+		Claw claw = new Claw(usPoller);
+		claw.grab();
+		while (true) {
+			Sound.beepSequenceUp();
+
+			Vehicle.LEFT_MOTOR.setAcceleration(6000);
+			Vehicle.RIGHT_MOTOR.setAcceleration(6000);
+			DualLightLocalizer dll = new DualLightLocalizer(left, right);
+			try {
+				dll.localizeToIntersection(Board.Heading.N);
+			} catch (OdometerExceptions e1) {
+				e1.printStackTrace();
+			}
+			Sound.beepSequence();
+
+			try {
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}   
+		}
+	}
 	private void testTimeWithCan() throws InterruptedException {
 		ColourDetection cd = new ColourDetection(3, usPoller);	
 		Claw claw = new Claw(usPoller);
@@ -223,131 +263,131 @@ public class Test {
 	}
 
 	private void testLineTravel() throws OdometerExceptions {
-	    	    
-	    //double dist = Board.TILE_SIZE * 3.5;
-	    
-	   DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
-       
-	   for (int i = 0; i < 4; i++) {
-	       dll.travelToLine(300);    
-	       Board.snapToHeading(Odometer.getOdometer());
-	       Board.snapToGridLine(Odometer.getOdometer());
-	       dll.travelToLine(300);
-	       Board.snapToHeading(Odometer.getOdometer());
-	       Board.snapToGridLine(Odometer.getOdometer());
-	       dll.travelToLine(300);
-	       Board.snapToHeading(Odometer.getOdometer());
-	       Board.snapToGridLine(Odometer.getOdometer());
-	       
-	       Navigator.turnTo(Odometer.getTheta() + 90.0);
-	   }
 
-	    
+		//double dist = Board.TILE_SIZE * 3.5;
+
+		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+
+		for (int i = 0; i < 4; i++) {
+			dll.travelToLine(300);    
+			Board.snapToHeading(Odometer.getOdometer());
+			Board.snapToGridLine(Odometer.getOdometer());
+			dll.travelToLine(300);
+			Board.snapToHeading(Odometer.getOdometer());
+			Board.snapToGridLine(Odometer.getOdometer());
+			dll.travelToLine(300);
+			Board.snapToHeading(Odometer.getOdometer());
+			Board.snapToGridLine(Odometer.getOdometer());
+
+			Navigator.turnTo(Odometer.getTheta() + 90.0);
+		}
+
+
 	}
-	
+
 	private void travelTo(double x, double y) throws OdometerExceptions {
-	    
-	    double hypot = Math.hypot(x, y);
-	    double minAngle = Navigator.getDestAngle(x, y);
-	    
-	    double yComp = Math.sin(minAngle) * hypot;
-	    double xComp = Math.cos(minAngle) * hypot;
-	    
-	    double yDest = Odometer.getY() + yComp;
-	    double xDest = Odometer.getX() + xComp;
-	    
-	      DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 
-	   
-	    while (yComp >= Board.TILE_SIZE) {
-	        dll.travelToLine(300);    
-	        Board.snapToHeading(Odometer.getOdometer());
-	        Board.snapToGridLine(Odometer.getOdometer());
-	        yComp -= Board.TILE_SIZE;
-	    }
-	    
-	    Navigator.travelTo(Odometer.getX(), yDest, true, true);
-	    
-	    Navigator.turnTo(Navigator.getDestAngle(xDest, Odometer.getY()));
-	    
-	    while (xComp >= Board.TILE_SIZE) {
-            dll.travelToLine(300);    
-            Board.snapToHeading(Odometer.getOdometer());
-            Board.snapToGridLine(Odometer.getOdometer());
-            xComp -= Board.TILE_SIZE;
-        }
-	    
-       Navigator.travelTo(xDest, yDest, true, true);
+		double hypot = Math.hypot(x, y);
+		double minAngle = Navigator.getDestAngle(x, y);
+
+		double yComp = Math.sin(minAngle) * hypot;
+		double xComp = Math.cos(minAngle) * hypot;
+
+		double yDest = Odometer.getY() + yComp;
+		double xDest = Odometer.getX() + xComp;
+
+		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+
+
+		while (yComp >= Board.TILE_SIZE) {
+			dll.travelToLine(300);    
+			Board.snapToHeading(Odometer.getOdometer());
+			Board.snapToGridLine(Odometer.getOdometer());
+			yComp -= Board.TILE_SIZE;
+		}
+
+		Navigator.travelTo(Odometer.getX(), yDest, true, true);
+
+		Navigator.turnTo(Navigator.getDestAngle(xDest, Odometer.getY()));
+
+		while (xComp >= Board.TILE_SIZE) {
+			dll.travelToLine(300);    
+			Board.snapToHeading(Odometer.getOdometer());
+			Board.snapToGridLine(Odometer.getOdometer());
+			xComp -= Board.TILE_SIZE;
+		}
+
+		Navigator.travelTo(xDest, yDest, true, true);
 
 	}
-	
+
 	private void testLocalizeToSquare() {
-	    
-	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
-        try {
-            dll.localizeToSquare(Board.Heading.N, Board.Heading.E, Config.FORWARD);
-        } catch (OdometerExceptions e1) {
-            e1.printStackTrace();
-        }
-        Sound.beepSequence();
-        
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }   
+
+		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+		try {
+			dll.localizeToSquare(Board.Heading.N, Board.Heading.E, Config.FORWARD);
+		} catch (OdometerExceptions e1) {
+			e1.printStackTrace();
+		}
+		Sound.beepSequence();
+
+		try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}   
 	}
-	
+
 	private void testTunnelOrientation() {
-	    
-	    
-	    if (WifiController.getOrientation(0, 0, 2, 1) == WifiController.TUNNEL_ORIENTATION.VERTICAL) {
-	        Sound.buzz();
-	    } else {
-	        Sound.beep();
-	    }
-	    
+
+
+		if (WifiController.getOrientation(0, 0, 2, 1) == WifiController.TUNNEL_ORIENTATION.VERTICAL) {
+			Sound.buzz();
+		} else {
+			Sound.beep();
+		}
+
 	}
-	
+
 	private void testShuffle() {
-	    while (true) {
-	        Navigator.turnTo(90);
-	        
-	        try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-	        
-	        Navigator.turnTo(0);
-	        
-	        try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-	    }
-	    
+		while (true) {
+			Navigator.turnTo(90);
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			Navigator.turnTo(0);
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
-	
+
 	private void testDualLocalization() {
-	    
-        Sound.beepSequenceUp();
-        
-	    
-        DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
-	    try {
-            dll.localizeToIntersection(Board.Heading.N);
-        } catch (OdometerExceptions e1) {
-            e1.printStackTrace();
-        }
-	    Sound.beepSequence();
-	    
-	    try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }   
+
+		Sound.beepSequenceUp();
+
+
+		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+		try {
+			dll.localizeToIntersection(Board.Heading.N);
+		} catch (OdometerExceptions e1) {
+			e1.printStackTrace();
+		}
+		Sound.beepSequence();
+
+		try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}   
 	}
 
 	private void testColorSensorLineDetection(ColorSensor sensor) {
@@ -534,11 +574,12 @@ public class Test {
 	private void testUSLocalization() throws InterruptedException {
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 		ul.usLocalize();
+
 	}
 
 
 	/*
-	 * Test localization at the origin. This will rotate, scan every line, and then face 0 degrees
+	 * Test localization at the origin. This will rotate,  every line, and then face 0 degrees
 	 */
 	private LightLocalizerTester testLocalizationAtOrigin() throws OdometerExceptions, InterruptedException {
 		testUSLocalization();
