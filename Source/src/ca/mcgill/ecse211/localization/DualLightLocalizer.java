@@ -51,7 +51,6 @@ public class DualLightLocalizer {
         travelToLine(SPEED);
         
         Navigator.travelSpecificDistance(-13, -SPEED);
-        Board.snapToHeading(Odometer.getOdometer());
         Board.snapToGridLine(Odometer.getOdometer());
         
         Navigator.turnTo(Odometer.getTheta() + 90.0);
@@ -60,8 +59,9 @@ public class DualLightLocalizer {
         
         Navigator.travelSpecificDistance(-13, -SPEED);
         Board.snapToGridLine(Odometer.getOdometer());
-        Board.snapToHeading(Odometer.getOdometer());
-                
+        
+        Navigator.turnTo(Odometer.getTheta() - 90.0);
+        
     }
     
     public enum Config {
@@ -74,10 +74,10 @@ public class DualLightLocalizer {
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
+        Navigator.travelSpecificDistance(10);
         travelToLine(SPEED);
         
         double diff = Board.TILE_SIZE - 4;
-        
         Navigator.travelSpecificDistance(-diff, -SPEED);
         
         Board.snapToHeading(Odometer.getOdometer());
@@ -91,9 +91,12 @@ public class DualLightLocalizer {
         
         Navigator.turnTo(90.0);
         
+
         if (config == Config.FORWARD) {
+            Navigator.travelSpecificDistance(-10);
             travelToLine(SPEED);
         } else {
+            Navigator.travelSpecificDistance(10);
             travelToLine(-SPEED);
         }
         
@@ -117,6 +120,12 @@ public class DualLightLocalizer {
             lThread.join();
             rThread.join();
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            Board.snapToHeading(Odometer.getOdometer());
+        } catch (OdometerExceptions e) {
             e.printStackTrace();
         }
         
