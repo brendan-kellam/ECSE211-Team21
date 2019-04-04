@@ -196,7 +196,14 @@ public class Navigator {
 	 * @param distance
 	 */
 	public static void travelSpecificDistance(double distance) {
-	    travelSpecificDistance(distance, DEFAULT_SPEED);
+	    
+	    int speed = DEFAULT_SPEED;
+	    
+	    if (distance < 0) {
+	        speed = -speed;
+	    }
+	    
+	    travelSpecificDistance(distance, speed);
 	}
 
 	/**

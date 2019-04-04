@@ -61,6 +61,9 @@ public class LineRunner implements Runnable {
     @Override
     public void run() {
         
+        // Save the current speed
+        int lastSpeed = motor.getSpeed();
+        
         motor.setSpeed(speed);
         
         // Change rotation direction dependent on the speed
@@ -87,6 +90,9 @@ public class LineRunner implements Runnable {
         }
         
         motor.stop();
+        
+        // Reset to the last speed
+        motor.setSpeed(lastSpeed);
     }
     
 }

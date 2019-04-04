@@ -129,13 +129,8 @@ public class Test {
 		//				testUSLocalization();
 		//		        testDualLocalization();
 		//		testTime();
-<<<<<<< HEAD
-		//		testTimeWithCan();
-		//		testFallingEdgeThenLocalize();
-=======
 		//testTimeWithCan();
 		testTravelToTunnel();
->>>>>>> 0f6d316c7d349d738a8f480535de4f5bfb37537a
 		//		        testLineDetection();
 		// testColorSensors();
 		//testColorSensorLineDetection(right);
@@ -214,23 +209,6 @@ public class Test {
         dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
         testTunnelNavigation();
         dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
-	}
-
-	private void testSearchForCan() throws InterruptedException {
-		ColourDetection cd = new ColourDetection(1,usPoller);
-		Claw claw = new Claw(usPoller);
-
-//		NewSearch ns = new NewSearch(usPoller);
-		
-		int target = 90;
-		Navigator.turnTo(target, 100, true);
-
-		while (Odometer.getTheta() < target - 10) {
-//			if (ns.scanForCan(100,cd)) {
-			{
-				claw.grab();
-			}
-		}
 	}
 
 	private void testNewSearch() throws OdometerExceptions, InterruptedException {
