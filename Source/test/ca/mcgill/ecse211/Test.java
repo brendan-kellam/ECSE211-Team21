@@ -24,8 +24,11 @@ import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.EV3Math;
 import ca.mcgill.ecse211.util.Log;
+import ca.mcgill.ecse211.util.Tile;
 import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.WifiController;
+import ca.mcgill.ecse211.util.Board.Heading;
+import ca.mcgill.ecse211.util.Log.Sender;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -126,8 +129,13 @@ public class Test {
 		//				testUSLocalization();
 		//		        testDualLocalization();
 		//		testTime();
+<<<<<<< HEAD
 		//		testTimeWithCan();
 		//		testFallingEdgeThenLocalize();
+=======
+		//testTimeWithCan();
+		testTravelToTunnel();
+>>>>>>> 0f6d316c7d349d738a8f480535de4f5bfb37537a
 		//		        testLineDetection();
 		// testColorSensors();
 		//testColorSensorLineDetection(right);
@@ -163,6 +171,49 @@ public class Test {
 
 		//		testTime();
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+	}
+	
+	private void testTravelToTunnel() throws OdometerExceptions {
+	    
+	   // Vehicle.setMotorSpeeds(300, 300);
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+	    
+	    Tile tunnel = Tile.lowerRight(4, 4);
+	    
+	    double targetX = tunnel.getLowerLeft().getX();
+        double targetY = tunnel.getLowerLeft().getY();
+        
+        Navigator.travelTo(Odometer.getX(), targetY, true, true, 300);
+        dll.travelToLine(100);
+        Navigator.travelSpecificDistance(5);
+        
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        Navigator.travelTo(targetX, Odometer.getY(), true, true, 300);
+        dll.travelToLine(100); 
+        
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        
+        Navigator.travelSpecificDistance(5);
+        
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
+        testTunnelNavigation();
+        dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 	}
 
 	private void testSearchForCan() throws InterruptedException {

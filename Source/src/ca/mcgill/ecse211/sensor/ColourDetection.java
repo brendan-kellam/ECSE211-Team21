@@ -41,12 +41,12 @@ public class ColourDetection {
 	/**
 	 * Number of values the light sensor will read.
 	 */
-	private final int numReadings = 18;
+	private final int numReadings = 15;
 
 	/**
 	 * Sweep angle for the light sensor's motor.
 	 */
-	private final int sweepAngle = 180;
+	private final int sweepAngle = 150;
 
 	/**
 	 * How close do we need to get to the can? 
