@@ -20,7 +20,7 @@ public class Weigh {
 		LIGHT
 	}
 	
-	private final int timeThreshold = 5500;
+	private final int timeThreshold = 10000;
 	
 	public Weigh(PollerSystem ps,ColorSensor cs) throws RuntimeException, InterruptedException {
 		this.cs = cs;
@@ -122,7 +122,7 @@ public class Weigh {
 	 * @param times
 	 */
 	private void getTimeInterval(long[] times) {
-		for (int i=0;i<2;i++) {
+		for (int i=0;i<3;i++) {
 			while (!cs.lineDetected()) {
 				try {
 					Thread.sleep(25);
@@ -130,10 +130,17 @@ public class Weigh {
 					e.printStackTrace();
 				}
 			};
+			if (i==0) {
+				times[0] = System.currentTimeMillis();
+			}
+			if (i==2) {
+				times[1] = System.currentTimeMillis();
+			}
 //			Sound.beep();
-			times[i] =  System.currentTimeMillis();
+			//times[i] =  System.currentTimeMillis();
+			if (i!=2);
 			try {
-				Thread.sleep(100);
+				Thread.sleep(150);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

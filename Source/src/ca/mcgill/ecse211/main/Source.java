@@ -41,7 +41,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = false;
+	public static final boolean TESTING = true;
 
 	/**
 	 * Main entry of program

@@ -105,7 +105,7 @@ public class ColourDetection {
 			return correctCan;
 		}
 
-		reverseAwayFromCan();
+//		reverseAwayFromCan();
 		return correctCan;
 	}
 
@@ -218,6 +218,7 @@ public class ColourDetection {
 				//Set the colour index at the point in the array with the most cans of a specific colour
 			}
 		}
+		LCD.drawString(colourValueOf(colourIndex).toString(), 0, 6);
 		return colourValueOf(colourIndex);
 	}
 
