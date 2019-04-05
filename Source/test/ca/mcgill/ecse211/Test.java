@@ -12,7 +12,6 @@ import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.main.SearchArea;
 import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
-import ca.mcgill.ecse211.main.NewSearch;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.OdometerDisplay;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -130,7 +129,7 @@ public class Test {
 		//		        testDualLocalization();
 		//		testTime();
 		//testTimeWithCan();
-		testTravelToTunnel();
+//		testTravelToTunnel();
 		//		        testLineDetection();
 		// testColorSensors();
 		//testColorSensorLineDetection(right);
