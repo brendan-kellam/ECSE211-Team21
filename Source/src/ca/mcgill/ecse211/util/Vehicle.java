@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.util;
 
 import ca.mcgill.ecse211.sensor.ColorSensor;
+import lejos.hardware.Power;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -19,6 +20,7 @@ public final class Vehicle {
     public static EV3LargeRegulatedMotor LEFT_MOTOR =
         new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
     
+    
     public static EV3LargeRegulatedMotor RIGHT_MOTOR =
         new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A")); 
     /////////////////////////////////////////////////////////
@@ -28,7 +30,9 @@ public final class Vehicle {
 	public static UnregulatedMotor UNREG_RIGHT_MOTOR;
 
     
-    //////////////// MOTOR FOR THE COLOUR SENSOR ////////////
+	public static Power power = LocalEV3.get().getPower();
+	
+	//////////////// MOTOR FOR THE COLOUR SENSOR ////////////
 	public static final EV3MediumRegulatedMotor FRONT_COLOUR_SENSOR_MOTOR = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
 	////////////////////////////////////////////////////////
 
