@@ -20,11 +20,27 @@ public class Weigh {
 		LIGHT
 	}
 	
-	private final int timeThreshold = 10000;
+	private int timeThreshold;
 	
 	public Weigh(PollerSystem ps,ColorSensor cs) throws RuntimeException, InterruptedException {
 		this.cs = cs;
 		this.ps = ps;
+		float battery = Vehicle.power.getVoltage();
+		if (battery > 7.1 && battery < 7.3) {
+			timeThreshold = 11600;
+		}
+		else if (battery > 7.3 && battery < 7.5) {
+			timeThreshold = 11100;
+		}
+		else if (battery > 7.5 && battery < 7.8) {
+			timeThreshold = 10600;
+		}
+		else if (battery > 7.8) {
+			timeThreshold = 10250;
+		}
+		else {
+			timeThreshold = 11800;
+		}
 	}
 	
 	/**
@@ -34,6 +50,7 @@ public class Weigh {
 	 */
 	public void weigh() throws InterruptedException {
 		
+
 		ps.stop();
 		Thread.sleep(300);
 		Vehicle.LEFT_MOTOR.close();
