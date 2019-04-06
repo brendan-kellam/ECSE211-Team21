@@ -14,10 +14,7 @@ public class WifiController {
     // Enable/disable printing of debug info from the WiFi class
     private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
     
-    public enum TUNNEL_ORIENTATION {
-        HORIZONTAL,
-        VERTICAL
-    }
+   
     
     public static void fetchGameplayData() {
         // Initialize WifiConnection class
@@ -70,8 +67,15 @@ public class WifiController {
                 throw new RuntimeException("Neither green team number nor red team number match TEAM_NUMBER: " + TEAM_NUMBER);
             }
             
-            // Horizontal
-            if (getOrientation(tnLLX, tnLLY, tnURX, tnURY) == TUNNEL_ORIENTATION.HORIZONTAL) {
+            // Set the tunnel orientation
+            try {
+                Board.setTunnelOrientation(tnLLX, tnLLY, tnURX, tnURY);
+            } catch (IllegalArgumentException e) {
+                throw e;
+            }
+                
+            // Horizontal tunnel
+            if (Board.getTunnelOrientation() == Board.TUNNEL_ORIENTATION.HORIZONTAL) {
                 Board.Config.tunnelLL = Tile.lowerRight(tnLLX, tnLLY);
                 Board.Config.tunnelUR = Tile.upperLeft(tnURX, tnURY);
                            
@@ -90,17 +94,5 @@ public class WifiController {
         return ((Long) data.get(key)).intValue();
     }
     
-    public static TUNNEL_ORIENTATION getOrientation(int llx, int lly, int urx, int ury) {
-        
-        // Sanity check
-        if (Math.abs(llx - urx) >= 2 && Math.abs(lly - ury) >= 2) {
-            throw new IllegalArgumentException("The tunnel is a rectangle with dimension 2x1");
-        }
-        
-        if (Math.abs(llx - urx) > Math.abs(lly - ury)) {
-            return TUNNEL_ORIENTATION.HORIZONTAL;
-        } else {
-            return TUNNEL_ORIENTATION.VERTICAL;
-        }
-    }
+    
 }

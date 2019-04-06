@@ -24,12 +24,50 @@ public final class Board {
      *
      **/
    
+    /**
+     * Describes the current heading of the vehicle. The heading of the vehicle is entirely dependent on it's dead reckoning system (I.E. this heading describes
+     * the current value of {@link ca.mcgill.ecse211.odometer.OdometerData #getTheta()}).
+     * 
+     */
     public enum Heading {
         N, 
         S,
         E,
         W
     }
+    
+    /**
+     * Describes the target tunnel orientation, either horizontal or vertical, relative to starting corner 0. </br>
+     * Note: Because we don't care about the competetor's tunnel, this enumeration shall only be used to describe our target tunnel.
+     * 
+     * </br>
+     * <ul>
+     * <li> Vertical:                               </li>
+     * <li> *------*                                </li>
+     * <li> |******|                                </li>
+     * <li> |******|                                </li>
+     * <li> |******|                                </li>
+     * <li> *------*                                </li>
+     * <li> Horizontal:                             </li>
+     * <li> * -- -- -- *                            </li>
+     * <li> | ******** |                            </li>
+     * <li> | ******** |                            </li>
+     * <li> * -- -- -- *                            </li>
+     * </ul>
+     * 
+     */
+    public enum TUNNEL_ORIENTATION {
+        HORIZONTAL,
+        VERTICAL
+    }
+    
+    /**
+     * Orientation of the tunnel in space. Defaults to HORIZONTAL. <br>
+     * 
+     * To modify, use: {@link ca.mcgill.ecse211.util.Board #setTunnelOrientation()}
+     */
+    private static TUNNEL_ORIENTATION curTunnelOrientation = TUNNEL_ORIENTATION.HORIZONTAL;
+    
     
     // Minimum tile multiple
     private static final double MIN_TILE_MULTIPLE = 0.5;
@@ -166,6 +204,39 @@ public final class Board {
         Heading heading = getHeading(Odometer.getTheta());
         
         odometer.setTheta(getHeadingAngle(heading));
+    }
+    
+    /**
+     * Sets the tunnel's {@link ca.mcgill.ecse211.util.Board #curTunnelOrientation orientation} to the correct 
+     * {@link ca.mcgill.ecse211.util.Board.TUNNEL_ORIENTATION TUNNEL_ORIENTATION}. This orientation is computed by comparing the length
+     * and height of the tunnel to see which is larger. (length > height ==> HORIZONTAL), (height > length ==> VERTICLE)
+     * 
+     * @param llx - lower left x of tunnel
+     * @param lly - lower left y of tunnel
+     * @param urx - upper right x of tunnel
+     * @param ury - upper right y of tunnel
+     * 
+     * @throws IllegalArgumentException If the tunnel length or height is invalid (I.E doesn't form a rectangle that's 2x1 or 1x2)
+     */
+    public static void setTunnelOrientation(int llx, int lly, int urx, int ury) throws IllegalArgumentException {
+        
+        double length = Math.abs(llx - urx);
+        double height = Math.abs(lly - ury);
+        
+        // Sanity check
+        if ((length >= 2 && height >= 2) || (length < 0 || height < 0) || (Math.abs(length - height) != 1)) {
+            throw new IllegalArgumentException("The tunnel is a rectangle with dimension 2x1");
+        }
+        
+        if (length > height) {
+            Board.curTunnelOrientation = TUNNEL_ORIENTATION.HORIZONTAL;
+        } else {
+            Board.curTunnelOrientation = TUNNEL_ORIENTATION.VERTICAL;
+        }
+    }
+    
+    public static TUNNEL_ORIENTATION getTunnelOrientation() {
+        return Board.curTunnelOrientation;
     }
     
     /**
