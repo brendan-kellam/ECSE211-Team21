@@ -247,7 +247,7 @@ public final class Source {
 	private static void travelThroughTunnel(Tile target) throws OdometerExceptions {
 	            
         //Cheat the beginning.
-        Navigator.travelSpecificDistance(Board.TILE_SIZE*2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
+        Navigator.travelSpecificDistance(Board.TILE_SIZE*2 + Board.TILE_SIZE/2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
         Vehicle.setMotorSpeeds(200, 200);
         while (!target.contains(Odometer.getX(), Odometer.getY())) {
