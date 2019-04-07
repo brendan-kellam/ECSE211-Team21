@@ -1,5 +1,7 @@
 package ca.mcgill.ecse211.util;
 
+import java.awt.geom.Point2D;
+
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerData;
 import ca.mcgill.ecse211.util.Log.Sender;
@@ -138,6 +140,52 @@ public final class Board {
         return 0;
     }
     
+    /**
+     * Starting corner translation
+     */
+    public static final Point2D scTranslation[] = {
+            new Point2D.Double(Board.TILE_SIZE, Board.TILE_SIZE),
+            new Point2D.Double(Board.TILE_SIZE * (Board.BOARD_WIDTH - 1), Board.TILE_SIZE),
+            new Point2D.Double(Board.TILE_SIZE * (Board.BOARD_WIDTH - 1), Board.TILE_SIZE * (Board.BOARD_HEIGHT - 1)),
+            new Point2D.Double(Board.TILE_SIZE, Board.TILE_SIZE * (Board.BOARD_HEIGHT - 1)),
+    };
+    
+    
+    public static final double scRotation[] = {
+            0.0,
+            270.0,
+            180.0,
+            90.0
+    };
+    
+    /**
+     * Return true if headings are orthogonal
+     * 
+     * @param h1
+     * @param h2
+     */
+    public static boolean areHeadingsOrthogonal(Heading h1, Heading h2) {
+        return EV3Math.distance(getHeadingAngle(h1), getHeadingAngle(h2)) == 90.0;
+    }
+    
+    /**
+     * Return true if headings are parallel
+     * 
+     * @param h1
+     * @param h2
+     * 
+     */
+    public static boolean areHeadingsParallel(Heading h1, Heading h2) {
+        return !areHeadingsOrthogonal(h1, h2);
+    }
+    
+    public static Heading getOrthogonalHeading(Heading h) {
+        return getHeading(getHeadingAngle(h) - 90.0);
+    }
+    
+    public static Heading getParallelHeading(Heading h) {
+        return getHeading(getHeadingAngle(h) + 180.0);
+    }
     
     /**
      * Snaps to a given gridline.
@@ -237,7 +285,7 @@ public final class Board {
      * </ol>     
      * 
      * This function returns a double array with two elements: xOffset and yOffset. <b>NOTE:</b> one of these components will always be 0.
-     * The other will either be ±{@link ca.mcgill.ecse211.util.Vehicle #DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE}
+     * The other will either be ±{@link ca.mcgill.ecse211.util.Vehicle #VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE}
      * 
      */
     public static double[] determineLightOffset() {
@@ -245,15 +293,15 @@ public final class Board {
         Heading heading = getHeading(Odometer.getTheta());
         
         if (heading == Heading.E) {
-            return new double[] {-Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+            return new double[] {-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
         }
         else if (heading == Heading.W) {
-            return new double[] {Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+            return new double[] {Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
         }
         else if (heading == Heading.N) {
-            return new double[] {0.0, -Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+            return new double[] {0.0, -Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
         } else {
-            return new double[] {0.0, Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+            return new double[] {0.0, Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
         }
         
     }
@@ -296,7 +344,6 @@ public final class Board {
     public static TUNNEL_ORIENTATION getTunnelOrientation() {
         return Board.curTunnelOrientation;
     }
-    
-   
+       
     
 }

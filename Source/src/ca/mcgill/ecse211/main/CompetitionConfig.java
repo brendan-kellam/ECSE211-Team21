@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.main;
 
+import ca.mcgill.ecse211.util.Board.Heading;
 import ca.mcgill.ecse211.util.Tile;
 
 /**
@@ -22,6 +23,9 @@ public class CompetitionConfig {
      */
     public static Tile tunnelEntranceToSearchArea;
     public static Tile tunnelEntranceToStartArea;
+    
+    public static Heading toSearchAreaHeading;
+    public static Heading toStartAreaHeading;
     
     public static int corner;
 }

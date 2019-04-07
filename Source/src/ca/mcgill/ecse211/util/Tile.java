@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.util;
 
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 /**
@@ -120,8 +121,70 @@ public class Tile {
         return center;
     }
     
+    public double getMinX() {
+        return getLowerLeft().getX();
+    }
+    
+    public double getMaxX() {
+        return getLowerRight().getX();
+    }
+    
+    public double getMinY() {
+        return getLowerLeft().getY();
+    }
+    
+    public double getMaxY() {
+        return getUpperLeft().getY();
+    }
+    
     public String toString() {
         return "ll: " + lowerLeft.toString() + " | lr: " + lowerRight.toString() + " | ul: " + upperLeft.toString() + " | ur: " + upperRight.toString(); 
     }
+    
+    /**
+     * Check if another tile intersects with this one
+     * 
+     * @param tile
+     * @return boolean - true if the tiles intersect
+     */
+    public boolean intersects(Tile tile) {
+                
+        return this.getMinX() < tile.getMaxX() &&
+               this.getMaxX() > tile.getMinX() &&
+               this.getMinY() < tile.getMaxY() &&
+               this.getMaxY() > tile.getMinY(); 
+    }
+    
+    /**
+     * Check if a arbitrary rectangle intersects with this tile
+     * 
+     * @param rect
+     * @return boolean - true if the rectangle and tile intersect
+     */
+    public boolean intersects(Rectangle rect) {
+        
+        return this.getMinX() < rect.getMaxX() &&
+               this.getMaxX() > rect.getMinX() &&
+               this.getMinY() < rect.getMaxY() &&
+               this.getMaxY() > rect.getMinY(); 
+    }
+    
+    
+    /**
+     * Check if a points is contained in this tile
+     * 
+     * @param x
+     * @param y
+     * @return boolean - true if rectangle contains this point
+     */
+    public boolean contains(double x, double y) {
+        
+        return this.getMinX() < x &&
+               this.getMaxX() > x &&
+               this.getMinY() < y &&
+               this.getMaxY() > y;
+        
+    }
+    
     
 }

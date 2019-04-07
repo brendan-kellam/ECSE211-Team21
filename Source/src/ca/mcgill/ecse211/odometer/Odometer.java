@@ -22,6 +22,7 @@ public class Odometer extends OdometerData implements Poller {
   private int lastTachoR;
   private int nowTachoL;
   private int nowTachoR;
+    
   private static final double PI = 3.14159;
 
   /**
@@ -63,7 +64,7 @@ public class Odometer extends OdometerData implements Poller {
       return odo;
     }
   }
-
+  
   /**
    * This method is where the logic for the odometer will run. Use the methods provided from the
    * OdometerData class to implement the odometer.
