@@ -62,10 +62,9 @@ public final class Vehicle {
     public static final EV3ColorSensor COLOR_SENSOR_FRONT = new EV3ColorSensor(LocalEV3.get().getPort("S2"));
     /////////////////////////////////////////////////////////////////
     
-    ////////////////TOUCH SENSOR ////////////////
-    //public static final EV3ColorSensor TOUCH_SENSOR = new EV3ColorSensor(LocalEV3.get().getPort("S1"));
+    ////////////////DISTANCE FROM LIGHT SENSORS TO WHEEL BASE ////////////////
+    public static final int DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE = 13;
     /////////////////////////////////////////////////////////////////
-    
     
     // Configuration class
     private static Configuration configuration;

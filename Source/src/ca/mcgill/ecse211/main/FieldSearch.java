@@ -4,7 +4,6 @@ import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.sensor.ColourDetection;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;

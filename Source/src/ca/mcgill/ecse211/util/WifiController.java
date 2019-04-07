@@ -3,21 +3,19 @@ package ca.mcgill.ecse211.util;
 import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
+import ca.mcgill.ecse211.main.CompetitionConfig;
 import lejos.hardware.Sound;
 
 public class WifiController {
 
     // ** Set these as appropriate for your team and current situation **//
-    private static final String SERVER_IP = "192.168.2.43";
+    private static final String SERVER_IP = "192.168.2.16";
     private static final int TEAM_NUMBER = 21;
 
     // Enable/disable printing of debug info from the WiFi class
     private static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
     
-    public enum TUNNEL_ORIENTATION {
-        HORIZONTAL,
-        VERTICAL
-    }
+   
     
     public static void fetchGameplayData() {
         // Initialize WifiConnection class
@@ -26,24 +24,24 @@ public class WifiController {
         try {
             Map data = conn.getData();
             
-            Board.Config.redTeam = getInt(data, "RedTeam");
-            Board.Config.greenTeam = getInt(data, "GreenTeam");           
+            CompetitionConfig.redTeam = getInt(data, "RedTeam");
+            CompetitionConfig.greenTeam = getInt(data, "GreenTeam");           
             
-            Board.Config.islandLL = Tile.lowerLeft(getInt(data, "Island_LL_x"),  getInt(data, "Island_LL_y")); 
-            Board.Config.islandUR = Tile.upperRight(getInt(data, "Island_UR_x"), getInt(data, "Island_UR_y"));
+            CompetitionConfig.islandLL = Tile.lowerLeft(getInt(data, "Island_LL_x"),  getInt(data, "Island_LL_y")); 
+            CompetitionConfig.islandUR = Tile.upperRight(getInt(data, "Island_UR_x"), getInt(data, "Island_UR_y"));
             
             // Tunnel params
             int tnLLX = 0, tnLLY = 0, tnURX = 0, tnURY = 0;
             
             // Red team
-            if (Board.Config.redTeam == TEAM_NUMBER) {
-                Board.Config.corner = getInt(data, "RedCorner");
+            if (CompetitionConfig.redTeam == TEAM_NUMBER) {
+                CompetitionConfig.corner = getInt(data, "RedCorner");
                 
-                Board.Config.startingAreaLL = Tile.lowerLeft(getInt(data,  "Red_LL_x"),    getInt(data, "Red_LL_y"));
-                Board.Config.startingAreaUR = Tile.upperRight(getInt(data, "Red_UR_x"),    getInt(data, "Red_UR_y"));            
+                CompetitionConfig.startingAreaLL = Tile.lowerLeft(getInt(data,  "Red_LL_x"),    getInt(data, "Red_LL_y"));
+                CompetitionConfig.startingAreaUR = Tile.upperRight(getInt(data, "Red_UR_x"),    getInt(data, "Red_UR_y"));            
 
-                Board.Config.searchAreaLL = Tile.lowerLeft(getInt(data, "SZR_LL_x"), getInt(data, "SZR_LL_y"));
-                Board.Config.searchAreaUR = Tile.upperRight(getInt(data, "SZR_UR_x"), getInt(data, "SZR_UR_y"));
+                CompetitionConfig.searchAreaLL = Tile.lowerLeft(getInt(data, "SZR_LL_x"), getInt(data, "SZR_LL_y"));
+                CompetitionConfig.searchAreaUR = Tile.upperRight(getInt(data, "SZR_UR_x"), getInt(data, "SZR_UR_y"));
                 
                 tnLLX = getInt(data, "TNR_LL_x");
                 tnLLY = getInt(data, "TNR_LL_y");
@@ -52,14 +50,14 @@ public class WifiController {
             }
             
             // Green team
-            else if (Board.Config.greenTeam == TEAM_NUMBER) {
-                Board.Config.corner = getInt(data, "GreenCorner");
+            else if (CompetitionConfig.greenTeam == TEAM_NUMBER) {
+                CompetitionConfig.corner = getInt(data, "GreenCorner");
                 
-                Board.Config.startingAreaLL = Tile.lowerLeft(getInt(data, "Green_LL_x"),     getInt(data, "Green_LL_y"));
-                Board.Config.startingAreaUR = Tile.upperRight(getInt(data, "Green_UR_x"),    getInt(data, "Green_UR_y"));            
+                CompetitionConfig.startingAreaLL = Tile.lowerLeft(getInt(data, "Green_LL_x"),     getInt(data, "Green_LL_y"));
+                CompetitionConfig.startingAreaUR = Tile.upperRight(getInt(data, "Green_UR_x"),    getInt(data, "Green_UR_y"));            
                 
-                Board.Config.searchAreaLL = Tile.lowerLeft(getInt(data, "SZG_LL_x"), getInt(data, "SZG_LL_y"));
-                Board.Config.searchAreaUR = Tile.upperRight(getInt(data, "SZG_UR_x"), getInt(data, "SZG_UR_y"));
+                CompetitionConfig.searchAreaLL = Tile.lowerLeft(getInt(data, "SZG_LL_x"), getInt(data, "SZG_LL_y"));
+                CompetitionConfig.searchAreaUR = Tile.upperRight(getInt(data, "SZG_UR_x"), getInt(data, "SZG_UR_y"));
                 
                 tnLLX = getInt(data, "TNG_LL_x");
                 tnLLY = getInt(data, "TNG_LL_y");
@@ -70,19 +68,39 @@ public class WifiController {
                 throw new RuntimeException("Neither green team number nor red team number match TEAM_NUMBER: " + TEAM_NUMBER);
             }
             
-            // Horizontal
-            if (getOrientation(tnLLX, tnLLY, tnURX, tnURY) == TUNNEL_ORIENTATION.HORIZONTAL) {
-                Board.Config.tunnelLL = Tile.lowerRight(tnLLX, tnLLY);
-                Board.Config.tunnelUR = Tile.upperLeft(tnURX, tnURY);
-                           
-            // Vertical
-            } else {
-                Board.Config.tunnelLL = Tile.upperLeft(tnLLX, tnLLY);
-                Board.Config.tunnelUR = Tile.lowerRight(tnURX, tnURY);
+            // Set the tunnel orientation
+            try {
+                Board.setTunnelOrientation(tnLLX, tnLLY, tnURX, tnURY);
+            } catch (IllegalArgumentException e) {
+                throw e;
             }
+                
+            configureTunnelEntryPoints(tnLLX, tnLLY, tnURX, tnURY);
+            
             
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Configures the tunnel entry tiles.
+     * 
+     * @param tnURY 
+     * @param tnURX 
+     * @param tnLLY 
+     * @param tnLLX 
+     */
+    private static void configureTunnelEntryPoints(int tnLLX, int tnLLY, int tnURX, int tnURY) {
+        // Configure if
+        if (Board.getTunnelOrientation() == Board.TUNNEL_ORIENTATION.HORIZONTAL) {
+            CompetitionConfig.tunnelEntranceToSearchArea = Tile.lowerRight(tnLLX, tnLLY);
+            CompetitionConfig.tunnelEntranceToStartArea = Tile.upperLeft(tnURX, tnURY);
+                       
+        // Vertical
+        } else {
+            CompetitionConfig.tunnelEntranceToSearchArea = Tile.upperLeft(tnLLX, tnLLY);
+            CompetitionConfig.tunnelEntranceToStartArea = Tile.lowerRight(tnURX, tnURY);
         }
     }
     
@@ -90,17 +108,5 @@ public class WifiController {
         return ((Long) data.get(key)).intValue();
     }
     
-    public static TUNNEL_ORIENTATION getOrientation(int llx, int lly, int urx, int ury) {
-        
-        // Sanity check
-        if (Math.abs(llx - urx) >= 2 && Math.abs(lly - ury) >= 2) {
-            throw new IllegalArgumentException("The tunnel is a rectangle with dimension 2x1");
-        }
-        
-        if (Math.abs(llx - urx) > Math.abs(lly - ury)) {
-            return TUNNEL_ORIENTATION.HORIZONTAL;
-        } else {
-            return TUNNEL_ORIENTATION.VERTICAL;
-        }
-    }
+    
 }

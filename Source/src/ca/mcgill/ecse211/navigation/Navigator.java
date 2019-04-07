@@ -217,6 +217,9 @@ public class Navigator {
 		Vehicle.LEFT_MOTOR.rotate(dist, true);
 		Vehicle.RIGHT_MOTOR.rotate(dist, false);
 	}
+	
+	
+	
 	/**
 	 * Optional turnTo. Uses DEFAULT_SPEED </br>
 	 * NOTE: <b> BLOCKING METHOD </b>
@@ -237,6 +240,18 @@ public class Navigator {
 	 */
 	public static void turnTo(double targetAngle,int speed) {
 		turnTo(targetAngle, speed, false);
+	}
+	
+	/**
+	 * Rotates the vehicle by delta degrees, either: </br>
+	 * 1. clockwise (delta >= 0)
+	 * 2. counter-clockwise (delta < 0)
+	 * 
+	 * @param delta - # of degrees to rotate by
+	 * @param speed - speed to rotate at
+	 */
+	public static void rotateVehicle(double delta, int speed) {
+	    turnTo(Odometer.getTheta() + delta, speed);
 	}
 
 	/**
