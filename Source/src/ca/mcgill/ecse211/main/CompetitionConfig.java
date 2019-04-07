@@ -28,4 +28,30 @@ public class CompetitionConfig {
     public static Heading toStartAreaHeading;
     
     public static int corner;
+    
+    private static void appendString(StringBuilder builder, String value) {
+        builder.append(value + System.lineSeparator());
+    }
+    
+    public static String tostr() {
+        StringBuilder builder = new StringBuilder();
+        
+        builder.append(System.lineSeparator());
+        appendString(builder, "Red Team: " + redTeam);
+        appendString(builder, "Green Team: " + greenTeam);
+        appendString(builder, "Starting Area LL: " + startingAreaLL.toString());
+        appendString(builder, "Starting Area UR: " + startingAreaUR.toString());
+        appendString(builder, "Island LL: " + islandLL.toString());
+        appendString(builder, "Island UR: " + islandUR.toString());
+        appendString(builder, "Search Area LL: " + searchAreaLL.toString());
+        appendString(builder, "Search Area UR: " + searchAreaUR.toString());
+        appendString(builder, "Tunnel Entrance To Search Area: " + tunnelEntranceToSearchArea.toString());
+        appendString(builder, "Tunnel Entrance To Start Area: " + tunnelEntranceToStartArea.toString());
+        appendString(builder, "To search area heading: " + toSearchAreaHeading.toString());
+        appendString(builder, "To start area heading: " + toStartAreaHeading.toString());
+        appendString(builder, "Starting Corner: " + corner);
+
+        
+        return builder.toString();
+    }
 }

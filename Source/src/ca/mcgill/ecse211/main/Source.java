@@ -98,8 +98,8 @@ public final class Source {
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
-        Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
-
+        //Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
+        Log.log(Sender.board, CompetitionConfig.tostr());
 		
         // ----- Localize to grid ------
         localize(ul, dll);
@@ -114,11 +114,13 @@ public final class Source {
 		travelToTunnel(dll);	  
 		
 		Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
+		
 		// Traveling to search area
 		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
-		travelThroughTunnel();
-	    dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
-		
+		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
+	    dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
+	    
+	    claw.release();
 	    
         Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
         
@@ -136,11 +138,32 @@ public final class Source {
         // Search the field
         FieldSearch fieldSearch = new FieldSearch(searchArea, usPoller,Vehicle.LEFT_CS,Vehicle.RIGHT_CS);
         
-        fieldSearch.startSearch(desiredCanColour);
+        if (fieldSearch.startSearch(desiredCanColour)) {
+            claw.grab();
+        }
         
         //Beep 5 times
         for (int i=0;i<5;i++) Sound.beep();
 		
+        
+        // NAVIGATE BACK TO START AREA
+        
+        Tile tunnelEntrance = CompetitionConfig.tunnelEntranceToStartArea;
+        Navigator.travelTo(tunnelEntrance.getCenter().getX(), tunnelEntrance.getCenter().getY(), true, true);   
+        
+        Heading toStartArea = CompetitionConfig.toStartAreaHeading;
+
+        dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
+        travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
+        dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
+        
+        Point2D start = Board.scTranslation[CompetitionConfig.corner];
+        
+        Navigator.travelTo(start.getX(), start.getY(), true, true);
+        claw.release();
+        
+        Sound.beepSequenceUp();
+        
 		pollerSystem.stop();
 
 		// Wait
@@ -221,20 +244,23 @@ public final class Source {
 	 * 
 	 * @throws OdometerExceptions
 	 */
-	private static void travelThroughTunnel() throws OdometerExceptions {
-	    
-	    
-        LightLocalizerTester uc = new LightLocalizerTester(Odometer.getOdometer());
-        
-        //Cheat the beginning.
-        Vehicle.setAcceleration(3000, 3000);
+	private static void travelThroughTunnel(Tile target) throws OdometerExceptions {
+	            
         //Cheat the beginning.
         Navigator.travelSpecificDistance(Board.TILE_SIZE*2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
-        Vehicle.setMotorSpeeds(550, 550);
-        while (uc.bridgeDetected());
-
+        Vehicle.setMotorSpeeds(200, 200);
+        while (!target.contains(Odometer.getX(), Odometer.getY())) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
         Vehicle.setMotorSpeeds(0, 0);
+        
+        Navigator.travelSpecificDistance(Board.TILE_SIZE/2+5);
 
     }
 	
