@@ -212,10 +212,12 @@ public class Navigator {
 	 */
 	public static void travelSpecificDistance(double distance, int speed) {
 		// Set motor speed and rotate
-		Vehicle.setMotorSpeeds(speed, speed);
+	    Vehicle.LEFT_MOTOR.setSpeed(speed);
+        Vehicle.RIGHT_MOTOR.setSpeed(speed);
 		int dist = EV3Math.convertDistance(Vehicle.getConfig().getWheelRadius(), distance);
 		Vehicle.LEFT_MOTOR.rotate(dist, true);
 		Vehicle.RIGHT_MOTOR.rotate(dist, false);
+		Vehicle.setMotorSpeeds(0.0, 0.0);
 	}
 	
 	

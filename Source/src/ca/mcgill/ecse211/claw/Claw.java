@@ -6,6 +6,16 @@ import lejos.hardware.motor.EV3MediumRegulatedMotor;
 
 public class Claw {
 
+    private enum ClawState {
+        OPEN,
+        GRABBED,
+        STOWED
+    }
+    
+    
+    // Claw starts out open
+    private ClawState currentState = ClawState.OPEN;
+    
 	/**
 	 * Colour sensor motor
 	 */
@@ -22,14 +32,37 @@ public class Claw {
 	 * Allow the claw to grab a can that is directly in front of the robot.
 	 */
 	public void grab() {
-		clawMotor.rotate(-130);
+	    if (currentState == ClawState.OPEN) {
+		    clawMotor.rotate(-130);
+		    currentState = ClawState.GRABBED;
+	    }
+	}
+	
+	public void stow() {
+	    if (currentState == ClawState.OPEN) {
+            clawMotor.rotate(-50);
+            currentState = ClawState.STOWED;
+        }
 	}
 	
 	/**
 	 * Allow the claw to release the can that it is holding 
 	 */
 	public void release() {
-		clawMotor.rotate(120);
+	    
+	    // Can't release if claw is already open
+	    if (currentState == ClawState.OPEN) {
+	        return;
+	    }
+	    
+	    if (currentState == ClawState.GRABBED) {
+		    clawMotor.rotate(120);
+	    } else {
+	        clawMotor.rotate(50);
+	    }
+	    
+        currentState = ClawState.OPEN;
+
 	}
 	
 	/*

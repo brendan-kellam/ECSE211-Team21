@@ -1,5 +1,7 @@
 package ca.mcgill.ecse211.util;
 
+import java.awt.geom.Point2D;
+
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerData;
 import ca.mcgill.ecse211.util.Log.Sender;
@@ -139,6 +141,24 @@ public final class Board {
     }
     
     /**
+     * Starting corner translation
+     */
+    public static final Point2D scTranslation[] = {
+            new Point2D.Double(Board.TILE_SIZE, Board.TILE_SIZE),
+            new Point2D.Double(Board.TILE_SIZE * (Board.BOARD_WIDTH - 1), Board.TILE_SIZE),
+            new Point2D.Double(Board.TILE_SIZE * (Board.BOARD_WIDTH - 1), Board.TILE_SIZE * (Board.BOARD_HEIGHT - 1)),
+            new Point2D.Double(Board.TILE_SIZE, Board.TILE_SIZE * (Board.BOARD_HEIGHT - 1)),
+    };
+    
+    
+    public static final double scRotation[] = {
+            0.0,
+            270.0,
+            180.0,
+            90.0
+    };
+    
+    /**
      * Return true if headings are orthogonal
      * 
      * @param h1
@@ -157,6 +177,14 @@ public final class Board {
      */
     public static boolean areHeadingsParallel(Heading h1, Heading h2) {
         return !areHeadingsOrthogonal(h1, h2);
+    }
+    
+    public static Heading getOrthogonalHeading(Heading h) {
+        return getHeading(getHeadingAngle(h) - 90.0);
+    }
+    
+    public static Heading getParallelHeading(Heading h) {
+        return getHeading(getHeadingAngle(h) + 180.0);
     }
     
     /**

@@ -4,12 +4,13 @@ import java.util.Map;
 
 import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 import ca.mcgill.ecse211.main.CompetitionConfig;
+import ca.mcgill.ecse211.util.Board.Heading;
 import lejos.hardware.Sound;
 
 public class WifiController {
 
     // ** Set these as appropriate for your team and current situation **//
-    private static final String SERVER_IP = "192.168.2.16";
+    private static final String SERVER_IP = "192.168.2.19";
     private static final int TEAM_NUMBER = 21;
 
     // Enable/disable printing of debug info from the WiFi class
@@ -92,15 +93,57 @@ public class WifiController {
      * @param tnLLX 
      */
     private static void configureTunnelEntryPoints(int tnLLX, int tnLLY, int tnURX, int tnURY) {
+        
+        
         // Configure if
         if (Board.getTunnelOrientation() == Board.TUNNEL_ORIENTATION.HORIZONTAL) {
-            CompetitionConfig.tunnelEntranceToSearchArea = Tile.lowerRight(tnLLX, tnLLY);
-            CompetitionConfig.tunnelEntranceToStartArea = Tile.upperLeft(tnURX, tnURY);
-                       
+            
+            // We have the assurance that leftTile.getMaxX() < rightTile.getMinX()
+            Tile leftTile = Tile.lowerRight(tnLLX, tnLLY);
+            Tile rightTile = Tile.upperLeft(tnURX, tnURY);
+            
+            double startX = Board.scTranslation[CompetitionConfig.corner].getX();
+            
+            // We must travel E to reach the search area
+            if (startX < leftTile.getMaxX()) {
+                CompetitionConfig.tunnelEntranceToSearchArea = leftTile;
+                CompetitionConfig.tunnelEntranceToStartArea = rightTile;
+                CompetitionConfig.toSearchAreaHeading = Heading.E;
+                CompetitionConfig.toStartAreaHeading = Heading.W;
+          
+            // Else, we must travel W to reach the search area
+            } else {
+                CompetitionConfig.tunnelEntranceToSearchArea = rightTile;
+                CompetitionConfig.tunnelEntranceToStartArea = leftTile;
+                CompetitionConfig.toSearchAreaHeading = Heading.W;
+                CompetitionConfig.toStartAreaHeading = Heading.E;
+            }
+
+            
         // Vertical
         } else {
-            CompetitionConfig.tunnelEntranceToSearchArea = Tile.upperLeft(tnLLX, tnLLY);
-            CompetitionConfig.tunnelEntranceToStartArea = Tile.lowerRight(tnURX, tnURY);
+            
+            Tile bottomTile = Tile.upperLeft(tnLLX, tnLLY);
+            Tile topTile = Tile.lowerRight(tnURX, tnURY);
+            
+            double startY = Board.scTranslation[CompetitionConfig.corner].getY();
+
+            // We must travel N to reach the search area
+            if (startY < bottomTile.getMaxY()) {
+                CompetitionConfig.tunnelEntranceToSearchArea = bottomTile;
+                CompetitionConfig.tunnelEntranceToStartArea = topTile;
+                CompetitionConfig.toSearchAreaHeading = Heading.N;
+                CompetitionConfig.toStartAreaHeading = Heading.S;
+            }
+
+            // Else, we must travel S to reach the search area
+            else {
+                CompetitionConfig.tunnelEntranceToSearchArea = topTile;
+                CompetitionConfig.tunnelEntranceToStartArea = bottomTile;
+                CompetitionConfig.toSearchAreaHeading = Heading.S;
+                CompetitionConfig.toStartAreaHeading = Heading.N;
+            }
+            
         }
     }
     

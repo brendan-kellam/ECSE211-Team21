@@ -1,8 +1,10 @@
 package ca.mcgill.ecse211.main;
 
+import java.awt.geom.Point2D;
 import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.Test;
+import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.LightLocalizerTester;
@@ -29,7 +31,6 @@ public final class Source {
 
 	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
 	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
-	// Lower left and upper right corner definitions [0,8]
 
 	/**
 	 * Represents a given MenuOption
@@ -40,7 +41,9 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
+	
+	
 
 	/**
 	 * Main entry of program
@@ -63,18 +66,14 @@ public final class Source {
 		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.73));
 		Vehicle.LEFT_MOTOR.setAcceleration(3000);
 		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
-        
-		// Starting corner
-	
+        	
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
 
 		// Create ultrasonic poller
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
-
-		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
-
+		
 		// Initialize logging
 		Log.setLogging(true, true, true, true, true, true);
 
@@ -85,6 +84,9 @@ public final class Source {
 			e1.printStackTrace();
 		}
 
+		// Create claw
+		Claw claw = new Claw(usPoller);
+		
 		PollerSystem pollerSystem = PollerSystem.getInstance();
 		pollerSystem.addPoller(usPoller);
 		pollerSystem.addPoller(odometer);
@@ -101,6 +103,7 @@ public final class Source {
 		
         // ----- Localize to grid ------
         localize(ul, dll);
+        claw.stow();
 		
 		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 		
@@ -109,10 +112,14 @@ public final class Source {
 	    
 		// ------ TRAVEL TO TUNNEL -------
 		travelToTunnel(dll);	  
-        dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
-		travelThroughTunnel();
-	    dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 		
+		Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
+		// Traveling to search area
+		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
+		travelThroughTunnel();
+	    dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
+		
+	    
         Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
         
         //Beep 5 times
@@ -153,58 +160,70 @@ public final class Source {
 	    ul.usLocalize();
         dll.localizeToIntersection(Heading.N);
         
-        Odometer.getOdometer().setX(Board.TILE_SIZE);
-        Odometer.getOdometer().setY(Board.TILE_SIZE);
+        Point2D trans = Board.scTranslation[CompetitionConfig.corner];
+        double rot = Board.scRotation[CompetitionConfig.corner];
+        
+        Odometer.getOdometer().setX(trans.getX());
+        Odometer.getOdometer().setY(trans.getY());
+        Odometer.getOdometer().setTheta(rot);
         
         // Compliance beeps
         for (int i = 0; i < 3; i++) {
             Sound.beep();
         }
         
-        dll.travelToLine(100);
+       dll.travelToLine(100);
 	}
 	
+	public static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
+	    
+	    Tile tunnelEntrance = CompetitionConfig.tunnelEntranceToSearchArea;
+	    Navigator.travelTo(tunnelEntrance.getCenter().getX(), tunnelEntrance.getCenter().getY(), true, true);   
+	}
+	
+
 	/**
 	 * Routine to travel to the tunnel
 	 * 
 	 * @param dll
 	 * @throws OdometerExceptions
 	 */
+	/*
 	private static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
 	    
 	    // Get tunnel lower left and right
-	    Tile tunnelLR = CompetitionConfig.tunnelEntranceToSearchArea;
+	    Tile toSearchArea = CompetitionConfig.tunnelEntranceToSearchArea;
         Tile tunnelUR = CompetitionConfig.tunnelEntranceToStartArea;
         
         // Debug information
-        Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
+        Log.log(Sender.Navigator, "tunnelLR: " + toSearchArea.toString());
         Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
         
-        
-        double targetX = tunnelLR.getLowerLeft().getX();
-        double targetY = tunnelLR.getLowerLeft().getY();
+        double targetX = toSearchArea.getLowerLeft().getX();
+        double targetY = toSearchArea.getLowerLeft().getY();
         
         Navigator.travelTo(Odometer.getX(), targetY, true, true);
         dll.travelToLine(100);
         
         Navigator.travelSpecificDistance(5);
         
-        Navigator.turnTo(Navigator.getDestAngle(targetX, tunnelLR.getCenter().getY()));
+        Navigator.turnTo(Navigator.getDestAngle(targetX, toSearchArea.getCenter().getY()));
         dll.travelToLine(100);
         
-        
-        Navigator.travelTo(targetX, tunnelLR.getCenter().getY(), true, true);
+        Navigator.travelTo(targetX, toSearchArea.getCenter().getY(), true, true);
         dll.travelToLine(100); 
         Navigator.travelSpecificDistance(5);
         
 	}
-
+	*/
+	
 	/**
 	 * 
 	 * @throws OdometerExceptions
 	 */
 	private static void travelThroughTunnel() throws OdometerExceptions {
-
+	    
+	    
         LightLocalizerTester uc = new LightLocalizerTester(Odometer.getOdometer());
         
         //Cheat the beginning.

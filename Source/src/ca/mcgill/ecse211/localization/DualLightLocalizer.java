@@ -88,7 +88,6 @@ public class DualLightLocalizer {
         
         Navigator.travelSpecificDistance(10);
         travelToLine(SPEED);
-
         
         double diff = Board.TILE_SIZE - 4;
         Navigator.travelSpecificDistance(-diff, -SPEED);
@@ -161,7 +160,7 @@ public class DualLightLocalizer {
             Navigator.turnTo(Board.getHeadingAngle(l));
         }
         
-        Vehicle.setMotorSpeeds(100, 100);
+        Vehicle.setMotorSpeeds(150, 150);
         try {
             Thread.sleep(lineCrossOverSleepTime);
         } catch (InterruptedException e) {
