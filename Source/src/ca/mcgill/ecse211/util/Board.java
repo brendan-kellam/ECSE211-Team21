@@ -138,6 +138,26 @@ public final class Board {
         return 0;
     }
     
+    /**
+     * Return true if headings are orthogonal
+     * 
+     * @param h1
+     * @param h2
+     */
+    public static boolean areHeadingsOrthogonal(Heading h1, Heading h2) {
+        return EV3Math.distance(getHeadingAngle(h1), getHeadingAngle(h2)) == 90.0;
+    }
+    
+    /**
+     * Return true if headings are parallel
+     * 
+     * @param h1
+     * @param h2
+     * 
+     */
+    public static boolean areHeadingsParallel(Heading h1, Heading h2) {
+        return !areHeadingsOrthogonal(h1, h2);
+    }
     
     /**
      * Snaps to a given gridline.
@@ -237,7 +257,7 @@ public final class Board {
      * </ol>     
      * 
      * This function returns a double array with two elements: xOffset and yOffset. <b>NOTE:</b> one of these components will always be 0.
-     * The other will either be ±{@link ca.mcgill.ecse211.util.Vehicle #DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE}
+     * The other will either be ±{@link ca.mcgill.ecse211.util.Vehicle #VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE}
      * 
      */
     public static double[] determineLightOffset() {
@@ -245,15 +265,15 @@ public final class Board {
         Heading heading = getHeading(Odometer.getTheta());
         
         if (heading == Heading.E) {
-            return new double[] {-Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+            return new double[] {-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
         }
         else if (heading == Heading.W) {
-            return new double[] {Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+            return new double[] {Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
         }
         else if (heading == Heading.N) {
-            return new double[] {0.0, -Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+            return new double[] {0.0, -Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
         } else {
-            return new double[] {0.0, Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+            return new double[] {0.0, Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
         }
         
     }
@@ -296,7 +316,6 @@ public final class Board {
     public static TUNNEL_ORIENTATION getTunnelOrientation() {
         return Board.curTunnelOrientation;
     }
-    
-   
+       
     
 }

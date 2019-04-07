@@ -1,5 +1,8 @@
 package ca.mcgill.ecse211.sensor;
 
+import ca.mcgill.ecse211.odometer.Odometer;
+import ca.mcgill.ecse211.util.Tile;
+import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
@@ -61,6 +64,66 @@ public class ColorSensor {
         float[] intensity = new float[sensorColour.sampleSize()];
         sensorColour.fetchSample(intensity, 0);
         return intensity[0];
+    }
+    
+    /**
+     * Get the x position
+     * 
+     * @param sensor
+     * @return
+     */
+    public static double getX(ColorSensor sensor) throws IllegalArgumentException {
+        
+        double angle = Math.toRadians(Odometer.getTheta());
+        
+        double x = Odometer.getX() - Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.sin(angle);
+        
+        if (sensor == Vehicle.LEFT_CS) { 
+            x -= Vehicle.HORZ_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.cos(angle);
+            return x;
+            
+            
+        } else if (sensor == Vehicle.RIGHT_CS) {
+            x += Vehicle.HORZ_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.cos(angle);
+            return x;
+        }
+        
+        throw new IllegalArgumentException("sensor is neither left or right mounted. Unable to get position.");
+    }
+    
+    /**
+     * Get the y position
+     * 
+     * @param sensor
+     * @return
+     */
+    public static double getY(ColorSensor sensor) throws IllegalArgumentException {
+        
+        double angle = Math.toRadians(Odometer.getTheta()); 
+        double y = Odometer.getY() - Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.cos(angle);
+        
+        if (sensor == Vehicle.LEFT_CS) {
+            
+            y += Vehicle.HORZ_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.sin(angle);
+            
+            return  y;
+        } else if (sensor == Vehicle.RIGHT_CS) {
+            
+            y -= Vehicle.HORZ_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE * Math.sin(angle);
+            
+            return y;
+        }
+        
+        throw new IllegalArgumentException("sensor is neither left or right mounted. Unable to get position.");
+    }
+    
+    /**
+     * Returns true if a tile contains a given sensor
+     * 
+     * @return
+     */
+    public static boolean checkTileContains(ColorSensor sensor, Tile tile) {
+        return tile.contains(getX(sensor), getY(sensor));
     }
     
 }

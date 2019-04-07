@@ -38,6 +38,7 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.EncoderMotor;
 import lejos.robotics.SampleProvider;
+import lejos.robotics.geometry.Rectangle;
 
 public class Test {
 
@@ -155,13 +156,83 @@ public class Test {
 //		testSearchForCan();
 		//testDriveToLine();
 		//testDriveInSquare();
-		testDualLocalization();
+//		testDualLocalization();
+		testLocalizeToTile();
+		//testLightSensorContainment();
 		// Wait so that we can measure
 		//		drawOdoValues();
 //		testFallingEdgeThenLocalize();
 
 		//		testTime();
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+	}
+	
+	private void testLightSensorContainment() {
+	    
+	    Tile t = Tile.lowerLeft(2, 2);
+	    
+	    
+	    double xa = 0.0, ya = 0.0;
+	    double xb = 0.0, yb = 0.0;
+	    
+	    try {
+            Navigator.travelTo(Board.TILE_SIZE*2, Board.TILE_SIZE*2, true, true);
+        } catch (OdometerExceptions e1) {
+            e1.printStackTrace();
+        }
+	    
+	    Vehicle.setMotorSpeeds(-100, 100);
+	    
+	    while (true) {
+	        
+	        xa = ColorSensor.getX(Vehicle.LEFT_CS);
+	        ya = ColorSensor.getY(Vehicle.LEFT_CS);
+	        
+	        xb = ColorSensor.getX(Vehicle.RIGHT_CS);
+            yb = ColorSensor.getY(Vehicle.RIGHT_CS);
+	        
+	        if (t.contains(xa, ya)) {
+	            Sound.beep();
+	        }
+	        
+	        if (t.contains(xb, yb)) {
+	            Sound.buzz();
+	        }
+	        
+	        //Log.log(Sender.board, "left CS (" + xa + ", " + ya + ")");
+	        
+	        
+	        try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+	    }
+	    
+	   // Vehicle.setMotorSpeeds(0, 0);
+	}
+	
+	private void testLocalizeToTile() {
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+
+	    Tile t = Tile.upperLeft(0, 2);
+	    
+	    try {
+            Navigator.travelTo(t.getCenter().getX(), t.getCenter().getY(), true, true);
+        } catch (OdometerExceptions e) {
+            e.printStackTrace();
+        }
+	    
+	    dll.localizeToTile(Heading.N, Heading.W, Heading.S);
+	    try {
+            testTunnelNavigation();
+        } catch (OdometerExceptions e) {
+            e.printStackTrace();
+        }
+	    dll.localizeToTile(Heading.N, Heading.W, Heading.N);
+	    
+	    Sound.beepSequence();
 	}
 	
 	private void testDriveToLine() {
@@ -181,7 +252,7 @@ public class Test {
 	        // Go back to origin
 	        Sound.beep();
                 
-	        Navigator.travelSpecificDistance(- (Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE));
+	        Navigator.travelSpecificDistance(- (Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE));
 	        Navigator.turnTo(angle);
 	        
 	        angle += 90.0;
@@ -505,9 +576,9 @@ public class Test {
 		//Cheat the beginning.
 		Vehicle.setAcceleration(3000, 3000);
 		//Cheat the beginning.
-		Navigator.travelSpecificDistance(75,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed());
-		//		while (!uc.bridgeDetected());
-		Vehicle.setMotorSpeeds(550, 550);
+		Navigator.travelSpecificDistance(Board.TILE_SIZE*2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
+
+		Vehicle.setMotorSpeeds(300, 300);
 		while (uc.bridgeDetected());
 
 
