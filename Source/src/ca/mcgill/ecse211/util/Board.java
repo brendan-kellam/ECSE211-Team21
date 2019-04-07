@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.util;
 
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerData;
+import ca.mcgill.ecse211.util.Log.Sender;
 
 public final class Board {
     
@@ -147,50 +148,72 @@ public final class Board {
      * @param position
      * @param odometer
      */
-    public static void snapToGridLine(Odometer odometer) {
+    public static void snapToGridLine(Odometer odometer, boolean withLightSensorOffset) {
         
         // Get x, y, theta
         double x = Odometer.getX();
         double y = Odometer.getY();
         double theta = Odometer.getTheta();
         
+        Log.log(Sender.board, "snapToGridLine:: Odometer X and Y: (" + Odometer.getX() + ", " + Odometer.getY() + ")");
+        
+        double xoffset = 0.0, yoffset = 0.0;
+        
+        if (withLightSensorOffset) {
+            double offset[] = determineLightOffset();
+            xoffset = offset[0];
+            yoffset = offset[1];
+        }   
+
+        // Apply the offset
+        x += xoffset;
+        y += yoffset;
+        
+        Log.log(Sender.board, "snapToGridLine:: Offset X and Y: (" + x + ", " + y + ")");
+        
         // Fills the new position of the robot after correction
         double pos; 
         
         Heading heading = getHeading(theta);
-        
+       
         // Moving in the y direction
         if (heading == Heading.N || heading == Heading.S) {
-            pos = y - OdometerData.yoffset;
+            pos = y;
         }
         
         // Moving in the x direction
         else {
-            pos = x - OdometerData.xoffset;
+            pos = x;
         }
         
         // For the current position, determine the number of tileLength multiples
         double div = pos / TILE_SIZE;
         
-        // If the multiple is less than the minimum multiple
-        if (Math.abs(div) < MIN_TILE_MULTIPLE) {
-            // Reset position to 0
-            pos = 0;
-            
-        // Otherwise, set position to the rounded multiple multiplied by the tile length
-        } else {
+//        // If the multiple is less than the minimum multiple
+//        if (Math.abs(div) < MIN_TILE_MULTIPLE) {
+//            // Reset position to 0
+//            pos = 0;
+//            
+//        // Otherwise, set position to the rounded multiple multiplied by the tile length
+//        } else {
             pos = TILE_SIZE * Math.round(div);
-        }
+//        }
         
-        String msg = "Snap to ";
-        
+        String msg = "snapToGridLine:: Snap to ";
+                
         // Moving in the y direction
         if (heading == Heading.N || heading == Heading.S) {
+            
+            // Remove the yoffset from the position
+            pos -= yoffset;
             odometer.setY(pos);
             msg += "Y: ";
         }
         // Moving in the x direction
         else {
+            
+            // Remove the xoffset from the position
+            pos -= xoffset; 
             odometer.setX(pos);
             msg += "X: ";
         }       
@@ -200,10 +223,45 @@ public final class Board {
         Log.log(Log.Sender.board, msg);
     }
     
+    
+    /**
+     * When a line is detected, and assuming the vehicle is orthogonal to the line, the vehicle is pointed towards either N, E, S or W. 
+     * Depending on this direction, the position of the light sensors will be differently offset from the origin of the robot.
+     * <b>The origin</b> of the robot is located in the center of the wheel base. The following are the offsets:
+     * 
+     * <ol>
+     * <li>E: x - 13cm</li>
+     * <li>W: x + 13cm</li>
+     * <li>N: y - 13cm</li>
+     * <li>S: y + 13cm</li>
+     * </ol>     
+     * 
+     * This function returns a double array with two elements: xOffset and yOffset. <b>NOTE:</b> one of these components will always be 0.
+     * The other will either be ±{@link ca.mcgill.ecse211.util.Vehicle #DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE}
+     * 
+     */
+    public static double[] determineLightOffset() {
+        
+        Heading heading = getHeading(Odometer.getTheta());
+        
+        if (heading == Heading.E) {
+            return new double[] {-Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+        }
+        else if (heading == Heading.W) {
+            return new double[] {Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, 0.0};
+        }
+        else if (heading == Heading.N) {
+            return new double[] {0.0, -Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+        } else {
+            return new double[] {0.0, Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE};
+        }
+        
+    }
+    
     public static void snapToHeading(Odometer odometer) {
         Heading heading = getHeading(Odometer.getTheta());
         
-        odometer.setTheta(getHeadingAngle(heading));
+        odometer.setTheta(getHeadingAngle(heading));        
     }
     
     /**
@@ -239,23 +297,6 @@ public final class Board {
         return Board.curTunnelOrientation;
     }
     
-    /**
-     * 
-     */
-    public static final class Config {
-        
-        public static int redTeam;
-        public static int greenTeam;
-        
-        public static Tile startingAreaLL;
-        public static Tile startingAreaUR;
-        public static Tile islandLL;
-        public static Tile islandUR;
-        public static Tile searchAreaLL;
-        public static Tile searchAreaUR;
-        public static Tile tunnelLL;
-        public static Tile tunnelUR;
-        public static int corner;
-    }
+   
     
 }

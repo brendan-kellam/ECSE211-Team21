@@ -7,6 +7,7 @@ import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.Board.Heading;
+import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.motor.BaseRegulatedMotor;
 
@@ -50,17 +51,18 @@ public class DualLightLocalizer {
         
         travelToLine(SPEED);
         
-        Navigator.travelSpecificDistance(-13, -SPEED);
-        Board.snapToGridLine(Odometer.getOdometer());
-        
-        Navigator.turnTo(Odometer.getTheta() + 90.0);
+        Navigator.travelSpecificDistance(-Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -SPEED);
+                
+        Navigator.turnTo(90.0);
         
         travelToLine(SPEED);
         
-        Navigator.travelSpecificDistance(-13, -SPEED);
-        Board.snapToGridLine(Odometer.getOdometer());
+        Navigator.travelSpecificDistance(-Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -SPEED);
+        Navigator.turnTo(4.0);
         
-        Navigator.turnTo(Odometer.getTheta() - 90.0);
+        // Magic
+        Navigator.travelSpecificDistance(2.0);
+        
         
     }
     
@@ -71,17 +73,19 @@ public class DualLightLocalizer {
     
     
     public boolean localizeToSquare(Heading heading, Heading finalHeading, Config config) throws OdometerExceptions {
+        
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
         Navigator.travelSpecificDistance(10);
         travelToLine(SPEED);
+//        
+//        Board.snapToHeading(Odometer.getOdometer());
+//        Board.snapToGridLine(Odometer.getOdometer(), true);
         
         double diff = Board.TILE_SIZE - 4;
         Navigator.travelSpecificDistance(-diff, -SPEED);
         
-        Board.snapToHeading(Odometer.getOdometer());
-        Board.snapToGridLine(Odometer.getOdometer());
         
         try {
             Thread.sleep(500);
@@ -91,7 +95,6 @@ public class DualLightLocalizer {
         
         Navigator.turnTo(90.0);
         
-
         if (config == Config.FORWARD) {
             Navigator.travelSpecificDistance(-10);
             travelToLine(SPEED);
@@ -100,8 +103,8 @@ public class DualLightLocalizer {
             travelToLine(-SPEED);
         }
         
-        Board.snapToGridLine(Odometer.getOdometer());
-        Board.snapToHeading(Odometer.getOdometer());
+//        Board.snapToGridLine(Odometer.getOdometer(), true);
+//        Board.snapToHeading(Odometer.getOdometer());
         
         return Board.getHeading(Odometer.getTheta()) == finalHeading;
         
@@ -125,6 +128,7 @@ public class DualLightLocalizer {
         
         try {
             Board.snapToHeading(Odometer.getOdometer());
+            Board.snapToGridLine(Odometer.getOdometer(), true);
         } catch (OdometerExceptions e) {
             e.printStackTrace();
         }

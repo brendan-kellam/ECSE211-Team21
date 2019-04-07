@@ -10,7 +10,6 @@ import ca.mcgill.ecse211.localization.DualLightLocalizer.Config;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Board.Heading;
@@ -41,7 +40,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
 
 	/**
 	 * Main entry of program
@@ -71,10 +70,6 @@ public final class Source {
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
 
-		// Create odometery correction | disable correction
-		OdometryCorrection odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_LEFT);
-		odoCorrection.disableCorrection();
-
 		// Create ultrasonic poller
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
@@ -101,40 +96,32 @@ public final class Source {
 		
 		// ----- Configuration ------
         WifiController.fetchGameplayData();
-        Log.log(Sender.usSensor, "Tunnel LL: " + Board.Config.tunnelLL.toString());
+        Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
 
 		
-        ul.usLocalize();
-        dll.localizeToIntersection(Heading.N);
-        
-        
-		Odometer.getOdometer().setX(Board.TILE_SIZE);
-		Odometer.getOdometer().setY(Board.TILE_SIZE);
-		
-		dll.travelToLine(100);
+        // ----- Localize to grid ------
+        localize(ul, dll);
 		
 		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 		
-		Sound.beepSequence();
-		
-				
 		int desiredCanColour = 1;
 		
 	    
+		// ------ TRAVEL TO TUNNEL -------
 		travelToTunnel(dll);	  
         dll.localizeToSquare(Heading.N, Heading.E, Config.BACKWARD);
 		travelThroughTunnel();
 	    dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 		
-        Navigator.travelTo(Board.Config.searchAreaLL.getLowerLeft().getX(), Board.Config.searchAreaLL.getLowerLeft().getY(), true, true);
+        Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
         
         //Beep 5 times
         for (int i=0;i<5;i++) Sound.beep();
         
-        int LLx = (int) (Board.Config.searchAreaLL.getLowerLeft().getX() / Board.TILE_SIZE);
-        int LLy = (int) (Board.Config.searchAreaLL.getLowerLeft().getY() / Board.TILE_SIZE);
-        int URx = (int) (Board.Config.searchAreaUR.getUpperRight().getX() / Board.TILE_SIZE);
-        int URy = (int) (Board.Config.searchAreaUR.getUpperRight().getY() / Board.TILE_SIZE);
+        int LLx = (int) (CompetitionConfig.searchAreaLL.getLowerLeft().getX() / Board.TILE_SIZE);
+        int LLy = (int) (CompetitionConfig.searchAreaLL.getLowerLeft().getY() / Board.TILE_SIZE);
+        int URx = (int) (CompetitionConfig.searchAreaUR.getUpperRight().getX() / Board.TILE_SIZE);
+        int URy = (int) (CompetitionConfig.searchAreaUR.getUpperRight().getY() / Board.TILE_SIZE);
 
         
         // Starting corner [0, 3]
@@ -143,6 +130,7 @@ public final class Source {
         FieldSearch fieldSearch = new FieldSearch(searchArea, usPoller,Vehicle.LEFT_CS,Vehicle.RIGHT_CS);
         
         fieldSearch.startSearch(desiredCanColour);
+        
         //Beep 5 times
         for (int i=0;i<5;i++) Sound.beep();
 		
@@ -152,24 +140,29 @@ public final class Source {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 		System.exit(0);
 	}
-
-	//	/**
-	//	 * Executes ultrasonic localization
-	//	 * 
-	//	 * @param ul
-	//	 * @param option
-	//	 */
-	//	private static void executeUSLocalization(UltrasonicPoller poller, MenuOption option) {
-	//		UltrasonicLocalizer ul;
-	//		if (option == MenuOption.FALLING_EDGE) {
-	//			ul = new FallingEdgeLocalizer(poller);
-	//		} else {
-	//			ul = new RisingEdgeLocalizer(poller);
-	//		}
-	//
-	//		// Localize
-	//		ul.localize();
-	//	}
+	
+	/**
+	 * Localize to play board
+	 * 
+	 * @param ul - falling edge localizer
+	 * @param dl - dual light localizer
+	 * @throws OdometerExceptions 
+	 * @throws InterruptedException 
+	 */
+	private static void localize(FallingEdgeLocalizer ul, DualLightLocalizer dll) throws OdometerExceptions, InterruptedException {
+	    ul.usLocalize();
+        dll.localizeToIntersection(Heading.N);
+        
+        Odometer.getOdometer().setX(Board.TILE_SIZE);
+        Odometer.getOdometer().setY(Board.TILE_SIZE);
+        
+        // Compliance beeps
+        for (int i = 0; i < 3; i++) {
+            Sound.beep();
+        }
+        
+        dll.travelToLine(100);
+	}
 	
 	/**
 	 * Routine to travel to the tunnel
@@ -180,8 +173,8 @@ public final class Source {
 	private static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
 	    
 	    // Get tunnel lower left and right
-	    Tile tunnelLR = Board.Config.tunnelLL;
-        Tile tunnelUR = Board.Config.tunnelUR;
+	    Tile tunnelLR = CompetitionConfig.tunnelEntranceToSearchArea;
+        Tile tunnelUR = CompetitionConfig.tunnelEntranceToStartArea;
         
         // Debug information
         Log.log(Sender.Navigator, "tunnelLR: " + tunnelLR.toString());
