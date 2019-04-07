@@ -16,7 +16,6 @@ import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.OdometerDisplay;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.sensor.ColourDetection;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
@@ -45,7 +44,6 @@ public class Test {
 	private static Odometer odometer;
 	private static UltrasonicPoller usPoller;
 
-	private static OdometryCorrection odoCorrection;
 	private static ColorSensor left;
 	private static ColorSensor right;
 	private static PollerSystem pollerSystem;
@@ -68,9 +66,6 @@ public class Test {
 		// Create odometer
 		odometer = Odometer.getOdometer();
 
-		// Create odometery correction | disable correction
-		odoCorrection = new OdometryCorrection(Vehicle.COLOR_SENSOR_LEFT);
-		odoCorrection.disableCorrection();
 		// Create ultrasonic poller
 		usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
@@ -80,7 +75,7 @@ public class Test {
 		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
 		// Initialize logging
-		Log.setLogging(true, true, true, true, true, true);
+		Log.setLogging(true, true, false, true, true, true);
 
 		// Set logging to write to file
 		try {
@@ -158,13 +153,69 @@ public class Test {
 		//				testScanThenGrab();
 		//						testTrackValue();
 //		testSearchForCan();
-		testNewSearch();
+		//testDriveToLine();
+		//testDriveInSquare();
+		testDualLocalization();
 		// Wait so that we can measure
 		//		drawOdoValues();
 //		testFallingEdgeThenLocalize();
 
 		//		testTime();
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+	}
+	
+	private void testDriveToLine() {
+	    
+	    //Navigator.travelSpecificDistance(Board.TILE_SIZE + Board.TILE_SIZE/2);
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+	    Log.log(Sender.board, "Odometer X and Y: (" + Odometer.getX() + ", " + Odometer.getY() + ")");
+	    
+	    double angle = 90.0;
+	    
+	    for (int i = 0; i < 4; i++) {
+	        dll.travelToLine(200);
+	        Log.log(Sender.board, "Odometer X and Y: (" + Odometer.getX() + ", " + Odometer.getY() + ")");
+	        Log.log(Sender.board, "Odometer theta: " + Odometer.getTheta());
+	        
+	        // Go back to origin
+	        Sound.beep();
+                
+	        Navigator.travelSpecificDistance(- (Vehicle.DISTANCE_FROM_LIGHT_SENSORS_TO_WHEEL_BASE));
+	        Navigator.turnTo(angle);
+	        
+	        angle += 90.0;
+	    }
+	    
+	    
+	    
+	}
+	
+	private void testDriveInSquare() {
+	    
+	    DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
+	    double angle = 90.0;
+	    
+	    for (int i = 0; i < 4; i++) {
+	        
+	        for (int j = 0; j < 3; j++) {
+    	        dll.travelToLine(200);
+    	        Log.log(Sender.board, "Odometer X and Y: (" + Odometer.getX() + ", " + Odometer.getY() + ")");
+                Log.log(Sender.board, "Odometer theta: " + Odometer.getTheta());
+                
+	        }
+            
+	        Navigator.turnTo(angle);
+	        angle+= 90.0;
+	    }
+	    
+	    Sound.beepSequenceUp();
+        try {
+            Navigator.travelTo(Board.TILE_SIZE, Board.TILE_SIZE, true, true);
+        } catch (OdometerExceptions e) {
+            e.printStackTrace();
+        }
+	    
 	}
 	
 	private void testTravelToTunnel() throws OdometerExceptions {
@@ -261,65 +312,6 @@ public class Test {
 		}		
 	}
 
-	private void testLineTravel() throws OdometerExceptions {
-
-		//double dist = Board.TILE_SIZE * 3.5;
-
-		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
-
-		for (int i = 0; i < 4; i++) {
-			dll.travelToLine(300);    
-			Board.snapToHeading(Odometer.getOdometer());
-			Board.snapToGridLine(Odometer.getOdometer());
-			dll.travelToLine(300);
-			Board.snapToHeading(Odometer.getOdometer());
-			Board.snapToGridLine(Odometer.getOdometer());
-			dll.travelToLine(300);
-			Board.snapToHeading(Odometer.getOdometer());
-			Board.snapToGridLine(Odometer.getOdometer());
-
-			Navigator.turnTo(Odometer.getTheta() + 90.0);
-		}
-
-
-	}
-
-	private void travelTo(double x, double y) throws OdometerExceptions {
-
-		double hypot = Math.hypot(x, y);
-		double minAngle = Navigator.getDestAngle(x, y);
-
-		double yComp = Math.sin(minAngle) * hypot;
-		double xComp = Math.cos(minAngle) * hypot;
-
-		double yDest = Odometer.getY() + yComp;
-		double xDest = Odometer.getX() + xComp;
-
-		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
-
-
-		while (yComp >= Board.TILE_SIZE) {
-			dll.travelToLine(300);    
-			Board.snapToHeading(Odometer.getOdometer());
-			Board.snapToGridLine(Odometer.getOdometer());
-			yComp -= Board.TILE_SIZE;
-		}
-
-		Navigator.travelTo(Odometer.getX(), yDest, true, true);
-
-		Navigator.turnTo(Navigator.getDestAngle(xDest, Odometer.getY()));
-
-		while (xComp >= Board.TILE_SIZE) {
-			dll.travelToLine(300);    
-			Board.snapToHeading(Odometer.getOdometer());
-			Board.snapToGridLine(Odometer.getOdometer());
-			xComp -= Board.TILE_SIZE;
-		}
-
-		Navigator.travelTo(xDest, yDest, true, true);
-
-	}
-
 	private void testLocalizeToSquare() {
 
 		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
@@ -339,8 +331,7 @@ public class Test {
 
 	private void testTunnelOrientation() {
 
-
-		if (WifiController.getOrientation(0, 0, 2, 1) == WifiController.TUNNEL_ORIENTATION.VERTICAL) {
+		if (Board.getTunnelOrientation() == Board.TUNNEL_ORIENTATION.VERTICAL) {
 			Sound.buzz();
 		} else {
 			Sound.beep();
@@ -377,6 +368,10 @@ public class Test {
 		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 		try {
 			dll.localizeToIntersection(Board.Heading.N);
+			
+			Log.log(Sender.board, "Odometer X and Y : (" + Odometer.getX() + ", " + Odometer.getY() + ")");
+	        Log.log(Sender.board, "Odometer theta : " + Odometer.getTheta());
+
 		} catch (OdometerExceptions e1) {
 			e1.printStackTrace();
 		}
