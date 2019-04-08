@@ -1,6 +1,5 @@
 package ca.mcgill.ecse211.claw;
 
-import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.main.PollerSystem;
 import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.util.Vehicle;
@@ -21,25 +20,24 @@ public class Weigh {
 	}
 	
 	private int timeThreshold;
-	
-	public Weigh(PollerSystem ps,ColorSensor cs) throws RuntimeException, InterruptedException {
+	public Weigh(PollerSystem ps, ColorSensor cs) throws RuntimeException, InterruptedException {
 		this.cs = cs;
 		this.ps = ps;
 		float battery = Vehicle.power.getVoltage();
-		if (battery > 7.1 && battery < 7.3) {
-			timeThreshold = 11600;
+		if (battery > 7.1 && battery <= 7.3) {
+			timeThreshold = 11450;
 		}
-		else if (battery > 7.3 && battery < 7.5) {
+		else if (battery > 7.3 && battery <= 7.5) {
 			timeThreshold = 11100;
 		}
-		else if (battery > 7.5 && battery < 7.8) {
+		else if (battery > 7.5 && battery <= 7.8) {
 			timeThreshold = 10600;
 		}
 		else if (battery > 7.8) {
 			timeThreshold = 10250;
 		}
 		else {
-			timeThreshold = 11800;
+			timeThreshold = 11700;
 		}
 	}
 	

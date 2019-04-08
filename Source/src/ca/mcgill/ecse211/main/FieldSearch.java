@@ -36,7 +36,7 @@ public class FieldSearch {
 
 	// Add a filter for can detection:
 	private static int filter = 0;
-	private static final int maxFilter = 10;
+	private static final int maxFilter = 6;
 	// Search area
 	private SearchArea searchArea;
 
@@ -67,59 +67,29 @@ public class FieldSearch {
 		ColourDetection cd = new ColourDetection(desiredCanColour,usPoller);
 
 		//Keep track of the coordinate we terminate the search at.
-		double finalX;
-		double finalY;
-
-		// Travel to first waypoint
-		Point firstWaypoint = searchArea.popWaypoint();
-
-		//Hold onto these variables incase the can is discovered in the first tile.
-		finalX  = firstWaypoint.getX();
-		finalY = firstWaypoint.getY();
-
 		Navigator.travelTo((searchArea.getBottomLeft().getX()) * TILE_SIZE, (searchArea.getBottomLeft().getY()) * TILE_SIZE, true, true);
-		//Travel to the first waypoint, denoted (Lx+0.5tile, Ly+0.tile)
-		try {
-			Navigator.travelTo(firstWaypoint.getX(), firstWaypoint.getY(), true, true);
-		} catch (OdometerExceptions e1) {
-			e1.printStackTrace();
+
+		//MANDATORY: NEEDS TO BEEP 3 TIMES UPON ARRIVING
+		for (int i=0;i<3;i++) {
+			Sound.beep();
 		}
 
-		Navigator.turnTo(0);
 		Point waypoint;
 		while ((waypoint = searchArea.popWaypoint()) != null) {
 
-			//Runs under the assumption that we're currently at the center of the tile, facing north
-			try {
-				Thread.sleep(30);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-
-			Heading heading = Board.getHeading(Odometer.getTheta());
+			Thread.sleep(50);
 			double[] targetLocation = new double[2];
 			double heldAngle = Odometer.getTheta();
 
-			//Sweep between two angles, depending on direction of bot
-			if (heading == Heading.N) {
-				targetLocation[0] = 310;
-				targetLocation[1] = 60;
-			}
-			else if (heading == Heading.E || heading == Heading.S){
-				targetLocation[0] = 130;//Check from left to right.
-				targetLocation[1] = 235;
-			} else {
-				targetLocation[0] = Odometer.getTheta();
-				targetLocation[1] = Odometer.getTheta();
-			}
+			targetLocation[0] = (heldAngle-90) % 360;
+			targetLocation[1] = (heldAngle+90) % 360;
 
-			Thread.sleep(20);
+
+			Thread.sleep(70);
 			Navigator.turnTo(targetLocation[0], sweepSpeed, true);
 
 			if (scanForCan(targetLocation[0],cd)) {
-				if (usPoller.getDistance() < 3) {
-					return true;
-				}
+				return true;
 			}
 
 			Thread.sleep(20);
@@ -130,28 +100,32 @@ public class FieldSearch {
 			Navigator.turnTo(targetLocation[1], sweepSpeed, true);
 
 			if (scanForCan(targetLocation[1],cd)) {
-				if (usPoller.getDistance() < 5) {
-					return true;
-				}
+				return true;
 			}
 
 			Thread.sleep(50);
 
-			//Travel to it, poll if there's a can. If there is, scan it, back up, dodge it, and continue.
+			//Travel to it, poll if there's a can. If there is, grab it
 
 			double destinationX = waypoint.getX();
 			double destinationY = waypoint.getY();
-			Navigator.turnTo(Navigator.getDestAngle(destinationX, destinationY));
-			Navigator.travelSpecificDistance(5);
-			dll.travelToLine(200);
-			Navigator.travelTo(destinationX, destinationY,true,true);
 
+			Navigator.travelToNonBlocking(destinationX, destinationY);
+			//While travelling
+
+			while (!withinError(destinationX,destinationY)) {
+				//If we found a can, scan it, then dodge it.
+				if (usPoller.getDistance() < 8) {
+					Vehicle.setMotorSpeeds(0, 0);
+					cd.checkCanColour();
+					return true;
+				}
+			}
 			//correction.disableCorrection();
 			Sound.beepSequence();
 		}
 		return false;
 	}
-
 
 	/**
 	 * Scan for a can near a given location.
@@ -164,7 +138,7 @@ public class FieldSearch {
 		//Sound.beep();
 
 		int filter = 0;
-		int maxDistance = 30;
+		int maxDistance = 24;
 
 		while (filter < maxFilter && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
 			Thread.sleep(20);
@@ -184,43 +158,17 @@ public class FieldSearch {
 		return false;
 	}
 
-	private void goToFinal(double finalX, double finalY) throws OdometerExceptions {
-
-		Navigator.travelTo(searchArea.getTopRight().getX() * TILE_SIZE, searchArea.getTopRight().getY() * TILE_SIZE, true, true);
-		//	    
-		//		//		Sound.beep();
-		//		Navigator.turnTo(0);
-		//		//		Sound.beep();
-		//		Navigator.travelTo(finalX, (searchArea.getTopRight().getY())  * TILE_SIZE - TILE_SIZE/2, true, false); //works well
-		//		//		Sound.beep();
-		//		Navigator.turnTo(90);
-		//		//		Sound.beep();
-		//		Navigator.travelTo((Lab5.URx) * TILE_SIZE - TILE_SIZE/2, (Lab5.URy) * TILE_SIZE - TILE_SIZE/2, true, false); //Never stops going!
-		//		//		Sound.beep();
-		//		Navigator.turnTo(45);
-		//		//		Sound.beep();
-		//		Navigator.travelTo((Lab5.URx) * TILE_SIZE, (Lab5.URy-1) * TILE_SIZE, true, false);
-	}
-
-	/**
-	 * Navigate to the lower left-hand corner of the search area
-	 * @throws OdometerExceptions 
+	/* * Check if we're within error of the destination
+	 * @param x
+	 * @param y
+	 * @return
+	 * @throws OdometerExceptions
 	 */
-	private void navigateToLL() throws OdometerExceptions {
-		// Traveling to bottom left
-		Point bottomLeft = searchArea.getBottomLeft();
-
-		double targetX = (bottomLeft.getX() - 1) * TILE_SIZE + TILE_SIZE/1.5;
-		double targetY = (bottomLeft.getY() - 1) * TILE_SIZE + TILE_SIZE/1.5;
-
-		// Navigate to lower left
-		Navigator.travelTo(targetX, targetY, true, true);
+	private boolean withinError(double x, double y) throws OdometerExceptions {
+		double currentX = Odometer.getOdometer().getXYT()[0];
+		double currentY = Odometer.getOdometer().getXYT()[1];
+		return Math.sqrt(Math.pow((currentX - x), 2) + Math.pow((currentY - y), 2)) < 0.5;
 	}
-
-	/*
-	 * 
-	 */
-
 
 
 	/**

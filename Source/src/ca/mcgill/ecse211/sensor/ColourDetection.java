@@ -52,7 +52,7 @@ public class ColourDetection {
 	 * How close do we need to get to the can? 
 	 * How far do we want to be once the scan terminates? 
 	 */
-	private final int approachDistance = 4;
+	private final int approachDistance = 3;
 	private int retreatDistance = 12; // This may be modified in the test
 
 
@@ -234,7 +234,7 @@ public class ColourDetection {
 		while (usPoller.getDistance() > approachDistance  && performScan) {
 			//FAULT TOLERANCE:
 			long currTime = System.currentTimeMillis();
-			if (currTime - startTime > 4000) { //If we travel for 4 seconds and haven't found a can, end the routine
+			if (currTime - startTime > 7500) { //If we travel for 7.5 seconds and haven't found a can, end the routine
 				this.performScan = false;
 			}
 			sleep(20);
