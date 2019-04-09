@@ -66,6 +66,14 @@ public class ColorSensor {
         return intensity[0];
     }
     
+	/*
+	 * Returns true if the intensity is the intensity of the bridge
+	 */
+	public boolean tunnelDetected() {
+		//Get the current intensity. On the blue board, the value is roughyl 350.
+		return fetchNormalizedSample() > 0.345;
+	}
+	
     /**
      * Get the x position
      * 

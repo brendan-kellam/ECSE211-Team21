@@ -5,13 +5,9 @@ import java.io.FileNotFoundException;
 import ca.mcgill.ecse211.claw.Claw;
 import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
-import ca.mcgill.ecse211.localization.LightLocalizerTester;
 import ca.mcgill.ecse211.localization.LineRunner;
 import ca.mcgill.ecse211.localization.DualLightLocalizer.Config;
-import ca.mcgill.ecse211.main.FieldSearch;
 import ca.mcgill.ecse211.main.PollerSystem;
-import ca.mcgill.ecse211.main.SearchArea;
-import ca.mcgill.ecse211.main.FieldSearch.StartingCorner;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.OdometerDisplay;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -73,7 +69,6 @@ public class Test {
 		// Create new display object
 		//		Display odometryDisplay = new Display(Vehicle.LCD_DISPLAY);
 
-		FieldSearch.StartingCorner SC = FieldSearch.StartingCorner.LOWER_LEFT;
 
 		// Initialize logging
 		Log.setLogging(true, true, false, true, true, true);
@@ -147,6 +142,7 @@ public class Test {
 		//		testLocalizationSE(); //Test localization when driving southeast
 		//		testLocalizationSW(); //Test localization when driving southwest
 		//				testTunnelNavigationWithCan();
+		testTunnelNavigationWithCan();
 		//		testForward();
 		//				testTunnelNavigation();
 		//		testClawGrab();
@@ -332,16 +328,6 @@ public class Test {
 		dll.localizeToSquare(Heading.N, Heading.E, Config.FORWARD);
 	}
 
-	private void testNewSearch() throws OdometerExceptions, InterruptedException {
-		SearchArea sa = new SearchArea(1,1,3,3);
-		Claw claw = new Claw(usPoller);
-		ColourDetection cd = new ColourDetection(1,usPoller);
-		FieldSearch ns = new FieldSearch(sa, usPoller,
-				left, right);
-		if (ns.startSearch(1)) {
-			claw.grab();
-		}
-	}
 
 	private void testFallingEdgeThenLocalize() throws InterruptedException {
 		testUSLocalization();
@@ -369,7 +355,7 @@ public class Test {
 		}
 	}
 	private void testTimeWithCan() throws InterruptedException {
-		ColourDetection cd = new ColourDetection(3, usPoller);	
+		ColourDetection cd = new ColourDetection(usPoller);	
 		Claw claw = new Claw(usPoller);
 
 
@@ -507,7 +493,7 @@ public class Test {
 		//Open the regulated motors
 		//Start the pollers
 
-		Weigh weigh = new Weigh(pollerSystem,right);
+		Weigh weigh = new Weigh(pollerSystem);
 		weigh.weigh();
 	}
 
@@ -518,7 +504,7 @@ public class Test {
 		int maxDistance = 30;
 		int sweepSpeed = 100;
 
-		ColourDetection cd = new ColourDetection(1,usPoller);
+		ColourDetection cd = new ColourDetection(usPoller);
 
 		odometer.setXYT(0, 0, 0);
 
@@ -572,16 +558,13 @@ public class Test {
 	 */
 	private void testTunnelNavigation() throws OdometerExceptions {
 
-		LightLocalizerTester uc = new LightLocalizerTester(odometer);
 		//Cheat the beginning.
 		Vehicle.setAcceleration(3000, 3000);
 		//Cheat the beginning.
 		Navigator.travelSpecificDistance(Board.TILE_SIZE*2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
 		Vehicle.setMotorSpeeds(300, 300);
-		while (uc.bridgeDetected());
-
-
+		while (Vehicle.LEFT_CS.tunnelDetected());
 		Vehicle.setMotorSpeeds(0, 0);
 
 	}
@@ -608,7 +591,7 @@ public class Test {
 	 */
 	private void testScanThenGrab() {
 
-		ColourDetection cd = new ColourDetection(4, usPoller);	
+		ColourDetection cd = new ColourDetection(usPoller);	
 		Claw claw = new Claw(usPoller);
 
 		if (cd.checkCanColour()){
@@ -644,73 +627,11 @@ public class Test {
 
 
 	/*
-	 * Test localization at the origin. This will rotate,  every line, and then face 0 degrees
-	 */
-	private LightLocalizerTester testLocalizationAtOrigin() throws OdometerExceptions, InterruptedException {
-		testUSLocalization();
-		LightLocalizerTester uc = new LightLocalizerTester(odometer);
-		uc.lightLocalize(Board.TILE_SIZE, Board.TILE_SIZE);
-		return uc;
-	}
-
-	/*
-	 * Test localization before heading northwest. This will first localize at the origin,
-	 *  then localize at the top left coordinate.
-	 */
-	private void testLocalizationNW() throws OdometerExceptions, InterruptedException{
-		testLocalizationAtOrigin();
-		LightLocalizerTester uc = testLocalizationAtOrigin();
-		Navigator.travelTo(1.5 * Board.TILE_SIZE, 1.5 * Board.TILE_SIZE, true, true); //Travel to center
-		Thread.sleep(25);
-		uc.lightLocalize(1 * Board.TILE_SIZE, 2);
-		Navigator.turnTo(0);
-	}
-
-	/*
-	 * Test localization before heading northeast. This will first localize at the origin,
-	 *  then localize at the top right coordinate.
-	 */
-	private void testLocalizationNE() throws OdometerExceptions, InterruptedException{
-		testLocalizationAtOrigin();
-		LightLocalizerTester uc = testLocalizationAtOrigin();
-		Navigator.travelTo(1.5 * Board.TILE_SIZE, 1.5 * Board.TILE_SIZE, true, true); //Travel to center
-		Thread.sleep(25);
-		uc.lightLocalize(2 * Board.TILE_SIZE, 2);
-		Navigator.turnTo(0);
-	}
-
-	/*
-	 * Test localization before heading southeast. This will first localize at the origin,
-	 * then localize at the bottom right coordinate.
-	 */
-	private void testLocalizationSE() throws OdometerExceptions, InterruptedException{
-		testLocalizationAtOrigin();
-		LightLocalizerTester uc = testLocalizationAtOrigin();
-		Navigator.travelTo(1.5 * Board.TILE_SIZE, 1.5 * Board.TILE_SIZE, true, true); //Travel to center
-		Thread.sleep(25);
-		uc.lightLocalize(2 * Board.TILE_SIZE, 1);
-		Navigator.turnTo(0);
-	}
-
-	/*
-	 * 	Test localization before heading southwest. This will first localize at the origin,
-	 *  then localize at the bottom left coordinate.
-	 */
-	private void testLocalizationSW() throws OdometerExceptions, InterruptedException{
-		testLocalizationAtOrigin();
-		LightLocalizerTester uc = testLocalizationAtOrigin();
-		Navigator.travelTo(1.5 * Board.TILE_SIZE, 1.5 * Board.TILE_SIZE, true, true); //Travel to center
-		Thread.sleep(25);
-		uc.lightLocalize(1 * Board.TILE_SIZE, 1);
-		Navigator.turnTo(0);
-	}
-
-	/*
 	 * This will test the colour detection. It will stay still, then if a can is in front of the robot,
 	 * the robot will advance and detect the colour, then print it to the display. It will do this infinitely. 
 	 */
 	private void testColourDetection() {
-		ColourDetection cd = new ColourDetection(1,usPoller);		
+		ColourDetection cd = new ColourDetection(usPoller);		
 		cd.testCanColours();
 
 

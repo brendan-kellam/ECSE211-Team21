@@ -66,7 +66,6 @@ public class ColourDetection {
 		YELLOW
 	}
 
-	private Colour desiredColour;
 
 	/*
 	 * If we drive too long, we no longer wnat to perform a scan
@@ -76,8 +75,7 @@ public class ColourDetection {
 	/*
 	 * Constructor for the colour detection; make the desired colour
 	 */
-	public ColourDetection(int desiredIntegerOfCan, UltrasonicPoller usPoller) {
-		this.desiredColour = colourValueOf(desiredIntegerOfCan);
+	public ColourDetection( UltrasonicPoller usPoller) {
 		this.usPoller = usPoller;
 	}
 	
@@ -97,16 +95,8 @@ public class ColourDetection {
 			return false;
 		}
 
-		boolean correctCan = sweepCan(this.desiredColour);
-
-		//Beep twice if we found the correct can
-		if (correctCan) {
-//			for (int i=0;i<10;i++) Sound.beep();
-			return correctCan;
-		}
-
-//		reverseAwayFromCan();
-		return correctCan;
+		sweepCan();
+		return true;
 	}
 
 
@@ -116,7 +106,7 @@ public class ColourDetection {
 	 * @param desiredColour the int index of the colour that we want 
 	 * @return true if the can we're at is the colour we want.
 	 */
-	private boolean sweepCan(Colour desiredColour) { 
+	private void sweepCan() { 
 
 		Colour colours[] = new Colour[numReadings]; // Create an array of the colour samples
 
@@ -138,7 +128,7 @@ public class ColourDetection {
 
 		//Bring the sensor back to its original position
 		colourSensorMotor.rotate(-sweepAngle);
-		return (mostCommonColour(colours) == desiredColour); 
+//		return (mostCommonColour(colours) == desiredColour); 
 	}
 
 	/**

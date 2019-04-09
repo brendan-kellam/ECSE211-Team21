@@ -22,7 +22,7 @@ public class FallingEdgeLocalizer {
 	private double WHEEL_RAD = Vehicle.getConfig().getWheelRadius();
 	private double TRACK = Vehicle.getConfig().getTrackWidth();
 
-	public static final int ROTATE_SPEED = 400;
+	public static final int ROTATE_SPEED = 200;
 
 	private UltrasonicPoller usPoller; // Ultrasonic poller
 	private Odometer odometer; // Odometer

@@ -5,12 +5,14 @@ import java.io.FileNotFoundException;
 
 import ca.mcgill.ecse211.Test;
 import ca.mcgill.ecse211.claw.Claw;
+import ca.mcgill.ecse211.claw.Weigh;
 import ca.mcgill.ecse211.localization.DualLightLocalizer;
 import ca.mcgill.ecse211.localization.FallingEdgeLocalizer;
 import ca.mcgill.ecse211.localization.DualLightLocalizer.Config;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.sensor.ColourDetection;
 import ca.mcgill.ecse211.sensor.UltrasonicPoller;
 import ca.mcgill.ecse211.util.Board;
 import ca.mcgill.ecse211.util.Board.Heading;
@@ -21,6 +23,7 @@ import ca.mcgill.ecse211.util.Vehicle;
 import ca.mcgill.ecse211.util.WifiController;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 
 /**
  * Main entry point class for Lab4
@@ -100,13 +103,14 @@ public final class Source {
 		//Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
 		Log.log(Sender.board, CompetitionConfig.tostr());
 
+
+		Search search = new Search(usPoller);
 		// ----- Localize to grid ------
 		localize(ul, dll);
 		claw.stow();
 
 		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 
-		int desiredCanColour = 1;
 
 
 		// ------ TRAVEL TO TUNNEL -------
@@ -118,6 +122,7 @@ public final class Source {
 		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
 		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
 		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
+		LCD.drawString("(" + Odometer.getX() + "," + Odometer.getY() + ")", 0, 7);
 
 		claw.release();
 
@@ -126,24 +131,10 @@ public final class Source {
 		//Beep 5 times
 		//        for (int i=0;i<5;i++) Sound.beep();
 
-		int LLx = (int) (CompetitionConfig.searchAreaLL.getLowerLeft().getX() / Board.TILE_SIZE);
-		int LLy = (int) (CompetitionConfig.searchAreaLL.getLowerLeft().getY() / Board.TILE_SIZE);
-		int URx = (int) (CompetitionConfig.searchAreaUR.getUpperRight().getX() / Board.TILE_SIZE);
-		int URy = (int) (CompetitionConfig.searchAreaUR.getUpperRight().getY() / Board.TILE_SIZE);
-
-
-		// Starting corner [0, 3]
-		SearchArea searchArea = new SearchArea(LLx, LLy, URx, URy);
-		// Search the field
-		FieldSearch fieldSearch = new FieldSearch(searchArea, usPoller,Vehicle.LEFT_CS,Vehicle.RIGHT_CS);
-
-		if (fieldSearch.startSearch(desiredCanColour)) {
+		Vehicle.setMotorSpeeds(0, 0);
+		if (	search.startSearch(new ColourDetection(usPoller))){
 			claw.grab();
 		}
-
-		//Beep 3 times
-		for (int i=0;i<3;i++) Sound.beep();
-
 
 		// NAVIGATE BACK TO START AREA
 
@@ -155,8 +146,53 @@ public final class Source {
 		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
 		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
 		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
-
-		Point2D start = Board.scTranslation[CompetitionConfig.corner];
+		
+		/*
+		 * TIME TO WEIGH THE CAN.
+		 */
+//		Navigator.travelSpecificDistance(-5);
+//		
+//
+//		Heading currHeading = Board.getHeading(Odometer.getTheta());
+//		double currX = Odometer.getX();
+//		double currY = Odometer.getY();
+//		
+//		Weigh weigher = new Weigh(pollerSystem);
+//		weigher.weigh(); // This will advance us 2 units forward 
+//		switch (currHeading){
+//		case N:
+//		{
+//			currY+=2*Board.TILE_SIZE;
+//			break;
+//		}
+//		case E:
+//		{
+//			currX+=2*Board.TILE_SIZE;
+//			break;
+//			
+//		}
+//		case S:
+//		{
+//			currY-=2*Board.TILE_SIZE;
+//			break;
+//			
+//		}
+//		case W:
+//		{
+//			currX-=2*Board.TILE_SIZE;
+//			break;
+//		}
+//		}
+//			
+//		odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
+//		Thread.sleep(30);
+//		Navigator.travelSpecificDistance(-8);
+//		Thread.sleep(30);
+//		dll.travelToLine(200);
+		/*
+		 * Weighing complete.
+		 */
+		Point2D start = Board.scTranslation[CompetitionConfig.corner]; // Get the coordinate of the start location.
 
 		Navigator.travelTo(start.getX(), start.getY(), true, true);
 		claw.release();
@@ -246,21 +282,36 @@ public final class Source {
 	private static void travelThroughTunnel(Tile target) throws OdometerExceptions {
 
 		//Cheat the beginning.
-		Navigator.travelSpecificDistance(Board.TILE_SIZE*2 + Board.TILE_SIZE/2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
+		Navigator.travelSpecificDistance(Board.TILE_SIZE*2.5,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
-		Vehicle.setMotorSpeeds(200, 200);
-		while (!target.contains(Odometer.getX(), Odometer.getY())) {
+		Vehicle.setMotorSpeeds(300, 300);
+//		while (Vehicle.LEFT_CS.tunnelDetected() || !target.contains(Odometer.getX(), Odometer.getY())) {
+		while (Vehicle.LEFT_CS.tunnelDetected()) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-
+		Navigator.travelSpecificDistance(8);
 		Vehicle.setMotorSpeeds(0, 0);
 
-		//        Navigator.travelSpecificDistance(Board.TILE_SIZE/2+5);
-		Navigator.travelSpecificDistance(Board.TILE_SIZE/2+10);
+		//Cheat the beginning.
+		//		Navigator.travelSpecificDistance(Board.TILE_SIZE*2 + Board.TILE_SIZE/2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
+		//
+		//		Vehicle.setMotorSpeeds(200, 200);
+		//		while (!target.contains(Odometer.getX(), Odometer.getY())) {
+		//			try {
+		//				Thread.sleep(50);
+		//			} catch (InterruptedException e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
+		//
+		//		Vehicle.setMotorSpeeds(0, 0);
+		//
+		//		//        Navigator.travelSpecificDistance(Board.TILE_SIZE/2+5);
+		//		Navigator.travelSpecificDistance(Board.TILE_SIZE/2+10);
 
 	}
 

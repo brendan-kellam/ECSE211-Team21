@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.claw;
 
 import ca.mcgill.ecse211.main.PollerSystem;
+import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.sensor.ColorSensor;
 import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.Sound;
@@ -11,8 +12,8 @@ import lejos.hardware.motor.UnregulatedMotor;
 
 public class Weigh {
 
-	PollerSystem ps;
-	ColorSensor cs;
+	private PollerSystem ps;
+	private ColorSensor cs = Vehicle.LEFT_CS;
 	
 	public enum Weight{
 		HEAVY,
@@ -20,8 +21,7 @@ public class Weigh {
 	}
 	
 	private int timeThreshold;
-	public Weigh(PollerSystem ps, ColorSensor cs) throws RuntimeException, InterruptedException {
-		this.cs = cs;
+	public Weigh(PollerSystem ps) throws RuntimeException, InterruptedException {
 		this.ps = ps;
 		float battery = Vehicle.power.getVoltage();
 		if (battery > 7.1 && battery <= 7.3) {
@@ -47,7 +47,8 @@ public class Weigh {
 	 * 
 	 */
 	public void weigh() throws InterruptedException {
-		
+		double currentx = Odometer.getX();
+		double currenty = Odometer.getY();
 
 		ps.stop();
 		Thread.sleep(300);
@@ -115,10 +116,12 @@ public class Weigh {
 	 */
 	private void DetermineWeight(int interval) {
 		if (interval> timeThreshold) {
-			LCD.drawString("HEAVY CAN", 0, 4);
+			Sound.beep();
+			LCD.drawString("HEAVY CAN", 0, 7);
 		}
 		else {
-			LCD.drawString("LIGHT CAN", 0, 4);
+			Sound.beepSequence();
+			LCD.drawString("LIGHT CAN", 0, 7);
 		}
 	}
 
