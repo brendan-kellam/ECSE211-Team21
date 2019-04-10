@@ -183,6 +183,71 @@ public final class Board {
         return getHeading(getHeadingAngle(h) - 90.0);
     }
     
+    
+    private enum Quadrant
+    {
+        I,
+        II,
+        III,
+        IV
+    }
+    
+    public static Heading getOrthogonalHeading(Heading h, Tile tile) {
+        
+        double x = tile.getCenter().getX(), y = tile.getCenter().getY();
+        
+        double midx = (BOARD_WIDTH * TILE_SIZE)/2;
+        double midy = (BOARD_HEIGHT * TILE_SIZE)/2;
+        
+        double angle = getHeadingAngle(h);
+        Heading fin = h;
+        
+        switch (h) {
+            case N:
+            {
+                if (x > midx) {
+                    fin = getHeading(angle - 90.0);
+                } else {
+                    fin = getHeading(angle + 90.0);
+                }
+                break;
+            }
+        
+            case S:
+            {
+                if (x > midx) {
+                    fin = getHeading(angle + 90.0);
+                } else {
+                    fin = getHeading(angle - 90.0);
+                }
+                break;
+            }
+            
+            case E:
+            {
+                if (y > midy) {
+                    fin = getHeading(angle + 90.0);
+                } else {
+                    fin = getHeading(angle - 90.0);
+                }
+                break;
+            }
+        
+            case W:
+            {
+                if (y > midy) {
+                    fin = getHeading(angle - 90.0);
+                } else {
+                    fin = getHeading(angle + 90.0);
+                }
+                break;
+            }
+        
+        }
+        
+        return fin;
+    }
+    
     public static Heading getParallelHeading(Heading h) {
         return getHeading(getHeadingAngle(h) + 180.0);
     }
