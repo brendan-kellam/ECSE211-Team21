@@ -65,10 +65,11 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.73));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.63));
 		Vehicle.LEFT_MOTOR.setAcceleration(3000);
 		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
 
+		LCD.setAutoRefresh(false);
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
@@ -77,14 +78,14 @@ public final class Source {
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
 		// Initialize logging
-		Log.setLogging(true, true, true, true, true, true);
-
-		// Set logging to write to file
-		try {
-			Log.setLogWriter("FinalProj" + ".log");
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
+//		Log.setLogging(true, true, true, true, true, true);
+//
+//		// Set logging to write to file
+//		try {
+//			Log.setLogWriter("FinalProj" + ".log");
+//		} catch (FileNotFoundException e1) {
+//			e1.printStackTrace();
+//		}
 
 		// Create claw
 		Claw claw = new Claw(usPoller);
@@ -107,103 +108,109 @@ public final class Source {
 		Search search = new Search(usPoller);
 		// ----- Localize to grid ------
 		localize(ul, dll);
-		claw.stow();
 
-		Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
+		while (true) {
+			claw.stow();
+
+			Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 
 
 
-		// ------ TRAVEL TO TUNNEL -------
-		travelToTunnel(dll);	  
+			// ------ TRAVEL TO TUNNEL -------
+			travelToTunnel(dll);	  
 
-		Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
+			Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
 
-		// Traveling to search area
-		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
-		Navigator.travelSpecificDistance(7);
-		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
-		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
-		claw.release();
+			// Traveling to search area
+			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
+			Navigator.travelSpecificDistance(7);
+			travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
+			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
+			claw.release();
 
-		//        Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
+			//        Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
 
-		//Beep 5 times
-		//        for (int i=0;i<5;i++) Sound.beep();
+			//Beep 5 times
+			//        for (int i=0;i<5;i++) Sound.beep();
 
-		Vehicle.setMotorSpeeds(0, 0);
-		if (	search.startSearch(new ColourDetection(usPoller))){
-			claw.grab();
-		}
+			Vehicle.setMotorSpeeds(0, 0);
+			if (	search.startSearch(new ColourDetection(usPoller))){
+				claw.grab();
+			}
 
-		// NAVIGATE BACK TO START AREA
+			// NAVIGATE BACK TO START AREA
 
-		Tile tunnelEntrance = CompetitionConfig.tunnelEntranceToStartArea;
-		Navigator.travelTo(tunnelEntrance.getCenter().getX(), tunnelEntrance.getCenter().getY(), true, true);   
+			Tile tunnelEntrance = CompetitionConfig.tunnelEntranceToStartArea;
+			Navigator.travelTo(tunnelEntrance.getCenter().getX(), tunnelEntrance.getCenter().getY(), true, true);   
 
-		Heading toStartArea = CompetitionConfig.toStartAreaHeading;
+			Heading toStartArea = CompetitionConfig.toStartAreaHeading;
 
-		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
-//		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
-		/*
-		 * TIME TO WEIGH THE CAN
-		 */
-		Heading currHeading = Board.getHeading(Odometer.getTheta());
-		double currX = Odometer.getX();
-		double currY = Odometer.getY();
+			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
+			//		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
+			/*
+			 * TIME TO WEIGH THE CAN
+			 */
+			Heading currHeading = Board.getHeading(Odometer.getTheta());
+			double currX = Odometer.getX();
+			double currY = Odometer.getY();
 
-		Thread.sleep(30);
-		
-		switch (currHeading){
-		case N:
-		{
-			currY+=2.5*Board.TILE_SIZE;
-			break;
-		}
-		case E:
-		{
-			currX+=2.5*Board.TILE_SIZE;
-			break;
+			Thread.sleep(30);
+
+			switch (currHeading){
+			case N:
+			{
+				currY+=2.5*Board.TILE_SIZE;
+				break;
+			}
+			case E:
+			{
+				currX+=2.5*Board.TILE_SIZE;
+				break;
+
+			}
+			case S:
+			{
+				currY-=2.5*Board.TILE_SIZE;
+				break;
+
+			}
+			case W:
+			{
+				currX-=2.5*Board.TILE_SIZE;
+				break;
+			}
+			}
+			
+			Navigator.travelSpecificDistance(5);
+			Weigh weigher = new Weigh(pollerSystem);
+			boolean heavy = weigher.weighThroughTunnel();
+			ColourDetection.canAssessment(heavy);
+
+
+			odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
+			Thread.sleep(30);
+
+			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
+			Navigator.travelSpecificDistance(-5); //Back up a bit
+			/*
+			 * Weighing complete.
+			 */
+			Point2D start = Board.scTranslation[CompetitionConfig.corner]; // Get the coordinate of the start location.
+
+			Navigator.travelTo(start.getX(), start.getY(), true, true);
+
+			claw.release();
+			
+			for (int i=0;i<5;i++) {
+				Sound.beep();
+			}
 			
 		}
-		case S:
-		{
-			currY-=2.5*Board.TILE_SIZE;
-			break;
-			
-		}
-		case W:
-		{
-			currX-=2.5*Board.TILE_SIZE;
-			break;
-		}
-		}
-		Navigator.travelSpecificDistance(5);
-		Weigh weigher = new Weigh(pollerSystem);
-		boolean heavy = weigher.weighThroughTunnel();
-		ColourDetection.canAssessment(heavy);
-
-			
-		odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
-		Thread.sleep(30);
-		
-		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
-		Navigator.travelSpecificDistance(-5); //Back up a bit
-		/*
-		 * Weighing complete.
-		 */
-		Point2D start = Board.scTranslation[CompetitionConfig.corner]; // Get the coordinate of the start location.
-
-		Navigator.travelTo(start.getX(), start.getY(), true, true);
-
-		claw.release();
-
-		Sound.beepSequenceUp();
-
-		pollerSystem.stop();
-
-		// Wait
-		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-		System.exit(0);
+//		pollerSystem.stop();
+//
+//		// Wait
+//		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+//		System.exit(0);
 	}
 
 	/**
@@ -285,7 +292,7 @@ public final class Source {
 		Navigator.travelSpecificDistance(Board.TILE_SIZE*2.5,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
 
 		Vehicle.setMotorSpeeds(300, 300);
-//		while (Vehicle.LEFT_CS.tunnelDetected() || !target.contains(Odometer.getX(), Odometer.getY())) {
+		//		while (Vehicle.LEFT_CS.tunnelDetected() || !target.contains(Odometer.getX(), Odometer.getY())) {
 		while (Vehicle.LEFT_CS.tunnelDetected()) {
 			try {
 				Thread.sleep(50);

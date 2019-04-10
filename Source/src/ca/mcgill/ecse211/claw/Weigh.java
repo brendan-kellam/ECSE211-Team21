@@ -119,7 +119,7 @@ public class Weigh {
 		Thread.sleep(100);
 
 		int interval = (int) (times[1] - times[0]);
-		PrintTimeInterval(times,interval);
+//		PrintTimeInterval(times,interval);
 		boolean heavy = isCanHeavy(interval);
 		ps.start();
 		return heavy;

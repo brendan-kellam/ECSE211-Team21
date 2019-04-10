@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.sensor;
 
+import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.util.Vehicle;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -211,7 +212,7 @@ public class ColourDetection {
 				//Set the colour index at the point in the array with the most cans of a specific colour
 			}
 		}
-		LCD.drawString(colourValueOf(colourIndex).toString(), 0, 6);
+//		LCD.drawString(colourValueOf(colourIndex).toString(), 0, 6);
 		return colourIndex;
 	}
 
@@ -227,7 +228,15 @@ public class ColourDetection {
 		while (usPoller.getDistance() > approachDistance  && performScan) {
 			//FAULT TOLERANCE:
 			long currTime = System.currentTimeMillis();
-			if (currTime - startTime > 7500) { //If we travel for 7.5 seconds and haven't found a can, end the routine
+			if (currTime - startTime > 4500) { //If we travel for 7.5 seconds and haven't found a can, end the routine
+				Vehicle.setMotorSpeeds(0,0);
+				try {
+					Thread.sleep(30);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Navigator.travelSpecificDistance(-8);
 				this.performScan = false;
 			}
 			sleep(20);
