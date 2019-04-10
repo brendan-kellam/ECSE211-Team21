@@ -180,9 +180,6 @@ public final class Source {
     		boolean heavy = weigher.weighThroughTunnel();
     		ColourDetection.canAssessment(heavy);
     		
-
-			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
-
 			odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
 			Thread.sleep(30);
 
