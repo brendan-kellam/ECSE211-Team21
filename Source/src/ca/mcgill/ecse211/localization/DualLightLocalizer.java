@@ -53,20 +53,20 @@ public class DualLightLocalizer {
      * Localize to a grid intersection
      * @throws OdometerExceptions 
      */
-    public void localizeToIntersection(Heading heading) throws OdometerExceptions {
+    public void localizeToIntersection(Heading heading, int speed) throws OdometerExceptions {
         
         // Start by turning to the given heading
         Navigator.turnTo(Board.getHeadingAngle(heading));
         
-        travelToLine(SPEED);
+        travelToLine(speed);
         
-        Navigator.travelSpecificDistance(-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -SPEED);
+        Navigator.travelSpecificDistance(-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -speed);
                 
         Navigator.turnTo(90.0);
         
-        travelToLine(SPEED);
+        travelToLine(speed);
         
-        Navigator.travelSpecificDistance(-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -SPEED);
+        Navigator.travelSpecificDistance(-Vehicle.VERT_DIST_FROM_LIGHT_SENSORS_TO_WHEEL_BASE, -speed);
         Navigator.turnTo(4.0);
         
         // Magic

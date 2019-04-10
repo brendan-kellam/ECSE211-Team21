@@ -118,21 +118,17 @@ public final class Source {
 			travelToTunnel(dll);	  
 
 			Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
+			
+    		// Traveling to search area
+    		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToSearchArea), Board.getParallelHeading(toSearchArea));
+    		Navigator.travelSpecificDistance(7);
+    		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
+    		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToStartArea), toSearchArea);
+    		claw.release();
 
-			// Traveling to search area
-			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
-			Navigator.travelSpecificDistance(7);
-			travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
-			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
-			claw.release();
-
-			//        Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
-
-			//Beep 5 times
-			//        for (int i=0;i<5;i++) Sound.beep();
 
 			Vehicle.setMotorSpeeds(0, 0);
-			if (	search.startSearch(new ColourDetection(usPoller))){
+			if (search.startSearch(new ColourDetection(usPoller))){
 				claw.grab();
 			}
 
@@ -143,48 +139,47 @@ public final class Source {
 
 			Heading toStartArea = CompetitionConfig.toStartAreaHeading;
 
-			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
-			//		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
-			/*
-			 * TIME TO WEIGH THE CAN
-			 */
-			Heading currHeading = Board.getHeading(Odometer.getTheta());
-			double currX = Odometer.getX();
-			double currY = Odometer.getY();
 
-			Thread.sleep(30);
+			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea, CompetitionConfig.tunnelEntranceToStartArea), Board.getParallelHeading(toStartArea));
 
-			switch (currHeading){
-			case N:
-			{
-				currY+=2.5*Board.TILE_SIZE;
-				break;
-			}
-			case E:
-			{
-				currX+=2.5*Board.TILE_SIZE;
-				break;
-
-			}
-			case S:
-			{
-				currY-=2.5*Board.TILE_SIZE;
-				break;
-
-			}
-			case W:
-			{
-				currX-=2.5*Board.TILE_SIZE;
-				break;
-			}
-			}
-			
-			Navigator.travelSpecificDistance(5);
-			Weigh weigher = new Weigh(pollerSystem);
-			boolean heavy = weigher.weighThroughTunnel();
-			ColourDetection.canAssessment(heavy);
-
-
+    		/*
+    		 * TIME TO WEIGH THE CAN
+    		 */
+    		Heading currHeading = Board.getHeading(Odometer.getTheta());
+    		double currX = Odometer.getX();
+    		double currY = Odometer.getY();
+    
+    		Thread.sleep(30);
+    		
+    		switch (currHeading){
+    		case N:
+    		{
+    			currY+=2.5*Board.TILE_SIZE;
+    			break;
+    		}
+    		case E:
+    		{
+    			currX+=2.5*Board.TILE_SIZE;
+    			break;
+    			
+    		}
+    		case S:
+    		{
+    			currY-=2.5*Board.TILE_SIZE;
+    			break;
+    			
+    		}
+    		case W:
+    		{
+    			currX-=2.5*Board.TILE_SIZE;
+    			break;
+    		}
+    		}
+    		Navigator.travelSpecificDistance(5);
+    		Weigh weigher = new Weigh(pollerSystem);
+    		boolean heavy = weigher.weighThroughTunnel();
+    		ColourDetection.canAssessment(heavy);
+    		
 			odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
 			Thread.sleep(30);
 
@@ -221,7 +216,7 @@ public final class Source {
 	 */
 	private static void localize(FallingEdgeLocalizer ul, DualLightLocalizer dll) throws OdometerExceptions, InterruptedException {
 		ul.usLocalize();
-		dll.localizeToIntersection(Heading.N);
+		dll.localizeToIntersection(Heading.N, 300);
 
 		Point2D trans = Board.scTranslation[CompetitionConfig.corner];
 		double rot = Board.scRotation[CompetitionConfig.corner];
@@ -300,24 +295,6 @@ public final class Source {
 		}
 		Navigator.travelSpecificDistance(8);
 		Vehicle.setMotorSpeeds(0, 0);
-
-		//Cheat the beginning.
-		//		Navigator.travelSpecificDistance(Board.TILE_SIZE*2 + Board.TILE_SIZE/2,(int) Vehicle.RIGHT_MOTOR.getMaxSpeed()/2);
-		//
-		//		Vehicle.setMotorSpeeds(200, 200);
-		//		while (!target.contains(Odometer.getX(), Odometer.getY())) {
-		//			try {
-		//				Thread.sleep(50);
-		//			} catch (InterruptedException e) {
-		//				e.printStackTrace();
-		//			}
-		//		}
-		//
-		//		Vehicle.setMotorSpeeds(0, 0);
-		//
-		//		//        Navigator.travelSpecificDistance(Board.TILE_SIZE/2+5);
-		//		Navigator.travelSpecificDistance(Board.TILE_SIZE/2+10);
-
 	}
 
 	/**

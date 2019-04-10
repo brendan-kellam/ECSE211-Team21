@@ -355,7 +355,7 @@ public class Test {
 			Vehicle.RIGHT_MOTOR.setAcceleration(6000);
 			DualLightLocalizer dll = new DualLightLocalizer(left, right);
 			try {
-				dll.localizeToIntersection(Board.Heading.N);
+				dll.localizeToIntersection(Board.Heading.N, 100);
 			} catch (OdometerExceptions e1) {
 				e1.printStackTrace();
 			}
@@ -438,7 +438,7 @@ public class Test {
 
 		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 		try {
-			dll.localizeToIntersection(Board.Heading.N);
+			dll.localizeToIntersection(Board.Heading.N, 100);
 
 			Log.log(Sender.board, "Odometer X and Y : (" + Odometer.getX() + ", " + Odometer.getY() + ")");
 			Log.log(Sender.board, "Odometer theta : " + Odometer.getTheta());
