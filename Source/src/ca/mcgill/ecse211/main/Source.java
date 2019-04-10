@@ -43,7 +43,7 @@ public final class Source {
 		INVALID
 	}
 
-	public static final boolean TESTING = true;
+	public static final boolean TESTING = false;
 
 
 
@@ -120,10 +120,9 @@ public final class Source {
 
 		// Traveling to search area
 		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), Board.getParallelHeading(toSearchArea));
+		Navigator.travelSpecificDistance(7);
 		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
 		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea), toSearchArea);
-		LCD.drawString("(" + Odometer.getX() + "," + Odometer.getY() + ")", 0, 7);
-
 		claw.release();
 
 		//        Navigator.travelTo(CompetitionConfig.searchAreaLL.getLowerLeft().getX(), CompetitionConfig.searchAreaLL.getLowerLeft().getY(), true, true);
@@ -144,57 +143,58 @@ public final class Source {
 		Heading toStartArea = CompetitionConfig.toStartAreaHeading;
 
 		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), Board.getParallelHeading(toStartArea));
-		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
-		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
-		
+//		travelThroughTunnel(CompetitionConfig.tunnelEntranceToSearchArea);
 		/*
-		 * TIME TO WEIGH THE CAN.
+		 * TIME TO WEIGH THE CAN
 		 */
-//		Navigator.travelSpecificDistance(-5);
-//		
-//
-//		Heading currHeading = Board.getHeading(Odometer.getTheta());
-//		double currX = Odometer.getX();
-//		double currY = Odometer.getY();
-//		
-//		Weigh weigher = new Weigh(pollerSystem);
-//		weigher.weigh(); // This will advance us 2 units forward 
-//		switch (currHeading){
-//		case N:
-//		{
-//			currY+=2*Board.TILE_SIZE;
-//			break;
-//		}
-//		case E:
-//		{
-//			currX+=2*Board.TILE_SIZE;
-//			break;
-//			
-//		}
-//		case S:
-//		{
-//			currY-=2*Board.TILE_SIZE;
-//			break;
-//			
-//		}
-//		case W:
-//		{
-//			currX-=2*Board.TILE_SIZE;
-//			break;
-//		}
-//		}
-//			
-//		odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
-//		Thread.sleep(30);
-//		Navigator.travelSpecificDistance(-8);
-//		Thread.sleep(30);
-//		dll.travelToLine(200);
+		Heading currHeading = Board.getHeading(Odometer.getTheta());
+		double currX = Odometer.getX();
+		double currY = Odometer.getY();
+
+		Thread.sleep(30);
+		
+		switch (currHeading){
+		case N:
+		{
+			currY+=2.5*Board.TILE_SIZE;
+			break;
+		}
+		case E:
+		{
+			currX+=2.5*Board.TILE_SIZE;
+			break;
+			
+		}
+		case S:
+		{
+			currY-=2.5*Board.TILE_SIZE;
+			break;
+			
+		}
+		case W:
+		{
+			currX-=2.5*Board.TILE_SIZE;
+			break;
+		}
+		}
+		Navigator.travelSpecificDistance(5);
+		Weigh weigher = new Weigh(pollerSystem);
+		boolean heavy = weigher.weighThroughTunnel();
+		ColourDetection.canAssessment(heavy);
+
+			
+		odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
+		Thread.sleep(30);
+		
+		dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea), toStartArea);
+		Navigator.travelSpecificDistance(-5); //Back up a bit
 		/*
 		 * Weighing complete.
 		 */
 		Point2D start = Board.scTranslation[CompetitionConfig.corner]; // Get the coordinate of the start location.
 
 		Navigator.travelTo(start.getX(), start.getY(), true, true);
+
 		claw.release();
 
 		Sound.beepSequenceUp();

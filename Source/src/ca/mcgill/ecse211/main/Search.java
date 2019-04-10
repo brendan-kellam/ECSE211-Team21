@@ -71,8 +71,10 @@ public class Search {
 			Sound.beep();
 		}
 
+		Navigator.turnTo(Board.getHeadingAngle(toSearchArea));
+		Navigator.travelSpecificDistance(-5);
 		for (int i=0;i<3;i++) {
-			Navigator.turnTo(Board.getHeadingAngle(toSearchArea));
+
 			double heldAngle = Odometer.getTheta();
 			Thread.sleep(50);
 			double angles[] = new double[2];
@@ -94,6 +96,7 @@ public class Search {
 			}
 			Navigator.turnTo(heldAngle);
 			Navigator.travelSpecificDistance(Board.TILE_SIZE);
+			Navigator.turnTo(Board.getHeadingAngle(toSearchArea));
 		}
 
 		return false;

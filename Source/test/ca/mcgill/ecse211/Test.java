@@ -119,7 +119,9 @@ public class Test {
 		//				testUSLocalization();
 		//		        testDualLocalization();
 		//		testTime();
-		testTimeWithCan();
+//		testTimeWithCan();
+		testTimeWithCanThroughTunnel();
+		
 		//		testTravelToTunnel();
 		//		        testLineDetection();
 		// testColorSensors();
@@ -163,6 +165,18 @@ public class Test {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
 	}
 
+	private void testTimeWithCanThroughTunnel() throws InterruptedException {
+		Weigh weigh = new Weigh(pollerSystem);
+		ColourDetection cd = new ColourDetection(usPoller);
+		Claw claw = new Claw(usPoller);
+		while (true) {
+			while (Button.waitForAnyPress() != Button.ID_ESCAPE);
+			cd.checkCanColour();
+			claw.grab();
+			weigh.weighThroughTunnel();
+			claw.release();
+		}
+	}
 	private void testLightSensorContainment() {
 
 		Tile t = Tile.lowerLeft(2, 2);
@@ -494,7 +508,7 @@ public class Test {
 		//Start the pollers
 
 		Weigh weigh = new Weigh(pollerSystem);
-		weigh.weigh();
+//		weigh.weigh();
 	}
 
 	private boolean testCanSearch() throws InterruptedException {

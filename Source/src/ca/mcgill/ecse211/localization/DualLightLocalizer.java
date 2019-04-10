@@ -103,6 +103,7 @@ public class DualLightLocalizer {
         
         if (config == Config.FORWARD) {
             Navigator.travelSpecificDistance(-10);
+   
             travelToLine(SPEED);
         } else {
             Navigator.travelSpecificDistance(10);
@@ -135,8 +136,8 @@ public class DualLightLocalizer {
             throw new IllegalArgumentException("Invalid line spec - fin and l2 must be parallel");
         }
         
-        localizeOnLine(fin, l1, 2000);
-        localizeOnLine(fin, l2, 2000);
+        localizeOnLine(fin, l1, 2300);
+        localizeOnLine(fin, l2, 2300);
         
         // Turn to final angle
         Navigator.turnTo(Board.getHeadingAngle(fin));
@@ -168,6 +169,11 @@ public class DualLightLocalizer {
         }
         Vehicle.setMotorSpeeds(0, 0);
 
+        try {
+			Thread.sleep(45);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
         // Travel to the 1st line
         travelToLine(speed);
         

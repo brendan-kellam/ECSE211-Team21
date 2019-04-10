@@ -65,6 +65,8 @@ public class ColourDetection {
 		GREEN,
 		YELLOW
 	}
+	
+	private static int discoveredColour = 0;
 
 
 	/*
@@ -128,6 +130,7 @@ public class ColourDetection {
 
 		//Bring the sensor back to its original position
 		colourSensorMotor.rotate(-sweepAngle);
+		discoveredColour = mostCommonColour(colours);
 //		return (mostCommonColour(colours) == desiredColour); 
 	}
 
@@ -197,7 +200,7 @@ public class ColourDetection {
 	 * @param occurrenceOfColour the number of times each colour occurs in the samples.
 	 * @return the index of the colour with the most occurences
 	 */
-	private Colour mostCommonColour(Colour[] colourSamples) {
+	private int mostCommonColour(Colour[] colourSamples) {
 		int max = -1,colourIndex = -1;
 		int[] occurrenceOfColour = countColours(colourSamples);
 		//Start from 1 cause we've only considered cans being of index 1,2,3,4
@@ -209,7 +212,7 @@ public class ColourDetection {
 			}
 		}
 		LCD.drawString(colourValueOf(colourIndex).toString(), 0, 6);
-		return colourValueOf(colourIndex);
+		return colourIndex;
 	}
 
 	/**
@@ -291,6 +294,20 @@ public class ColourDetection {
 		}
 	}
 
+	/**
+	 * 
+	 * @param heavy true if the held can is heavy, false otherwise
+	 * @throws InterruptedException 
+	 */
+	public static void canAssessment(boolean heavy) throws InterruptedException {
+		int duration = heavy ? 1000 : 300;
+		for (int i=0;i < discoveredColour;i++) {
+			Sound.playTone(569, duration);
+			Thread.sleep(150);
+
+		}
+	}
+	
 	/////////////////////FOR TESTING PURPOSES///////////////////////////////////////
 	/**
 	 * This method will check the colour of a can that it has detected.
@@ -310,6 +327,7 @@ public class ColourDetection {
 				Sound.beep();
 		}
 	}
+
 
 	/**
 	 * Determine the colour of the can being swept, and print it to the LCD.
@@ -338,7 +356,7 @@ public class ColourDetection {
 		//Bring the sensor back to its original.
 		colourSensorMotor.rotate(-sweepAngle);
 		//Determine the most common colour from the samples.
-		Colour mostCommonColour = mostCommonColour(colours);
+		Colour mostCommonColour = colourValueOf(mostCommonColour(colours));
 		LCD.clear();
 		LCD.drawString("The can colour is: " , 0,5);
 		LCD.drawString(mostCommonColour.toString(), 2, 6);

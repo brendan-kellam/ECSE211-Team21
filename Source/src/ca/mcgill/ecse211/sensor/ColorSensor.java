@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.sensor;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.util.Tile;
 import ca.mcgill.ecse211.util.Vehicle;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
@@ -60,7 +61,7 @@ public class ColorSensor {
      * 
      * @return normalized intensity
      */
-    private float fetchNormalizedSample() {
+    public float fetchNormalizedSample() {
         float[] intensity = new float[sensorColour.sampleSize()];
         sensorColour.fetchSample(intensity, 0);
         return intensity[0];

@@ -308,7 +308,6 @@ public final class Board {
     
     public static void snapToHeading(Odometer odometer) {
         Heading heading = getHeading(Odometer.getTheta());
-        
         odometer.setTheta(getHeadingAngle(heading));        
     }
     
