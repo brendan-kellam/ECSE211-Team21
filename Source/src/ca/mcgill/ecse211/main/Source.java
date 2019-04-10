@@ -65,11 +65,9 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.63));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.58));
 		Vehicle.LEFT_MOTOR.setAcceleration(3000);
 		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
-
-		LCD.setAutoRefresh(false);
 
 		// Create odometer
 		Odometer odometer = Odometer.getOdometer();
@@ -78,14 +76,14 @@ public final class Source {
 		UltrasonicPoller usPoller = new UltrasonicPoller(Vehicle.US_SENSOR);
 
 		// Initialize logging
-//		Log.setLogging(true, true, true, true, true, true);
-//
-//		// Set logging to write to file
-//		try {
-//			Log.setLogWriter("FinalProj" + ".log");
-//		} catch (FileNotFoundException e1) {
-//			e1.printStackTrace();
-//		}
+		Log.setLogging(false, false, false, false, false, false);
+
+		// Set logging to write to file
+		try {
+			Log.setLogWriter("FinalProj" + ".log");
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 
 		// Create claw
 		Claw claw = new Claw(usPoller);
@@ -102,7 +100,7 @@ public final class Source {
 		// ----- Configuration ------
 		WifiController.fetchGameplayData();
 		//Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
-		Log.log(Sender.board, CompetitionConfig.tostr());
+//		Log.log(Sender.board, CompetitionConfig.tostr());
 
 
 		Search search = new Search(usPoller);
@@ -112,7 +110,7 @@ public final class Source {
 		while (true) {
 			claw.stow();
 
-			Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
+//			Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
 
 
 
@@ -237,7 +235,7 @@ public final class Source {
 			Sound.beep();
 		}
 
-		dll.travelToLine(100);
+//		dll.travelToLine(100);
 	}
 
 	public static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {

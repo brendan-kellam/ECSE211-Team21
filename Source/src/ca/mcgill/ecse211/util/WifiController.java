@@ -118,8 +118,6 @@ public class WifiController {
                 CompetitionConfig.toSearchAreaHeading = Heading.W;
                 CompetitionConfig.toStartAreaHeading = Heading.E;
             }
-
-            
         // Vertical
         } else {
             

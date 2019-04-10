@@ -602,8 +602,9 @@ public class Test {
 
 	/**
 	 * Scan a can then grab it
+	 * @throws InterruptedException 
 	 */
-	private void testScanThenGrab() {
+	private void testScanThenGrab() throws InterruptedException {
 
 		ColourDetection cd = new ColourDetection(usPoller);	
 		Claw claw = new Claw(usPoller);
@@ -644,7 +645,7 @@ public class Test {
 	 * This will test the colour detection. It will stay still, then if a can is in front of the robot,
 	 * the robot will advance and detect the colour, then print it to the display. It will do this infinitely. 
 	 */
-	private void testColourDetection() {
+	private void testColourDetection() throws InterruptedException {
 		ColourDetection cd = new ColourDetection(usPoller);		
 		cd.testCanColours();
 

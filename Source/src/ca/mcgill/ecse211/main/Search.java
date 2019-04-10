@@ -111,7 +111,7 @@ public class Search {
 	 */
 	private boolean scanForCan(double targetLocation, ColourDetection cd) throws InterruptedException {
 		int filter = 0;
-		int maxDistance = 35;
+		int maxDistance = 30;
 
 		while (filter < MAX_FILTER && Math.abs(Odometer.getTheta() - targetLocation) > 5)  {
 			Thread.sleep(30);
@@ -126,6 +126,9 @@ public class Search {
 			Thread.sleep(50);
 			if (cd.checkCanColour()) {
 				return true;
+			}
+			else {
+				Navigator.travelSpecificDistance(-5);
 			}
 		}
 		//		Sound.twoBeeps();

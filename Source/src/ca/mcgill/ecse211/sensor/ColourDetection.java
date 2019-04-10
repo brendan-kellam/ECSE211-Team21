@@ -90,7 +90,7 @@ public class ColourDetection {
 	 * @return true if the can is the desired colour, false otherwise.
 	 * @throws InterruptedException 
 	 */
-	public boolean checkCanColour() {
+	public boolean checkCanColour() throws InterruptedException {
 		this.performScan = true;
 		approachCan(); //Approach the can
 
@@ -218,8 +218,9 @@ public class ColourDetection {
 
 	/**
 	 * Approach the can within the specified distance "approachDistance"
+	 * @throws InterruptedException 
 	 */
-	private void approachCan() {	
+	private void approachCan() throws InterruptedException {	
 		long startTime = System.currentTimeMillis();
 		// Drive forward slowly.
 		Vehicle.setMotorSpeeds(APPROACH_SPEED, APPROACH_SPEED); 
@@ -230,16 +231,10 @@ public class ColourDetection {
 			long currTime = System.currentTimeMillis();
 			if (currTime - startTime > 4500) { //If we travel for 7.5 seconds and haven't found a can, end the routine
 				Vehicle.setMotorSpeeds(0,0);
-				try {
-					Thread.sleep(30);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				Navigator.travelSpecificDistance(-8);
+				Thread.sleep(30);
 				this.performScan = false;
 			}
-			sleep(20);
+			Thread.sleep(15);
 		}
 		//Stop the car
 		Vehicle.setMotorSpeeds(0, 0);
@@ -324,7 +319,7 @@ public class ColourDetection {
 	 * @return true if the can is the desired colour, false otherwise.
 	 * @throws InterruptedException 
 	 */
-	public void testCanColours () {
+	public void testCanColours () throws InterruptedException {
 		retreatDistance = 8;
 		while (true) {
 			while (Button.waitForAnyPress() != Button.ID_ESCAPE);
