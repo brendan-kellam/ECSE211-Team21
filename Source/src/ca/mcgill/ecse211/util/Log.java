@@ -22,6 +22,11 @@ public class Log {
 	static boolean printColour;
 	static boolean printBoard;
 
+	/**
+	 * Writes logs for the requested sender.
+	 * @param sender
+	 * @param message
+	 */
 	public static void log(Sender sender, String message) {
 		long timestamp = System.currentTimeMillis() % 100000;
 
@@ -49,6 +54,15 @@ public class Log {
 
 	}
 
+	/**
+	 * Begins logging for the requested loggers
+	 * @param nav
+	 * @param odom
+	 * @param us
+	 * @param avoid
+	 * @param colourDetect
+	 * @param board
+	 */
 	public static void setLogging(boolean nav, boolean odom, boolean us,boolean avoid,boolean colourDetect, boolean board) {
 		printNavigator = nav;
 		printOdometer = odom;
@@ -58,6 +72,11 @@ public class Log {
 		printBoard = board;
 	}
 
+	/**
+	 * Log to a file.
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
 	public static void setLogWriter(String filename) throws FileNotFoundException {
 		writer = new PrintStream(new File(filename));
 	}

@@ -38,6 +38,9 @@ public class Claw {
 	    }
 	}
 	
+	/**
+	 * Stow the claw in order to enter the tunnel cleanly
+	 */
 	public void stow() {
 	    if (currentState == ClawState.OPEN) {
             clawMotor.rotate(-50);
@@ -62,7 +65,6 @@ public class Claw {
 	    }
 	    
         currentState = ClawState.OPEN;
-
 	}
 	
 	/*

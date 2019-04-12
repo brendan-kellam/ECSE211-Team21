@@ -25,7 +25,7 @@ public class LineRunner implements Runnable {
     private long delay;
     
     /**
-     * Construct a new LineRunner
+     * Construct a new LineRunner. This will poll a light sensor until a line is detected.
      * 
      * @param sensor - color sensor to poll from
      * @param motor - motor to move until detection
@@ -79,7 +79,6 @@ public class LineRunner implements Runnable {
             e1.printStackTrace();
         }
 
-        
         // Continuously check for line
         while (!sensor.lineDetected()) {
             try {

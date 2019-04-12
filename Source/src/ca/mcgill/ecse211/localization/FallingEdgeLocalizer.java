@@ -30,6 +30,11 @@ public class FallingEdgeLocalizer {
 	private static final int distFallingEdge = 30;
 	private static final int tolFallingEdge = 10;
 
+	/**
+	 * Construct the falling edge localizer. This will use the odometer and the usPoller
+	 * @param odometer 
+	 * @param usPoller 
+	 */
 	public FallingEdgeLocalizer(Odometer odometer,UltrasonicPoller usPoller) {
 		this.odometer = odometer;
 		this.usPoller = usPoller;

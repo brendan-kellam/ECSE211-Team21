@@ -18,6 +18,9 @@ public class WifiController {
     
    
     
+    /**
+     * Get the gameplay data from the server
+     */
     public static void fetchGameplayData() {
         // Initialize WifiConnection class
         WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);

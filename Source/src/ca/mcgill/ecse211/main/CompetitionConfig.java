@@ -29,10 +29,19 @@ public class CompetitionConfig {
     
     public static int corner;
     
+    /**
+     * Append an item to the passed string
+     * @param builder
+     * @param value
+     */
     private static void appendString(StringBuilder builder, String value) {
         builder.append(value + System.lineSeparator());
     }
     
+    /**
+     * Convert the list of parameters to a string to read them. 
+     * @return
+     */
     public static String tostr() {
         StringBuilder builder = new StringBuilder();
         

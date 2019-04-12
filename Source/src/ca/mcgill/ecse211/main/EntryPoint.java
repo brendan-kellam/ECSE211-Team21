@@ -29,23 +29,9 @@ import lejos.hardware.lcd.LCD;
  * Main entry point class for Lab4
  */
 
-public final class Source {
-
-	// Time to wait after display initialization (to allow graphics to apear on EV3's screen)
-	private static final short DISPLAY_INIT_SLEEP_TIME = 2000;
-
-	/**
-	 * Represents a given MenuOption
-	 */
-	private enum MenuOption {
-		TEST_COLOURS,
-		NAVIGATE_MAP,
-		INVALID
-	}
+public final class EntryPoint {
 
 	public static final boolean TESTING = false;
-
-
 
 	/**
 	 * Main entry of program
@@ -54,7 +40,6 @@ public final class Source {
 	 * @throws InterruptedException 
 	 */
 	public static void main(String[] args) throws OdometerExceptions, InterruptedException {
-
 
 		if (TESTING) {
 			Test tester = new Test();
@@ -65,7 +50,7 @@ public final class Source {
 		// ----- Configuration ------
 
 		// Create new vehicle configuration
-		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.58));
+		Vehicle.newConfig(new Vehicle.Configuration(2.1, 17.73));
 		Vehicle.LEFT_MOTOR.setAcceleration(3000);
 		Vehicle.RIGHT_MOTOR.setAcceleration(3000);
 
@@ -93,38 +78,34 @@ public final class Source {
 		pollerSystem.addPoller(odometer);
 		pollerSystem.start();
 
+		Thread.sleep(60);
 		FallingEdgeLocalizer ul = new FallingEdgeLocalizer(odometer,usPoller);
 		DualLightLocalizer dll = new DualLightLocalizer(Vehicle.LEFT_CS, Vehicle.RIGHT_CS);
 
 
 		// ----- Configuration ------
 		WifiController.fetchGameplayData();
-		//Log.log(Sender.usSensor, "Tunnel LL: " + CompetitionConfig.tunnelEntranceToSearchArea.toString());
-//		Log.log(Sender.board, CompetitionConfig.tostr());
 
 
 		Search search = new Search(usPoller);
+		Thread.sleep(60);
 		// ----- Localize to grid ------
 		localize(ul, dll);
 
 		while (true) {
 			claw.stow();
 
-//			Log.log(Sender.odometer, "SET XY - X: " + Odometer.getX() + " | Y: " + Odometer.getY());
-
-
-
 			// ------ TRAVEL TO TUNNEL -------
 			travelToTunnel(dll);	  
 
 			Heading toSearchArea = CompetitionConfig.toSearchAreaHeading;
-			
-    		// Traveling to search area
-    		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToSearchArea), Board.getParallelHeading(toSearchArea));
-    		Navigator.travelSpecificDistance(7);
-    		travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
-    		dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToStartArea), toSearchArea);
-    		claw.release();
+
+			// Traveling to search area
+			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToSearchArea), Board.getParallelHeading(toSearchArea));
+			Navigator.travelSpecificDistance(7);
+			travelThroughTunnel(CompetitionConfig.tunnelEntranceToStartArea);
+			dll.localizeToTile(toSearchArea, Board.getOrthogonalHeading(toSearchArea, CompetitionConfig.tunnelEntranceToStartArea), toSearchArea);
+			claw.release();
 
 
 			Vehicle.setMotorSpeeds(0, 0);
@@ -142,44 +123,44 @@ public final class Source {
 
 			dll.localizeToTile(toStartArea, Board.getOrthogonalHeading(toStartArea, CompetitionConfig.tunnelEntranceToStartArea), Board.getParallelHeading(toStartArea));
 
-    		/*
-    		 * TIME TO WEIGH THE CAN
-    		 */
-    		Heading currHeading = Board.getHeading(Odometer.getTheta());
-    		double currX = Odometer.getX();
-    		double currY = Odometer.getY();
-    
-    		Thread.sleep(30);
-    		
-    		switch (currHeading){
-    		case N:
-    		{
-    			currY+=2.5*Board.TILE_SIZE;
-    			break;
-    		}
-    		case E:
-    		{
-    			currX+=2.5*Board.TILE_SIZE;
-    			break;
-    			
-    		}
-    		case S:
-    		{
-    			currY-=2.5*Board.TILE_SIZE;
-    			break;
-    			
-    		}
-    		case W:
-    		{
-    			currX-=2.5*Board.TILE_SIZE;
-    			break;
-    		}
-    		}
-    		Navigator.travelSpecificDistance(5);
-    		Weigh weigher = new Weigh(pollerSystem);
-    		boolean heavy = weigher.weighThroughTunnel();
-    		ColourDetection.canAssessment(heavy);
-    		
+			/*
+			 * TIME TO WEIGH THE CAN
+			 */
+			Heading currHeading = Board.getHeading(Odometer.getTheta());
+			double currX = Odometer.getX();
+			double currY = Odometer.getY();
+
+			Thread.sleep(30);
+
+			switch (currHeading){
+			case N:
+			{
+				currY+=2.8*Board.TILE_SIZE;
+				break;
+			}
+			case E:
+			{
+				currX+=2.8*Board.TILE_SIZE;
+				break;
+
+			}
+			case S:
+			{
+				currY-=2.8*Board.TILE_SIZE;
+				break;
+
+			}
+			case W:
+			{
+				currX-=2.8*Board.TILE_SIZE;
+				break;
+			}
+			}
+			Navigator.travelSpecificDistance(5);
+			Weigh weigher = new Weigh(pollerSystem);
+			boolean heavy = weigher.weighThroughTunnel();
+			ColourDetection.canAssessment(heavy);
+
 			odometer.setXYT(currX, currY, Board.getHeadingAngle(currHeading));
 			Thread.sleep(30);
 
@@ -193,17 +174,12 @@ public final class Source {
 			Navigator.travelTo(start.getX(), start.getY(), true, true);
 
 			claw.release();
-			
+
 			for (int i=0;i<5;i++) {
 				Sound.beep();
 			}
-			
+
 		}
-//		pollerSystem.stop();
-//
-//		// Wait
-//		while (Button.waitForAnyPress() != Button.ID_ESCAPE);
-//		System.exit(0);
 	}
 
 	/**
@@ -216,6 +192,7 @@ public final class Source {
 	 */
 	private static void localize(FallingEdgeLocalizer ul, DualLightLocalizer dll) throws OdometerExceptions, InterruptedException {
 		ul.usLocalize();
+		Thread.sleep(30);
 		dll.localizeToIntersection(Heading.N, 300);
 
 		Point2D trans = Board.scTranslation[CompetitionConfig.corner];
@@ -230,7 +207,7 @@ public final class Source {
 			Sound.beep();
 		}
 
-//		dll.travelToLine(100);
+		//		dll.travelToLine(100);
 	}
 
 	public static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
@@ -239,41 +216,6 @@ public final class Source {
 		Navigator.travelTo(tunnelEntrance.getCenter().getX(), tunnelEntrance.getCenter().getY(), true, true);   
 	}
 
-
-	/**
-	 * Routine to travel to the tunnel
-	 * 
-	 * @param dll
-	 * @throws OdometerExceptions
-	 */
-	/*
-	private static void travelToTunnel(DualLightLocalizer dll) throws OdometerExceptions {
-
-	    // Get tunnel lower left and right
-	    Tile toSearchArea = CompetitionConfig.tunnelEntranceToSearchArea;
-        Tile tunnelUR = CompetitionConfig.tunnelEntranceToStartArea;
-
-        // Debug information
-        Log.log(Sender.Navigator, "tunnelLR: " + toSearchArea.toString());
-        Log.log(Sender.Navigator, "tunnelUR: " + tunnelUR.toString());
-
-        double targetX = toSearchArea.getLowerLeft().getX();
-        double targetY = toSearchArea.getLowerLeft().getY();
-
-        Navigator.travelTo(Odometer.getX(), targetY, true, true);
-        dll.travelToLine(100);
-
-        Navigator.travelSpecificDistance(5);
-
-        Navigator.turnTo(Navigator.getDestAngle(targetX, toSearchArea.getCenter().getY()));
-        dll.travelToLine(100);
-
-        Navigator.travelTo(targetX, toSearchArea.getCenter().getY(), true, true);
-        dll.travelToLine(100); 
-        Navigator.travelSpecificDistance(5);
-
-	}
-	 */
 
 	/**
 	 * 
@@ -296,26 +238,4 @@ public final class Source {
 		Navigator.travelSpecificDistance(8);
 		Vehicle.setMotorSpeeds(0, 0);
 	}
-
-	/**
-	 * Gets the User's menu choice of either RISING or FALLING edge
-	 * 
-	 * @return MenuOption
-	 */
-	public static MenuOption getUserChoice() {
-		Vehicle.LCD_DISPLAY.drawString("Test Colours: UP", 0, 0);
-		Vehicle.LCD_DISPLAY.drawString("Navigate map: DOWN", 0, 1);
-
-		int choice = Button.waitForAnyPress();
-
-		if (choice == Button.ID_UP) {
-			return MenuOption.TEST_COLOURS;
-		}
-		else if (choice == Button.ID_DOWN) {
-			return MenuOption.NAVIGATE_MAP;
-		}
-
-		return MenuOption.INVALID;
-	}
-
 }

@@ -27,7 +27,7 @@ public class EV3Math {
     
     
     /**
-     * Bounds angle
+     * Bounds angle between 0 and 360
      * 
      * @param angle
      * @return

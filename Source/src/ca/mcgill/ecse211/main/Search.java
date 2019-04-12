@@ -21,6 +21,11 @@ public class Search {
 	private final int ROTATION_SPEED = 200;
 	private final int MAX_FILTER = 12;
 
+	/**
+	 * Construct the search. This will require the poller, and will compute the desired initial searching position
+	 * based on the shortest distance from the tunnel exit to the search area.
+	 * @param usPoller
+	 */
 	public Search(UltrasonicPoller usPoller) {
 
 		this.usPoller = usPoller;
